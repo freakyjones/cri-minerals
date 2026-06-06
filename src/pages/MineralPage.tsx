@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useMineral } from '../features/minerals/hooks/useMineral';
 import ReservesChart from '../features/minerals/components/ReservesChart';
 import ProductionChart from '../features/minerals/components/ProductionChart';
+import { GlobalMap } from '../features/minerals/components/GlobalMap';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
@@ -107,6 +108,11 @@ export default function MineralPage() {
               <p className="text-xs text-gray-400 mb-6 border-b border-white/10 pb-2">Which countries are currently extracting it.</p>
               <ProductionChart data={mineral.production} />
             </Card>
+          </div>
+
+          {/* Global Map */}
+          <div className="w-full">
+            <GlobalMap mineral={mineral} />
           </div>
 
           {/* Refining & Choke Points */}
