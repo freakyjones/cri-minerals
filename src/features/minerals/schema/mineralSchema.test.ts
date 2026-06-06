@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { mineralSchema } from './mineralSchema';
+import { mineralSchema, mineralsArraySchema } from './mineralSchema';
+import mineralsData from '../data/minerals.json';
 
 describe('mineralSchema', () => {
   const validData = {
@@ -34,7 +35,10 @@ describe('mineralSchema', () => {
     ],
     dataSources: [
       { label: "USGS", url: "https://www.usgs.gov" }
-    ]
+    ],
+    substitutability: "LOW",
+    recyclingRate: 5,
+    recyclingSources: ["USGS 2024", "IEA 2023", "EU CRM Report 2023"]
   };
 
   it('validates correct mineral data', () => {
@@ -64,5 +68,68 @@ describe('mineralSchema', () => {
     };
     const result = mineralSchema.safeParse(invalidData);
     expect(result.success).toBe(false);
+  });
+
+  // Phase 5: New intelligence field tests
+  it('fails if substitutability is not a valid enum', () => {
+    const invalidData = { ...validData, substitutability: "EXTREME" };
+    const result = mineralSchema.safeParse(invalidData);
+    expect(result.success).toBe(false);
+  });
+
+  it('fails if recyclingRate is below 0', () => {
+    const invalidData = { ...validData, recyclingRate: -5 };
+    const result = mineralSchema.safeParse(invalidData);
+    expect(result.success).toBe(false);
+  });
+
+  it('fails if recyclingRate exceeds 100', () => {
+    const invalidData = { ...validData, recyclingRate: 150 };
+    const result = mineralSchema.safeParse(invalidData);
+    expect(result.success).toBe(false);
+  });
+
+  it('fails if recyclingSources is empty', () => {
+    const invalidData = { ...validData, recyclingSources: [] };
+    const result = mineralSchema.safeParse(invalidData);
+    expect(result.success).toBe(false);
+  });
+
+  it('validates with esgRisks present', () => {
+    const dataWithEsg = {
+      ...validData,
+      esgRisks: [{
+        country: "DRC",
+        category: "HUMAN_RIGHTS",
+        severity: "CRITICAL",
+        summary: "Child labor in cobalt mines."
+      }]
+    };
+    const result = mineralSchema.safeParse(dataWithEsg);
+    expect(result.success).toBe(true);
+  });
+
+  it('validates without esgRisks (optional field)', () => {
+    const result = mineralSchema.safeParse(validData);
+    expect(result.success).toBe(true);
+  });
+
+  it('fails if esgRisks has invalid category', () => {
+    const invalidData = {
+      ...validData,
+      esgRisks: [{
+        country: "DRC",
+        category: "INVALID_CATEGORY",
+        severity: "HIGH",
+        summary: "Test"
+      }]
+    };
+    const result = mineralSchema.safeParse(invalidData);
+    expect(result.success).toBe(false);
+  });
+
+  it('validates the full minerals.json dataset', () => {
+    const result = mineralsArraySchema.safeParse(mineralsData);
+    expect(result.success).toBe(true);
   });
 });

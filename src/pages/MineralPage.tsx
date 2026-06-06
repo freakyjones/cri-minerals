@@ -4,6 +4,8 @@ import { useMineral } from '../features/minerals/hooks/useMineral';
 import ReservesChart from '../features/minerals/components/ReservesChart';
 import ProductionChart from '../features/minerals/components/ProductionChart';
 import { GlobalMap } from '../features/minerals/components/GlobalMap';
+import SummaryStats from '../features/minerals/components/SummaryStats';
+import EsgAlertCard from '../features/minerals/components/EsgAlertCard';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
@@ -50,7 +52,7 @@ export default function MineralPage() {
     >
       <Link to="/" className="text-gray-400 hover:text-white mb-8 inline-block transition-colors">&larr; Back to Dashboard</Link>
       
-      <header className="mb-12 border-b border-white/10 pb-8">
+      <header className="mb-8 border-b border-white/10 pb-8">
         <div className="flex items-center gap-4 mb-4">
           <motion.span layoutId={`symbol-${mineral.slug}`} className="text-4xl md:text-5xl font-bold" style={{ color: mineral.color }}>{mineral.symbol}</motion.span>
           <motion.div layoutId={`risk-${mineral.slug}`}>
@@ -63,6 +65,9 @@ export default function MineralPage() {
         <motion.h1 layoutId={`name-${mineral.slug}`} className="text-4xl md:text-6xl font-bold tracking-tight mb-4 text-white">{mineral.name}</motion.h1>
         <p className="text-xl md:text-2xl text-gray-400 max-w-3xl">{mineral.tagline}</p>
       </header>
+
+      {/* Summary Stats Bar */}
+      <SummaryStats mineral={mineral} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column - Stats & Usage */}
@@ -83,6 +88,9 @@ export default function MineralPage() {
               ))}
             </ul>
           </Card>
+
+          {/* ESG Alert Card */}
+          <EsgAlertCard mineral={mineral} />
           
           <div className="text-xs text-gray-500 bg-bg-surface border border-white/5 p-4 rounded-card">
             <p className="mb-2 font-bold text-gray-400">Data Sources:</p>

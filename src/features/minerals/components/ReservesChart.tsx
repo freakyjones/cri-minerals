@@ -1,4 +1,5 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts';
+import ChartTooltip from './ChartTooltip';
 import type { Mineral } from '../schema/mineralSchema';
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#64748b'];
@@ -29,11 +30,7 @@ export default function ReservesChart({ data }: ReservesChartProps) {
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
-          <RechartsTooltip 
-            contentStyle={{ backgroundColor: '#080d1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff' }}
-            itemStyle={{ color: '#fff' }}
-            formatter={(value) => [`${value}%`, 'Global Share']}
-          />
+          <RechartsTooltip content={<ChartTooltip />} />
           <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px', color: '#94a3b8' }} />
         </PieChart>
       </ResponsiveContainer>
