@@ -1,0 +1,432 @@
+[
+  {
+    "id": "lithium",
+    "slug": "lithium",
+    "name": "Lithium",
+    "symbol": "Li",
+    "atomicNumber": 3,
+    "category": "battery-metal",
+    "tagline": "The backbone of the EV revolution",
+    "riskScore": "HIGH",
+    "color": "#a78bfa",
+    "useCases": [
+      { "label": "EV Batteries", "share": 74 },
+      { "label": "Grid Storage", "share": 14 },
+      { "label": "Consumer Electronics", "share": 8 },
+      { "label": "Other", "share": 4 }
+    ],
+    "reserves": [
+      { "country": "Chile", "share": 35, "amount_mt": 9200000 },
+      { "country": "Australia", "share": 24, "amount_mt": 6300000 },
+      { "country": "Argentina", "share": 22, "amount_mt": 5700000 }
+    ],
+    "production": [
+      { "country": "Australia", "share": 47, "amount_mt": 86000 },
+      { "country": "Chile", "share": 30, "amount_mt": 55000 },
+      { "country": "China", "share": 15, "amount_mt": 27000 }
+    ],
+    "refining": [
+      { "country": "China", "share": 65 },
+      { "country": "Chile", "share": 20 },
+      { "country": "Argentina", "share": 10 },
+      { "country": "Other", "share": 5 }
+    ],
+    "chokePoints": [
+      {
+        "title": "Chinese Refining Dominance",
+        "severity": "CRITICAL",
+        "description": "65% of global lithium refining capacity sits in China. Any trade disruption immediately threatens global battery supply chains.",
+        "affectedCountries": ["USA", "EU", "Japan", "South Korea"]
+      }
+    ],
+    "dataSources": [
+      { "label": "USGS Mineral Commodity Summaries 2024", "url": "https://www.usgs.gov/centers/national-minerals-information-center" },
+      { "label": "IEA Critical Minerals Market Review 2023", "url": "https://www.iea.org/reports/critical-minerals-market-review-2023" }
+    ]
+  },
+  {
+    "id": "cobalt",
+    "slug": "cobalt",
+    "name": "Cobalt",
+    "symbol": "Co",
+    "atomicNumber": 27,
+    "category": "battery-metal",
+    "tagline": "Thermal stability for high-energy batteries",
+    "riskScore": "HIGH",
+    "color": "#3b82f6",
+    "useCases": [
+      { "label": "EV Batteries", "share": 50 },
+      { "label": "Superalloys", "share": 15 },
+      { "label": "Hard Materials", "share": 10 },
+      { "label": "Other", "share": 25 }
+    ],
+    "reserves": [
+      { "country": "DRC", "share": 48, "amount_mt": 4000000 },
+      { "country": "Australia", "share": 18, "amount_mt": 1500000 },
+      { "country": "Indonesia", "share": 7, "amount_mt": 600000 }
+    ],
+    "production": [
+      { "country": "DRC", "share": 73, "amount_mt": 130000 },
+      { "country": "Indonesia", "share": 5, "amount_mt": 9000 },
+      { "country": "Russia", "share": 4, "amount_mt": 8000 }
+    ],
+    "refining": [
+      { "country": "China", "share": 74 },
+      { "country": "Finland", "share": 10 },
+      { "country": "Canada", "share": 5 },
+      { "country": "Other", "share": 11 }
+    ],
+    "chokePoints": [
+      {
+        "title": "DRC Production Concentration",
+        "severity": "CRITICAL",
+        "description": "73% of raw cobalt is extracted in the Democratic Republic of Congo, posing significant supply stability and ESG risks.",
+        "affectedCountries": ["Global"]
+      },
+      {
+        "title": "Chinese Refining Monopoly",
+        "severity": "HIGH",
+        "description": "China controls nearly 75% of global cobalt refining, creating a tight bottleneck for battery manufacturers globally.",
+        "affectedCountries": ["USA", "EU", "South Korea"]
+      }
+    ],
+    "dataSources": [
+      { "label": "USGS Mineral Commodity Summaries 2024", "url": "https://www.usgs.gov/centers/national-minerals-information-center" }
+    ]
+  },
+  {
+    "id": "nickel",
+    "slug": "nickel",
+    "name": "Nickel",
+    "symbol": "Ni",
+    "atomicNumber": 28,
+    "category": "battery-metal",
+    "tagline": "Energy density for long-range EVs",
+    "riskScore": "MEDIUM",
+    "color": "#94a3b8",
+    "useCases": [
+      { "label": "Stainless Steel", "share": 65 },
+      { "label": "EV Batteries", "share": 15 },
+      { "label": "Alloys", "share": 12 },
+      { "label": "Other", "share": 8 }
+    ],
+    "reserves": [
+      { "country": "Indonesia", "share": 21, "amount_mt": 21000000 },
+      { "country": "Australia", "share": 21, "amount_mt": 21000000 },
+      { "country": "Brazil", "share": 16, "amount_mt": 16000000 }
+    ],
+    "production": [
+      { "country": "Indonesia", "share": 48, "amount_mt": 1600000 },
+      { "country": "Philippines", "share": 10, "amount_mt": 330000 },
+      { "country": "Russia", "share": 7, "amount_mt": 220000 }
+    ],
+    "refining": [
+      { "country": "China", "share": 35 },
+      { "country": "Indonesia", "share": 15 },
+      { "country": "Japan", "share": 8 },
+      { "country": "Other", "share": 42 }
+    ],
+    "chokePoints": [
+      {
+        "title": "Class 1 Nickel Shortage",
+        "severity": "MEDIUM",
+        "description": "While general nickel is abundant, Class 1 nickel (required for EV batteries) is facing supply deficits.",
+        "affectedCountries": ["EV Manufacturers"]
+      }
+    ],
+    "dataSources": [
+      { "label": "IEA Critical Minerals Market Review 2023", "url": "https://www.iea.org/reports/critical-minerals-market-review-2023" }
+    ]
+  },
+  {
+    "id": "copper",
+    "slug": "copper",
+    "name": "Copper",
+    "symbol": "Cu",
+    "atomicNumber": 29,
+    "category": "infrastructure",
+    "tagline": "The metal of electrification",
+    "riskScore": "MEDIUM",
+    "color": "#f59e0b",
+    "useCases": [
+      { "label": "Equipment", "share": 31 },
+      { "label": "Construction", "share": 28 },
+      { "label": "Infrastructure", "share": 16 },
+      { "label": "Transport", "share": 13 }
+    ],
+    "reserves": [
+      { "country": "Chile", "share": 21, "amount_mt": 190000000 },
+      { "country": "Australia", "share": 11, "amount_mt": 97000000 },
+      { "country": "Peru", "share": 9, "amount_mt": 81000000 }
+    ],
+    "production": [
+      { "country": "Chile", "share": 24, "amount_mt": 5200000 },
+      { "country": "Peru", "share": 10, "amount_mt": 2200000 },
+      { "country": "DRC", "share": 10, "amount_mt": 2200000 }
+    ],
+    "refining": [
+      { "country": "China", "share": 42 },
+      { "country": "Chile", "share": 10 },
+      { "country": "Japan", "share": 6 },
+      { "country": "Other", "share": 42 }
+    ],
+    "chokePoints": [
+      {
+        "title": "Declining Ore Grades",
+        "severity": "MEDIUM",
+        "description": "Global copper ore grades are declining, requiring more energy and investment to extract the same amount of metal.",
+        "affectedCountries": ["Global"]
+      }
+    ],
+    "dataSources": [
+      { "label": "USGS Mineral Commodity Summaries 2024", "url": "https://www.usgs.gov/centers/national-minerals-information-center" }
+    ]
+  },
+  {
+    "id": "graphite",
+    "slug": "graphite",
+    "name": "Graphite",
+    "symbol": "C",
+    "atomicNumber": 6,
+    "category": "battery-metal",
+    "tagline": "The anode essential",
+    "riskScore": "HIGH",
+    "color": "#475569",
+    "useCases": [
+      { "label": "Batteries", "share": 50 },
+      { "label": "Refractories", "share": 20 },
+      { "label": "Foundries", "share": 10 },
+      { "label": "Other", "share": 20 }
+    ],
+    "reserves": [
+      { "country": "Turkey", "share": 27, "amount_mt": 90000000 },
+      { "country": "Brazil", "share": 22, "amount_mt": 74000000 },
+      { "country": "China", "share": 22, "amount_mt": 73000000 }
+    ],
+    "production": [
+      { "country": "China", "share": 65, "amount_mt": 850000 },
+      { "country": "Mozambique", "share": 13, "amount_mt": 170000 },
+      { "country": "Madagascar", "share": 8, "amount_mt": 110000 }
+    ],
+    "refining": [
+      { "country": "China", "share": 99 },
+      { "country": "Other", "share": 1 }
+    ],
+    "chokePoints": [
+      {
+        "title": "Total Refining Monopoly",
+        "severity": "CRITICAL",
+        "description": "China controls nearly 100% of the world's spherical graphite refining capacity, making battery anodes fully dependent on one nation.",
+        "affectedCountries": ["Global"]
+      }
+    ],
+    "dataSources": [
+      { "label": "IEA Critical Minerals Market Review 2023", "url": "https://www.iea.org/reports/critical-minerals-market-review-2023" }
+    ]
+  },
+  {
+    "id": "manganese",
+    "slug": "manganese",
+    "name": "Manganese",
+    "symbol": "Mn",
+    "atomicNumber": 25,
+    "category": "battery-metal",
+    "tagline": "Steel strengthening and battery stability",
+    "riskScore": "MEDIUM",
+    "color": "#c084fc",
+    "useCases": [
+      { "label": "Steelmaking", "share": 90 },
+      { "label": "Batteries", "share": 5 },
+      { "label": "Other", "share": 5 }
+    ],
+    "reserves": [
+      { "country": "South Africa", "share": 38, "amount_mt": 640000000 },
+      { "country": "Brazil", "share": 16, "amount_mt": 270000000 },
+      { "country": "Australia", "share": 16, "amount_mt": 270000000 }
+    ],
+    "production": [
+      { "country": "South Africa", "share": 36, "amount_mt": 7200000 },
+      { "country": "Gabon", "share": 23, "amount_mt": 4600000 },
+      { "country": "Australia", "share": 16, "amount_mt": 3300000 }
+    ],
+    "refining": [
+      { "country": "China", "share": 90 },
+      { "country": "South Africa", "share": 5 },
+      { "country": "Other", "share": 5 }
+    ],
+    "chokePoints": [
+      {
+        "title": "High Purity Refining Bottleneck",
+        "severity": "HIGH",
+        "description": "While manganese ore is abundant, high-purity manganese sulphate needed for batteries is over 90% refined in China.",
+        "affectedCountries": ["USA", "EU", "South Korea"]
+      }
+    ],
+    "dataSources": [
+      { "label": "USGS Mineral Commodity Summaries 2024", "url": "https://www.usgs.gov/centers/national-minerals-information-center" }
+    ]
+  },
+  {
+    "id": "silicon",
+    "slug": "silicon",
+    "name": "Silicon",
+    "symbol": "Si",
+    "atomicNumber": 14,
+    "category": "semiconductor",
+    "tagline": "The foundation of the digital age",
+    "riskScore": "MEDIUM",
+    "color": "#cbd5e1",
+    "useCases": [
+      { "label": "Alloys", "share": 50 },
+      { "label": "Silicones", "share": 35 },
+      { "label": "Semiconductors", "share": 10 },
+      { "label": "Solar Panels", "share": 5 }
+    ],
+    "reserves": [
+      { "country": "Abundant", "share": 100, "amount_mt": 999999999 }
+    ],
+    "production": [
+      { "country": "China", "share": 68, "amount_mt": 6000000 },
+      { "country": "Russia", "share": 7, "amount_mt": 600000 },
+      { "country": "Brazil", "share": 5, "amount_mt": 400000 }
+    ],
+    "refining": [
+      { "country": "China", "share": 70 },
+      { "country": "USA", "share": 10 },
+      { "country": "Other", "share": 20 }
+    ],
+    "chokePoints": [
+      {
+        "title": "Polysilicon Concentration",
+        "severity": "MEDIUM",
+        "description": "Solar-grade polysilicon production is highly concentrated in specific regions, posing risks to renewable energy rollouts.",
+        "affectedCountries": ["Global"]
+      }
+    ],
+    "dataSources": [
+      { "label": "USGS Mineral Commodity Summaries 2024", "url": "https://www.usgs.gov/centers/national-minerals-information-center" }
+    ]
+  },
+  {
+    "id": "gallium",
+    "slug": "gallium",
+    "name": "Gallium",
+    "symbol": "Ga",
+    "atomicNumber": 31,
+    "category": "semiconductor",
+    "tagline": "Next-generation power electronics",
+    "riskScore": "HIGH",
+    "color": "#f87171",
+    "useCases": [
+      { "label": "Integrated Circuits", "share": 74 },
+      { "label": "Optoelectronics", "share": 24 },
+      { "label": "R&D", "share": 2 }
+    ],
+    "reserves": [
+      { "country": "Uncertain (Bauxite Byproduct)", "share": 100, "amount_mt": 0 }
+    ],
+    "production": [
+      { "country": "China", "share": 98, "amount_mt": 540 },
+      { "country": "Russia", "share": 1, "amount_mt": 5 },
+      { "country": "Japan", "share": 1, "amount_mt": 3 }
+    ],
+    "refining": [
+      { "country": "China", "share": 98 },
+      { "country": "Other", "share": 2 }
+    ],
+    "chokePoints": [
+      {
+        "title": "Export Controls",
+        "severity": "CRITICAL",
+        "description": "China controls 98% of primary gallium production and has instituted export controls, threatening Western defense and tech sectors.",
+        "affectedCountries": ["USA", "EU", "Japan"]
+      }
+    ],
+    "dataSources": [
+      { "label": "USGS Mineral Commodity Summaries 2024", "url": "https://www.usgs.gov/centers/national-minerals-information-center" }
+    ]
+  },
+  {
+    "id": "germanium",
+    "slug": "germanium",
+    "name": "Germanium",
+    "symbol": "Ge",
+    "atomicNumber": 32,
+    "category": "semiconductor",
+    "tagline": "Fiber optics and infrared supremacy",
+    "riskScore": "HIGH",
+    "color": "#fb923c",
+    "useCases": [
+      { "label": "Fiber Optics", "share": 30 },
+      { "label": "Infrared Optics", "share": 25 },
+      { "label": "Electronics", "share": 20 },
+      { "label": "Solar", "share": 15 }
+    ],
+    "reserves": [
+      { "country": "Uncertain (Zinc Byproduct)", "share": 100, "amount_mt": 0 }
+    ],
+    "production": [
+      { "country": "China", "share": 68, "amount_mt": 95 },
+      { "country": "Russia", "share": 5, "amount_mt": 5 },
+      { "country": "Other", "share": 27, "amount_mt": 30 }
+    ],
+    "refining": [
+      { "country": "China", "share": 80 },
+      { "country": "Other", "share": 20 }
+    ],
+    "chokePoints": [
+      {
+        "title": "Export Restrictions",
+        "severity": "CRITICAL",
+        "description": "Subject to recent export controls from major producers, jeopardizing supply for aerospace and defense applications.",
+        "affectedCountries": ["USA", "EU"]
+      }
+    ],
+    "dataSources": [
+      { "label": "USGS Mineral Commodity Summaries 2024", "url": "https://www.usgs.gov/centers/national-minerals-information-center" }
+    ]
+  },
+  {
+    "id": "rare-earth-elements",
+    "slug": "rare-earth-elements",
+    "name": "Rare Earth Elements",
+    "symbol": "REE",
+    "atomicNumber": 0,
+    "category": "critical",
+    "tagline": "The permanent magnet powerhouse",
+    "riskScore": "HIGH",
+    "color": "#34d399",
+    "useCases": [
+      { "label": "Magnets (Nd, Pr, Dy)", "share": 38 },
+      { "label": "Catalysts (Ce, La)", "share": 24 },
+      { "label": "Polishing", "share": 13 },
+      { "label": "Other", "share": 25 }
+    ],
+    "reserves": [
+      { "country": "China", "share": 34, "amount_mt": 44000000 },
+      { "country": "Vietnam", "share": 17, "amount_mt": 22000000 },
+      { "country": "Brazil", "share": 16, "amount_mt": 21000000 }
+    ],
+    "production": [
+      { "country": "China", "share": 70, "amount_mt": 210000 },
+      { "country": "USA", "share": 14, "amount_mt": 43000 },
+      { "country": "Australia", "share": 6, "amount_mt": 18000 }
+    ],
+    "refining": [
+      { "country": "China", "share": 85 },
+      { "country": "Malaysia", "share": 10 },
+      { "country": "Other", "share": 5 }
+    ],
+    "chokePoints": [
+      {
+        "title": "Heavy REE Monopoly",
+        "severity": "CRITICAL",
+        "description": "China dominates over 85% of global REE processing, and nearly 100% of heavy rare earths (like Dysprosium) separation.",
+        "affectedCountries": ["Global"]
+      }
+    ],
+    "dataSources": [
+      { "label": "USGS Mineral Commodity Summaries 2024", "url": "https://www.usgs.gov/centers/national-minerals-information-center" }
+    ]
+  }
+]
