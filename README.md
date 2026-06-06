@@ -1,16 +1,60 @@
-# React + Vite
+# Critical Minerals Intelligence Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A strategic intelligence platform designed for policymakers, supply chain managers, and analysts to monitor the global critical minerals landscape. This dashboard provides data on global reserves, production, refining dominance, and supply chain choke points for the top critical minerals.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Top 10 Minerals Tracking:** Deep dives into Lithium, Cobalt, Rare Earth Elements, and more.
+- **Supply Chain Risk Scoring:** Visual badges mapping single points of failure.
+- **Geographic Visualizations:** Data charts highlighting country-by-country reserves vs. production.
+- **Data Guardrails:** Strict runtime validation using Zod to prevent data corruption.
+- **Premium UI:** Built with Tailwind CSS, Framer Motion, and shadcn/ui for a highly responsive, modern dark-mode experience.
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Framework:** React 19 + Vite
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS
+- **Components:** shadcn/ui
+- **Animations:** Framer Motion
+- **Data Validation:** Zod
+- **Testing:** Vitest + React Testing Library
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Prerequisites
+- Node.js 18+
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/freakyjones/cri-minerals.git
+   cd cri-minerals
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Run the development server:
+   ```bash
+   npm run dev
+   ```
+   The dashboard will be available at `http://localhost:5173`.
+
+## Testing & Building
+
+To run the Vitest test suite:
+```bash
+npm run test
+```
+
+To build for production (runs TypeScript type-checks first):
+```bash
+npm run build
+```
+
+## AI Agent Guardrails
+This project includes an `.agents/rules/project_rules.md` file. Any AI coding assistant opening this repository will automatically read these rules to ensure all future code follows strict styling, architecture, and typing standards.
