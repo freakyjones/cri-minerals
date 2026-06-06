@@ -1,58 +1,45 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import mineralsDataRaw from '../data/minerals.json';
 import { mineralsArraySchema, mineralSchema } from '../schema/mineralSchema';
 import type { Mineral } from '../schema/mineralSchema';
 
+// Parse and cache the data globally so it's instantly available and only parsed once
+let cachedMinerals: Mineral[] | null = null;
+
 export function useMinerals() {
-  const [minerals, setMinerals] = useState<Mineral[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<unknown>(null);
+  const [minerals] = useState<Mineral[]>(() => {
+    if (cachedMinerals) return cachedMinerals;
+    try {
+      cachedMinerals = mineralsArraySchema.parse(mineralsDataRaw);
+      return cachedMinerals;
+    } catch (err) {
+      console.error("Data validation failed:", err);
+      return [];
+    }
+  });
 
-  useEffect(() => {
-    // Simulate API fetch
-    const timer = setTimeout(() => {
-      try {
-        const validatedData = mineralsArraySchema.parse(mineralsDataRaw);
-        setMinerals(validatedData);
-      } catch (err) {
-        console.error("Data validation failed:", err);
-        setError(err);
-      } finally {
-        setLoading(false);
-      }
-    }, 800);
-    return () => clearTimeout(timer);
-  }, []);
-
-  return { minerals, loading, error };
+  // Loading is permanently false because data is local and instant
+  return { minerals, loading: false, error: null };
 }
 
 export function useMineral(slug: string | undefined) {
-  const [mineral, setMineral] = useState<Mineral | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<unknown>(null);
-
-  useEffect(() => {
-    setLoading(true);
-    // Simulate API fetch
-    const timer = setTimeout(() => {
-      try {
-        const found = mineralsDataRaw.find((m) => m.slug === slug);
-        if (found) {
-          const validatedMineral = mineralSchema.parse(found);
-          setMineral(validatedMineral);
-        } else {
-          setMineral(null);
-        }
-      } catch (err) {
-        console.error("Data validation failed:", err);
-        setError(err);
-      } finally {
-        setLoading(false);
+  const [mineral] = useState<Mineral | null>(() => {
+    if (!slug) return null;
+    
+    // Use cache if available
+    const dataList = cachedMinerals || mineralsDataRaw;
+    
+    try {
+      const found = dataList.find((m: any) => m.slug === slug);
+      if (found) {
+        return mineralSchema.parse(found);
       }
-    }, 800);
-    return () => clearTimeout(timer);
-  }, [slug]);
+      return null;
+    } catch (err) {
+      console.error("Data validation failed:", err);
+      return null;
+    }
+  });
 
-  return { mineral, loading, error };
+  return { mineral, loading: false, error: null };
 }
