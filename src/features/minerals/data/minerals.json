@@ -42,6 +42,22 @@
     "dataSources": [
       { "label": "USGS Mineral Commodity Summaries 2024", "url": "https://www.usgs.gov/centers/national-minerals-information-center" },
       { "label": "IEA Critical Minerals Market Review 2023", "url": "https://www.iea.org/reports/critical-minerals-market-review-2023" }
+    ],
+    "substitutability": "LOW",
+    "substituteMineral": "Sodium-ion batteries (emerging, lower energy density)",
+    "recyclingRate": 5,
+    "recyclingSources": [
+      "IEA Global EV Outlook 2023",
+      "USGS Mineral Commodity Summaries 2024",
+      "European Commission Critical Raw Materials Report 2023"
+    ],
+    "esgRisks": [
+      {
+        "country": "Chile",
+        "category": "ENVIRONMENT",
+        "severity": "MEDIUM",
+        "summary": "Lithium brine extraction in the Atacama Desert consumes vast quantities of freshwater, threatening local ecosystems and indigenous water access."
+      }
     ]
   },
   {
@@ -92,6 +108,28 @@
     ],
     "dataSources": [
       { "label": "USGS Mineral Commodity Summaries 2024", "url": "https://www.usgs.gov/centers/national-minerals-information-center" }
+    ],
+    "substitutability": "HIGH",
+    "substituteMineral": "Iron Phosphate (LFP) cathode chemistry eliminates cobalt entirely",
+    "recyclingRate": 32,
+    "recyclingSources": [
+      "IEA Global EV Outlook 2023",
+      "Cobalt Institute Annual Report 2023",
+      "USGS Mineral Commodity Summaries 2024"
+    ],
+    "esgRisks": [
+      {
+        "country": "DRC",
+        "category": "HUMAN_RIGHTS",
+        "severity": "CRITICAL",
+        "summary": "Artisanal cobalt mining in the DRC involves widespread child labor and hazardous working conditions, with an estimated 40,000 children working in mines."
+      },
+      {
+        "country": "DRC",
+        "category": "CONFLICT",
+        "severity": "HIGH",
+        "summary": "Revenue from cobalt mining has been linked to financing armed groups in eastern DRC provinces."
+      }
     ]
   },
   {
@@ -136,6 +174,22 @@
     ],
     "dataSources": [
       { "label": "IEA Critical Minerals Market Review 2023", "url": "https://www.iea.org/reports/critical-minerals-market-review-2023" }
+    ],
+    "substitutability": "MEDIUM",
+    "substituteMineral": "LFP batteries (lower energy density but cobalt/nickel-free)",
+    "recyclingRate": 68,
+    "recyclingSources": [
+      "Nickel Institute Recycling Report 2023",
+      "USGS Mineral Commodity Summaries 2024",
+      "IEA Critical Minerals Market Review 2023"
+    ],
+    "esgRisks": [
+      {
+        "country": "Indonesia",
+        "category": "ENVIRONMENT",
+        "severity": "HIGH",
+        "summary": "Rapid nickel smelter expansion in Indonesia has caused widespread deforestation of tropical rainforest and toxic tailings dumped into coastal waters."
+      }
     ]
   },
   {
@@ -180,6 +234,14 @@
     ],
     "dataSources": [
       { "label": "USGS Mineral Commodity Summaries 2024", "url": "https://www.usgs.gov/centers/national-minerals-information-center" }
+    ],
+    "substitutability": "LOW",
+    "substituteMineral": "Aluminum (partial substitute in power cables, but inferior conductivity)",
+    "recyclingRate": 30,
+    "recyclingSources": [
+      "International Copper Study Group 2023",
+      "USGS Mineral Commodity Summaries 2024",
+      "European Copper Institute Recycling Report 2023"
     ]
   },
   {
@@ -222,6 +284,22 @@
     ],
     "dataSources": [
       { "label": "IEA Critical Minerals Market Review 2023", "url": "https://www.iea.org/reports/critical-minerals-market-review-2023" }
+    ],
+    "substitutability": "MEDIUM",
+    "substituteMineral": "Silicon-carbon composite anodes (emerging technology, higher capacity)",
+    "recyclingRate": 0,
+    "recyclingSources": [
+      "IEA Critical Minerals Market Review 2023",
+      "USGS Mineral Commodity Summaries 2024",
+      "Benchmark Mineral Intelligence Graphite Report 2023"
+    ],
+    "esgRisks": [
+      {
+        "country": "China",
+        "category": "ENVIRONMENT",
+        "severity": "MEDIUM",
+        "summary": "Graphite processing in China generates significant air pollution (graphite dust) and acid waste, affecting nearby communities."
+      }
     ]
   },
   {
@@ -264,6 +342,14 @@
     ],
     "dataSources": [
       { "label": "USGS Mineral Commodity Summaries 2024", "url": "https://www.usgs.gov/centers/national-minerals-information-center" }
+    ],
+    "substitutability": "MEDIUM",
+    "substituteMineral": "Titanium or molybdenum in steel alloys; LFP cathodes bypass manganese in batteries",
+    "recyclingRate": 53,
+    "recyclingSources": [
+      "International Manganese Institute 2023",
+      "USGS Mineral Commodity Summaries 2024",
+      "IEA Critical Minerals Market Review 2023"
     ]
   },
   {
@@ -305,6 +391,14 @@
     ],
     "dataSources": [
       { "label": "USGS Mineral Commodity Summaries 2024", "url": "https://www.usgs.gov/centers/national-minerals-information-center" }
+    ],
+    "substitutability": "HIGH",
+    "substituteMineral": "Gallium Nitride (GaN) and Silicon Carbide (SiC) for power electronics",
+    "recyclingRate": 0,
+    "recyclingSources": [
+      "USGS Mineral Commodity Summaries 2024",
+      "IRENA End-of-Life Solar Panel Management Report 2023",
+      "IEA Critical Minerals Market Review 2023"
     ]
   },
   {
@@ -344,6 +438,14 @@
     ],
     "dataSources": [
       { "label": "USGS Mineral Commodity Summaries 2024", "url": "https://www.usgs.gov/centers/national-minerals-information-center" }
+    ],
+    "substitutability": "LOW",
+    "substituteMineral": "Silicon-based alternatives exist but lack GaN's superior power efficiency",
+    "recyclingRate": 0,
+    "recyclingSources": [
+      "USGS Mineral Commodity Summaries 2024",
+      "European Commission Critical Raw Materials Report 2023",
+      "Roskill Gallium Market Outlook 2023"
     ]
   },
   {
@@ -384,6 +486,14 @@
     ],
     "dataSources": [
       { "label": "USGS Mineral Commodity Summaries 2024", "url": "https://www.usgs.gov/centers/national-minerals-information-center" }
+    ],
+    "substitutability": "LOW",
+    "substituteMineral": "Zinc selenide for some infrared optics; silicon for some electronic uses",
+    "recyclingRate": 30,
+    "recyclingSources": [
+      "USGS Mineral Commodity Summaries 2024",
+      "European Commission Critical Raw Materials Report 2023",
+      "Umicore Recycling Technology Reports 2023"
     ]
   },
   {
@@ -427,6 +537,22 @@
     ],
     "dataSources": [
       { "label": "USGS Mineral Commodity Summaries 2024", "url": "https://www.usgs.gov/centers/national-minerals-information-center" }
+    ],
+    "substitutability": "LOW",
+    "substituteMineral": "Ferrite magnets (vastly inferior performance for motors and turbines)",
+    "recyclingRate": 1,
+    "recyclingSources": [
+      "USGS Mineral Commodity Summaries 2024",
+      "European Commission Critical Raw Materials Report 2023",
+      "IEA Critical Minerals Market Review 2023"
+    ],
+    "esgRisks": [
+      {
+        "country": "China",
+        "category": "ENVIRONMENT",
+        "severity": "HIGH",
+        "summary": "REE processing in China generates toxic and radioactive tailings waste. The Bayan Obo tailings dam in Inner Mongolia is one of the largest toxic waste sites in the world."
+      }
     ]
   }
 ]

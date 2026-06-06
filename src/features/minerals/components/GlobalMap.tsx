@@ -68,7 +68,8 @@ export const GlobalMap = ({ mineral }: GlobalMapProps) => {
           <MapContainer 
             center={[20, 0]} 
             zoom={2} 
-            scrollWheelZoom={false} 
+            scrollWheelZoom={false}
+            dragging={!L.Browser.mobile}
             className="h-full w-full bg-slate-950"
           >
             {/* Dark themed tile layer (CartoDB Dark Matter) */}

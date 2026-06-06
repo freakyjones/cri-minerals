@@ -37,7 +37,17 @@ export const mineralSchema = z.object({
   dataSources: z.array(z.object({
     label: z.string(),
     url: z.string().url()
-  }))
+  })),
+  substitutability: z.enum(['LOW', 'MEDIUM', 'HIGH']),
+  substituteMineral: z.string().optional(),
+  recyclingRate: z.number().min(0).max(100),
+  recyclingSources: z.array(z.string()).min(1),
+  esgRisks: z.array(z.object({
+    country: z.string(),
+    category: z.enum(['HUMAN_RIGHTS', 'ENVIRONMENT', 'GOVERNANCE', 'CONFLICT']),
+    severity: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
+    summary: z.string()
+  })).optional()
 });
 
 export const mineralsArraySchema = z.array(mineralSchema);

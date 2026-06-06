@@ -1,4 +1,5 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell } from 'recharts';
+import ChartTooltip from './ChartTooltip';
 import type { Mineral } from '../schema/mineralSchema';
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#64748b'];
@@ -19,8 +20,7 @@ export default function ProductionChart({ data }: ProductionChartProps) {
           <YAxis dataKey="country" type="category" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} width={80} />
           <RechartsTooltip 
             cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-            contentStyle={{ backgroundColor: '#080d1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff' }}
-            formatter={(value) => [`${value}%`, 'Global Share']}
+            content={<ChartTooltip />}
           />
           <Bar dataKey="share" radius={[0, 4, 4, 0]} barSize={24}>
              {data.map((_, index) => (
