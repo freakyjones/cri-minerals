@@ -1,40 +1,18 @@
-components:
-  - changed-files:
-    - any-glob-to-any-file: 'src/components/**/*'
-
-features:
-  - changed-files:
-    - any-glob-to-any-file: 'src/features/**/*'
-
-dependencies:
-  - changed-files:
-    - any-glob-to-any-file: 
-      - 'package.json'
-      - 'package-lock.json'
+# Labeler configuration for actions/labeler@v4
+frontend:
+  - 'src/**/*'
 
 config:
-  - changed-files:
-    - any-glob-to-any-file: 
-      - 'vite.config.ts'
-      - 'tailwind.config.js'
-      - 'tsconfig*.json'
-      - 'eslint.config.js'
-      - 'postcss.config.js'
+  - '*.json'
+  - '*.ts'
+  - '*.js'
+  - 'eslint.config.js'
+  - 'postcss.config.js'
+  - 'vite.config.ts'
+
+documentation:
+  - 'README.md'
+  - '.agents/**/*'
 
 ci:
-  - changed-files:
-    - any-glob-to-any-file: '.github/**/*'
-
-docs:
-  - changed-files:
-    - any-glob-to-any-file: 
-      - 'README.md'
-      - 'docs/**/*'
-
-pages:
-  - changed-files:
-    - any-glob-to-any-file: 'src/pages/**/*'
-
-rules:
-  - changed-files:
-    - any-glob-to-any-file: '.agents/**/*'
+  - '.github/**/*'
