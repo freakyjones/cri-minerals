@@ -1,7 +1,5 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useMinerals } from '../features/minerals/hooks/useMineral';
-import MineralCard from '../features/minerals/components/MineralCard';
+import { useMineralDashboard, MineralCard } from '../features/minerals';
 
 const pageVariants = {
   initial: { opacity: 0 },
@@ -24,29 +22,15 @@ const cardVariants = {
   show: { opacity: 1, y: 0 }
 };
 
-const CATEGORIES = [
-  { label: 'All', value: 'all' },
-  { label: 'Battery Metals', value: 'battery-metal' },
-  { label: 'Semiconductors', value: 'semiconductor' },
-  { label: 'Infrastructure', value: 'infrastructure' },
-  { label: 'Critical', value: 'critical' }
-];
-
 export default function HomePage() {
-  const { minerals, loading } = useMinerals();
-  const [activeCategory, setActiveCategory] = useState('all');
-
-  const filteredMinerals = activeCategory === 'all' 
-    ? minerals 
-    : minerals.filter(m => m.category === activeCategory);
-
-  // Risk level counts
-  const riskCounts = {
-    CRITICAL: minerals.filter(m => m.riskScore === 'CRITICAL').length,
-    HIGH: minerals.filter(m => m.riskScore === 'HIGH').length,
-    MEDIUM: minerals.filter(m => m.riskScore === 'MEDIUM').length,
-    LOW: minerals.filter(m => m.riskScore === 'LOW').length
-  };
+  const { 
+    loading, 
+    activeCategory, 
+    setActiveCategory, 
+    filteredMinerals, 
+    riskCounts,
+    categories
+  } = useMineralDashboard();
 
   return (
     <motion.div 
@@ -97,7 +81,7 @@ export default function HomePage() {
 
       {/* Category Filter Tabs */}
       <div className="flex flex-wrap gap-2 mb-8">
-        {CATEGORIES.map(cat => (
+        {categories.map(cat => (
           <button
             key={cat.value}
             onClick={() => setActiveCategory(cat.value)}
