@@ -6,7 +6,9 @@ export const CATEGORIES = [
   { label: 'Battery Metals', value: 'battery-metal' },
   { label: 'Semiconductors', value: 'semiconductor' },
   { label: 'Infrastructure', value: 'infrastructure' },
-  { label: 'Critical', value: 'critical' }
+  { label: 'Critical', value: 'critical' },
+  { label: 'Defense', value: 'defense' },
+  { label: 'Industrial', value: 'industrial' }
 ] as const;
 
 export function useMineralDashboard() {

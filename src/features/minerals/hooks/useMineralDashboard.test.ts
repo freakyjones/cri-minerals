@@ -49,7 +49,7 @@ describe('useMineralDashboard', () => {
   it('should expose the list of available categories', () => {
     const { result } = renderHook(() => useMineralDashboard());
     
-    expect(result.current.categories).toHaveLength(5);
+    expect(result.current.categories).toHaveLength(7);
     expect(result.current.categories[0].value).toBe('all');
   });
 });

@@ -128,6 +128,69 @@ describe('mineralSchema', () => {
     expect(result.success).toBe(false);
   });
 
+  // Timeline tests
+  it('validates with timeline present', () => {
+    const dataWithTimeline = {
+      ...validData,
+      timeline: [{
+        year: 2023,
+        event: "Chile announces lithium nationalization",
+        impact: "State control over 35% of global reserves"
+      }]
+    };
+    const result = mineralSchema.safeParse(dataWithTimeline);
+    expect(result.success).toBe(true);
+  });
+
+  it('validates without timeline (optional field)', () => {
+    const result = mineralSchema.safeParse(validData);
+    expect(result.success).toBe(true);
+  });
+
+  it('fails if timeline event has non-integer year', () => {
+    const invalidData = {
+      ...validData,
+      timeline: [{
+        year: "twenty-twenty",
+        event: "Test",
+        impact: "Test"
+      }]
+    };
+    const result = mineralSchema.safeParse(invalidData);
+    expect(result.success).toBe(false);
+  });
+
+  it('fails if timeline event is missing required fields', () => {
+    const invalidData = {
+      ...validData,
+      timeline: [{
+        year: 2023
+        // missing event and impact
+      }]
+    };
+    const result = mineralSchema.safeParse(invalidData);
+    expect(result.success).toBe(false);
+  });
+
+  // Category enum tests
+  it('validates defense category', () => {
+    const defenseMineral = { ...validData, category: 'defense' };
+    const result = mineralSchema.safeParse(defenseMineral);
+    expect(result.success).toBe(true);
+  });
+
+  it('validates industrial category', () => {
+    const industrialMineral = { ...validData, category: 'industrial' };
+    const result = mineralSchema.safeParse(industrialMineral);
+    expect(result.success).toBe(true);
+  });
+
+  it('fails if category is not a valid enum value', () => {
+    const invalidData = { ...validData, category: 'unknown-category' };
+    const result = mineralSchema.safeParse(invalidData);
+    expect(result.success).toBe(false);
+  });
+
   it('validates the full minerals.json dataset', () => {
     const result = mineralsArraySchema.safeParse(mineralsData);
     expect(result.success).toBe(true);

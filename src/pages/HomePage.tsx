@@ -42,7 +42,7 @@ export default function HomePage() {
     >
       <header className="mb-8">
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3 text-white">Critical Minerals Intelligence</h1>
-        <p className="text-lg text-gray-400">Monitoring global supply chains, choke points, and market dominance.</p>
+        <p className="text-lg text-gray-400">Monitoring 20 critical minerals across global supply chains, choke points, and geopolitical risks.</p>
         <p className="text-xs text-gray-600 mt-4 uppercase tracking-widest">Data for illustrative purposes only. Sources: USGS, IEA, World Bank.</p>
       </header>
 
