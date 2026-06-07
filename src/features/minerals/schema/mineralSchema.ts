@@ -1,12 +1,29 @@
 import { z } from 'zod';
 
+export const MINERAL_CATEGORIES = [
+  'battery-metal',
+  'semiconductor',
+  'infrastructure',
+  'critical',
+  'defense',
+  'industrial'
+] as const;
+
+export type MineralCategory = typeof MINERAL_CATEGORIES[number];
+
+export const timelineEventSchema = z.object({
+  year: z.number().int(),
+  event: z.string(),
+  impact: z.string()
+});
+
 export const mineralSchema = z.object({
   id: z.string(),
   slug: z.string(),
   name: z.string(),
   symbol: z.string(),
   atomicNumber: z.number().int().nonnegative(),
-  category: z.string(),
+  category: z.enum(MINERAL_CATEGORIES),
   tagline: z.string(),
   riskScore: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
   color: z.string().regex(/^#[0-9a-fA-F]{3,6}$/, { message: "Must be a valid hex color" }),
@@ -47,9 +64,11 @@ export const mineralSchema = z.object({
     category: z.enum(['HUMAN_RIGHTS', 'ENVIRONMENT', 'GOVERNANCE', 'CONFLICT']),
     severity: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
     summary: z.string()
-  })).optional()
+  })).optional(),
+  timeline: z.array(timelineEventSchema).optional()
 });
 
 export const mineralsArraySchema = z.array(mineralSchema);
 
 export type Mineral = z.infer<typeof mineralSchema>;
+export type TimelineEvent = z.infer<typeof timelineEventSchema>;

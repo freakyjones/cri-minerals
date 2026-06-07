@@ -36,7 +36,7 @@ describe('HomePage Integration', () => {
     );
     
     expect(screen.getByText('Critical Minerals Intelligence')).toBeInTheDocument();
-    expect(screen.getByText(/Monitoring global supply chains/i)).toBeInTheDocument();
+    expect(screen.getByText(/Monitoring 20 critical minerals across global supply chains/i)).toBeInTheDocument();
   });
 
   it('renders the mineral cards based on the filteredMinerals array', () => {

@@ -12,6 +12,7 @@ export { default as ProductionChart } from './components/ProductionChart';
 export { GlobalMap } from './components/GlobalMap';
 export { default as SummaryStats } from './components/SummaryStats';
 export { default as EsgAlertCard } from './components/EsgAlertCard';
+export { default as MineralTimeline } from './components/MineralTimeline';
 
 // Types and Schema
 export { mineralSchema, mineralsArraySchema } from './schema/mineralSchema';

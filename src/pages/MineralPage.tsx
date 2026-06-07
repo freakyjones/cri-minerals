@@ -9,7 +9,8 @@ import {
   ProductionChart, 
   GlobalMap, 
   SummaryStats, 
-  EsgAlertCard 
+  EsgAlertCard,
+  MineralTimeline 
 } from '../features/minerals';
 import { Card } from '@/components/ui/card';
 
@@ -58,6 +59,9 @@ export default function MineralPage() {
         <div className="space-y-8 lg:col-span-1">
           <PrimaryApplications useCases={mineral.useCases} />
           <EsgAlertCard mineral={mineral} />
+          {mineral.timeline && mineral.timeline.length > 0 && (
+            <MineralTimeline timeline={mineral.timeline} color={mineral.color} />
+          )}
           
           <div className="text-xs text-gray-500 bg-bg-surface border border-white/5 p-4 rounded-card">
             <p className="mb-2 font-bold text-gray-400">Data Sources:</p>
