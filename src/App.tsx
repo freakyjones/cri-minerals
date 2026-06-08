@@ -28,16 +28,20 @@ function AppRoutes() {
   const location = useLocation();
   
   return (
-    <Suspense fallback={<div className="min-h-screen bg-bg-base flex items-center justify-center"><div className="animate-pulse bg-bg-surface h-8 w-32 rounded"></div></div>}>
-      <MainLayout>
+    <MainLayout>
+      <Suspense fallback={
+        <div className="h-full w-full flex items-center justify-center min-h-[50vh]">
+          <div className="animate-pulse bg-white/5 h-8 w-32 rounded"></div>
+        </div>
+      }>
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={<HomePage />} />
             <Route path="/mineral/:slug" element={<MineralPage />} />
           </Routes>
         </AnimatePresence>
-      </MainLayout>
-    </Suspense>
+      </Suspense>
+    </MainLayout>
   );
 }
 
