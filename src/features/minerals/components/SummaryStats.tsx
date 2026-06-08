@@ -55,7 +55,7 @@ export default function SummaryStats({ mineral }: SummaryStatsProps) {
           <Recycle className="h-4 w-4 text-slate-400" />
           <span className="text-xs text-slate-400 uppercase tracking-wider font-medium">Recycling Rate</span>
         </div>
-        <span className={`text-2xl font-bold ${getRecycleColor(mineral.recyclingRate)}`}>
+        <span className={`text-2xl font-bold font-mono tabular-nums tracking-tight ${getRecycleColor(mineral.recyclingRate)}`}>
           {mineral.recyclingRate}%
         </span>
       </div>
@@ -67,7 +67,7 @@ export default function SummaryStats({ mineral }: SummaryStatsProps) {
           <span className="text-xs text-slate-400 uppercase tracking-wider font-medium group-hover:text-white transition-colors">ESG Alerts</span>
         </div>
         {esgCount > 0 ? (
-          <Badge className="bg-red-500/20 text-red-400 border border-red-500/30 font-bold text-sm px-3 py-1 mt-1">
+          <Badge className="bg-red-500/20 text-red-400 border border-red-500/30 font-bold text-sm px-3 py-1 mt-1 font-mono tabular-nums tracking-tight">
             {esgCount} {esgCount === 1 ? 'Alert' : 'Alerts'}
           </Badge>
         ) : (

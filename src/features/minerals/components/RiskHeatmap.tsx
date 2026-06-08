@@ -33,7 +33,7 @@ export default function RiskHeatmap({ riskCounts, activeRisk, onRiskClick }: Ris
             <Card className={`p-6 transition-all shadow-glass h-full border-2 ${isActive ? r.activeBorder : r.border} ${r.bg}`}>
               <div className="flex items-center justify-between mb-4">
                 <span className={`text-2xl ${r.text}`}>{getRiskIcon(r.key)}</span>
-                <span className={`text-3xl font-bold ${r.text}`}>{r.count}</span>
+                <span className={`text-3xl font-bold font-mono tabular-nums tracking-tight ${r.text}`}>{r.count}</span>
               </div>
               <p className="text-sm font-medium text-slate-300 uppercase tracking-wider">{r.label}</p>
               {isActive && (

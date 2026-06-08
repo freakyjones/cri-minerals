@@ -1,28 +1,14 @@
 import { motion } from 'framer-motion';
-import { useMineralDashboard, MineralCard } from '../features/minerals';
+import { useMineralDashboard } from '../features/minerals';
 import RiskHeatmap from '../features/minerals/components/RiskHeatmap';
 import CategoryFilter from '../features/minerals/components/CategoryFilter';
+import MineralTable from '../features/minerals/components/MineralTable';
 import { useAccessibleVariants } from '../lib/useAccessibleVariants';
 
 const pageVariantsFull = {
   initial: { opacity: 0 },
   animate: { opacity: 1 },
   exit: { opacity: 0 }
-};
-
-const listVariantsFull = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.08
-    }
-  }
-};
-
-const cardVariantsFull = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 }
 };
 
 export default function HomePage() {
@@ -38,8 +24,6 @@ export default function HomePage() {
   } = useMineralDashboard();
 
   const pageVariants = useAccessibleVariants(pageVariantsFull);
-  const listVariants = useAccessibleVariants(listVariantsFull);
-  const cardVariants = useAccessibleVariants(cardVariantsFull);
 
   return (
     <motion.div 
@@ -63,31 +47,42 @@ export default function HomePage() {
         />
       )}
 
-      <CategoryFilter
-        categories={categories}
-        activeCategory={activeCategory}
-        onCategoryChange={setActiveCategory}
-      />
-      
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className="h-48 bg-bg-surface rounded-card animate-pulse shadow-glass"></div>
-          ))}
+      <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex-1">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-white">Intelligence Index</h2>
+            <CategoryFilter
+              categories={categories}
+              activeCategory={activeCategory}
+              onCategoryChange={setActiveCategory}
+            />
+          </div>
+
+          {loading ? (
+            <div className="h-96 bg-bg-surface rounded-card animate-pulse shadow-glass"></div>
+          ) : (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              key={`${activeCategory}-${activeRisk}`}
+            >
+              <MineralTable minerals={filteredMinerals} />
+            </motion.div>
+          )}
         </div>
-      ) : (
-        <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-          variants={listVariants}
-          initial="hidden"
-          animate="show"
-          key={activeCategory}
-        >
-          {filteredMinerals.map(m => (
-            <MineralCard key={m.id} mineral={m} variants={cardVariants} />
-          ))}
-        </motion.div>
-      )}
+        
+        {/* Placeholder for future Bento right column (e.g. Market Alerts, Top Movers) */}
+        <div className="w-full lg:w-80 space-y-6 hidden lg:block">
+          <div className="bg-bg-surface border border-white/10 rounded-xl p-6 shadow-glass h-full">
+            <h3 className="font-bold text-white mb-4">Market Alerts</h3>
+            <div className="space-y-4">
+              <p className="text-sm text-slate-400">Select a mineral to view detailed ESG alerts and choke point vulnerabilities.</p>
+              <div className="h-24 bg-white/5 rounded animate-pulse"></div>
+              <div className="h-24 bg-white/5 rounded animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </motion.div>
   );
 }
