@@ -3,7 +3,10 @@ import { useMineralDashboard } from '../features/minerals';
 import RiskHeatmap from '../features/minerals/components/RiskHeatmap';
 import CategoryFilter from '../features/minerals/components/CategoryFilter';
 import MineralTable from '../features/minerals/components/MineralTable';
+import MineralListMobile from '../features/minerals/components/MineralListMobile';
+import MarketAlerts from '../features/minerals/components/MarketAlerts';
 import { useAccessibleVariants } from '../lib/useAccessibleVariants';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 const pageVariantsFull = {
   initial: { opacity: 0 },
@@ -23,6 +26,7 @@ export default function HomePage() {
     setActiveRisk
   } = useMineralDashboard();
 
+  const isMobile = useIsMobile();
   const pageVariants = useAccessibleVariants(pageVariantsFull);
 
   return (
@@ -64,24 +68,18 @@ export default function HomePage() {
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              key={`${activeCategory}-${activeRisk}`}
+              key={`${activeCategory}-${activeRisk}-${isMobile ? 'mobile' : 'desktop'}`}
             >
-              <MineralTable minerals={filteredMinerals} />
+              {isMobile ? (
+                <MineralListMobile minerals={filteredMinerals} />
+              ) : (
+                <MineralTable minerals={filteredMinerals} />
+              )}
             </motion.div>
           )}
         </div>
         
-        {/* Placeholder for future Bento right column (e.g. Market Alerts, Top Movers) */}
-        <div className="w-full lg:w-80 space-y-6 hidden lg:block">
-          <div className="bg-bg-surface border border-white/10 rounded-xl p-6 shadow-glass h-full">
-            <h3 className="font-bold text-white mb-4">Market Alerts</h3>
-            <div className="space-y-4">
-              <p className="text-sm text-slate-400">Select a mineral to view detailed ESG alerts and choke point vulnerabilities.</p>
-              <div className="h-24 bg-white/5 rounded animate-pulse"></div>
-              <div className="h-24 bg-white/5 rounded animate-pulse"></div>
-            </div>
-          </div>
-        </div>
+        <MarketAlerts />
       </div>
     </motion.div>
   );

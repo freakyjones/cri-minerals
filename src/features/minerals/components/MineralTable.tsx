@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import type { Mineral } from '../schema/mineralSchema';
 import { getRiskIcon, getRiskColorSolid } from '../utils';
@@ -8,8 +8,6 @@ interface MineralTableProps {
 }
 
 export default function MineralTable({ minerals }: MineralTableProps) {
-  const navigate = useNavigate();
-
   return (
     <div className="bg-bg-surface border border-white/10 rounded-xl shadow-glass overflow-hidden">
       <div className="overflow-x-auto">
@@ -27,24 +25,20 @@ export default function MineralTable({ minerals }: MineralTableProps) {
             {minerals.map((mineral) => (
               <tr 
                 key={mineral.id}
-                onClick={() => navigate(`/mineral/${mineral.slug}`)}
-                className="hover:bg-white/5 transition-colors duration-150 cursor-pointer group outline-none focus-within:bg-white/5 focus-within:ring-2 focus-within:ring-accent-blue focus-within:ring-inset"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') navigate(`/mineral/${mineral.slug}`);
-                }}
+                className="hover:bg-white/5 transition-colors duration-150 group"
               >
                 <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <span className="w-8 h-8 rounded bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-slate-300">
+                  <Link 
+                    to={`/mineral/${mineral.slug}`}
+                    className="flex items-center gap-3 outline-none focus-visible:ring-2 focus-visible:ring-accent-blue rounded-md p-1 -m-1"
+                  >
+                    <span className="w-8 h-8 rounded bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-slate-300 shrink-0">
                       {mineral.symbol}
                     </span>
-                    <div>
-                      <div className="font-bold text-white group-hover:text-accent-blue transition-colors">
-                        {mineral.name}
-                      </div>
+                    <div className="font-bold text-white group-hover:text-accent-blue transition-colors">
+                      {mineral.name}
                     </div>
-                  </div>
+                  </Link>
                 </td>
                 <td className="px-6 py-4">
                   <span className="text-slate-300">{mineral.category}</span>
