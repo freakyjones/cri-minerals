@@ -17,6 +17,7 @@ export default function PrimaryApplications({ useCases }: PrimaryApplicationsPro
               <span className="font-bold text-accent-blue">{uc.share}%</span>
             </div>
             <div className="w-full bg-black/40 rounded-full h-2">
+              {/* eslint-disable-next-line react/forbid-dom-props */}
               <div className="bg-accent-blue h-2 rounded-full" style={{ width: `${uc.share}%` }}></div>
             </div>
           </li>

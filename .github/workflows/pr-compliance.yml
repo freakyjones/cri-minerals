@@ -1,0 +1,27 @@
+name: PR Compliance Check
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  check-checklist:
+    name: Verify PR Checklist
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for unchecked boxes
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body;
+            if (!body) {
+              core.setFailed("Pull request body is empty. Please fill out the PR template.");
+              return;
+            }
+            
+            const uncheckedBoxRegex = /-\s\[\s\]/g;
+            if (uncheckedBoxRegex.test(body)) {
+              core.setFailed("You have unchecked boxes in your PR description. Please complete all requirements before merging.");
+            } else {
+              console.log("All checklist items are checked!");
+            }

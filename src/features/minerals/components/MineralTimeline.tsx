@@ -46,7 +46,7 @@ export default function MineralTimeline({ timeline, color }: MineralTimelineProp
         {/* Vertical timeline line */}
         <div
           className="absolute left-[19px] top-2 bottom-2 w-px opacity-30"
-          style={{ backgroundColor: color }}
+          style={{ backgroundColor: color }} // eslint-disable-line react/forbid-dom-props
         />
 
         <div className="space-y-6">
@@ -60,7 +60,7 @@ export default function MineralTimeline({ timeline, color }: MineralTimelineProp
               <div className="flex flex-col items-center shrink-0 z-10">
                 <div
                   className="w-[10px] h-[10px] rounded-full ring-4 ring-bg-surface"
-                  style={{ backgroundColor: color }}
+                  style={{ backgroundColor: color }} // eslint-disable-line react/forbid-dom-props
                 />
               </div>
 
@@ -69,7 +69,7 @@ export default function MineralTimeline({ timeline, color }: MineralTimelineProp
                 <div className="flex items-center gap-3 mb-2">
                   <span
                     className="text-sm font-bold px-2 py-0.5 rounded"
-                    style={{ backgroundColor: `${color}20`, color }}
+                    style={{ backgroundColor: `${color}20`, color }} // eslint-disable-line react/forbid-dom-props
                   >
                     {event.year}
                   </span>
