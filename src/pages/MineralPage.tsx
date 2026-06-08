@@ -1,6 +1,6 @@
-import { lazy, Suspense } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { lazy, Suspense } from 'react';
 import { 
   useMineral, 
   MineralPageHeader, 
@@ -11,12 +11,13 @@ import {
   MineralTimeline 
 } from '../features/minerals';
 import { Card } from '@/components/ui/card';
+import { useAccessibleVariants } from '../lib/useAccessibleVariants';
 
-const ReservesChart = lazy(() => import('../features/minerals/components/ReservesChart'));
+const SharePieChart = lazy(() => import('../features/minerals/components/SharePieChart'));
 const ProductionChart = lazy(() => import('../features/minerals/components/ProductionChart'));
-const GlobalMap = lazy(() => import('../features/minerals/components/GlobalMap').then(m => ({ default: m.GlobalMap })));
+const GlobalMap = lazy(() => import('../features/minerals/components/GlobalMap'));
 
-const pageVariants = {
+const pageVariantsFull = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
   exit: { opacity: 0, y: -20 }
@@ -25,6 +26,7 @@ const pageVariants = {
 export default function MineralPage() {
   const { slug } = useParams();
   const { mineral, loading } = useMineral(slug);
+  const pageVariants = useAccessibleVariants(pageVariantsFull);
 
   if (loading) {
     return (
@@ -38,7 +40,7 @@ export default function MineralPage() {
     return (
       <div className="min-h-screen p-8 max-w-7xl mx-auto">
         <h1 className="text-2xl text-red-500">Mineral not found</h1>
-        <Link to="/" className="text-accent-blue hover:underline mt-4 inline-block">&larr; Back to Dashboard</Link>
+        <Link to="/" className="text-accent-blue hover:underline mt-4 inline-block focus-visible:ring-2 focus-visible:ring-accent-blue rounded">&larr; Back to Dashboard</Link>
       </div>
     );
   }
@@ -51,7 +53,13 @@ export default function MineralPage() {
       animate="animate"
       exit="exit"
     >
-      <Link to="/" className="text-gray-400 hover:text-white mb-8 inline-block transition-colors">&larr; Back to Dashboard</Link>
+      <Link
+        to="/"
+        className="text-slate-400 hover:text-white mb-8 inline-flex items-center gap-2 transition-colors focus-visible:ring-2 focus-visible:ring-accent-blue rounded px-1"
+      >
+        &larr; Back to Dashboard
+        <kbd className="text-xs bg-white/10 border border-white/10 rounded px-1.5 py-0.5 text-slate-500 ml-1">Esc</kbd>
+      </Link>
       
       <MineralPageHeader mineral={mineral} />
       <SummaryStats mineral={mineral} />
@@ -65,11 +73,11 @@ export default function MineralPage() {
             <MineralTimeline timeline={mineral.timeline} color={mineral.color} />
           )}
           
-          <div className="text-xs text-gray-500 bg-bg-surface border border-white/5 p-4 rounded-card">
-            <p className="mb-2 font-bold text-gray-400">Data Sources:</p>
+          <div className="text-xs text-slate-500 bg-bg-surface border border-white/5 p-4 rounded-card">
+            <p className="mb-2 font-bold text-slate-400">Data Sources:</p>
             <ul className="list-disc pl-4 space-y-1">
               {mineral.dataSources.map((ds, i) => (
-                <li key={i}><a href={ds.url} target="_blank" rel="noreferrer" className="hover:underline hover:text-accent-blue">{ds.label}</a></li>
+                <li key={i}><a href={ds.url} target="_blank" rel="noreferrer" className="hover:underline hover:text-accent-blue focus-visible:ring-2 focus-visible:ring-accent-blue rounded">{ds.label}</a></li>
               ))}
             </ul>
           </div>
@@ -80,15 +88,15 @@ export default function MineralPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <Card className="bg-bg-surface border-white/10 p-6 shadow-glass">
               <h2 className="text-xl font-bold mb-2 text-white">Global Reserves</h2>
-              <p className="text-xs text-gray-400 mb-6 border-b border-white/10 pb-2">Where the mineral physically exists in the ground.</p>
+              <p className="text-xs text-slate-400 mb-6 border-b border-white/10 pb-2">Where the mineral physically exists in the ground.</p>
               <Suspense fallback={<div className="h-64 w-full flex items-center justify-center text-slate-500 animate-pulse">Loading chart...</div>}>
-                <ReservesChart data={mineral.reserves} />
+                <SharePieChart data={mineral.reserves} />
               </Suspense>
             </Card>
 
             <Card className="bg-bg-surface border-white/10 p-6 shadow-glass">
               <h2 className="text-xl font-bold mb-2 text-white">Active Production</h2>
-              <p className="text-xs text-gray-400 mb-6 border-b border-white/10 pb-2">Which countries are currently extracting it.</p>
+              <p className="text-xs text-slate-400 mb-6 border-b border-white/10 pb-2">Which countries are currently extracting it.</p>
               <Suspense fallback={<div className="h-64 w-full flex items-center justify-center text-slate-500 animate-pulse">Loading chart...</div>}>
                 <ProductionChart data={mineral.production} />
               </Suspense>

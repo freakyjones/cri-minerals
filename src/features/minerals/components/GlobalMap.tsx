@@ -27,7 +27,7 @@ const createCustomIcon = (color: string) => {
   });
 };
 
-export const GlobalMap = ({ mineral }: GlobalMapProps) => {
+export default function GlobalMap({ mineral }: GlobalMapProps) {
   const icon = createCustomIcon(mineral.color);
 
   // Combine reserves and production for mapping, filtering out non-specific locations
@@ -104,4 +104,4 @@ export const GlobalMap = ({ mineral }: GlobalMapProps) => {
       </CardContent>
     </Card>
   );
-};
+}

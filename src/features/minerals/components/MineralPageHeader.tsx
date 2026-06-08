@@ -1,12 +1,11 @@
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import type { Mineral } from '../schema/mineralSchema';
+import { getRiskColorSolid } from '../utils';
 
 interface MineralPageHeaderProps {
   mineral: Mineral;
 }
-
-import { getRiskColorSolid } from '../utils';
 
 export default function MineralPageHeader({ mineral }: MineralPageHeaderProps) {
   return (

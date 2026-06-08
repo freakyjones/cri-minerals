@@ -1,13 +1,12 @@
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import ReservesChart from './ReservesChart';
+import SharePieChart from './SharePieChart';
 import type { Mineral } from '../schema/mineralSchema';
+import { getRiskColorSolid } from '../utils';
 
 interface ChokePointsProps {
   mineral: Mineral;
 }
-
-import { getRiskColorSolid } from '../utils';
 
 export default function ChokePoints({ mineral }: ChokePointsProps) {
   return (
@@ -20,7 +19,7 @@ export default function ChokePoints({ mineral }: ChokePointsProps) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="col-span-1 border-r border-white/10 pr-6">
           <h3 className="text-sm text-gray-400 mb-4 font-bold uppercase tracking-wider">Refining Dominance</h3>
-          <ReservesChart data={mineral.refining} /> 
+          <SharePieChart data={mineral.refining} /> 
         </div>
         <div className="col-span-1 md:col-span-2 space-y-4">
           <h3 className="text-sm text-gray-400 mb-4 font-bold uppercase tracking-wider">Identified Choke Points</h3>

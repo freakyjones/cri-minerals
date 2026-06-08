@@ -42,6 +42,17 @@ The Critical Minerals Intelligence Dashboard is a strategic intelligence platfor
 > [!IMPORTANT]  
 > Reserves (in the ground) and Production (active mining) must **never** be conflated or merged. They must remain visually distinct on all dashboards.
 
+### 4.3 Global Layout (Hub-and-Spoke Navigation)
+- **Persistent Sidebar (The Hub):** A global left-hand sidebar containing navigation tabs (Dashboard, Minerals Index, Map, Alerts, Settings) to prevent users from getting lost in deep data.
+- **Global Topbar:** A sticky top navigation containing a universal Search Bar (to filter minerals or future entities), an Export utility, and Watchlist actions.
+- **Contextual Navigation (The Spokes):** 
+  - A Quick-Switch Dropdown on detail pages (e.g., "Cobalt ▾") to jump between entities.
+  - A crisp `← Back to Dashboard` button with an explicitly visible `Esc` keyboard shortcut indicator.
+
+### 4.4 Actionable Data & Interactive Features
+- **Clickable KPIs (Home):** The summary statistics strip must act as clickable filters (e.g., clicking "2 Critical Alerts" immediately filters the dashboard grid).
+- **Anchor Link Cards (Detail View):** The Summary Stats cards (Supply Risk, ESG Alerts) must act as quick-navigation anchor links, smooth-scrolling the user to the detailed sections below.
+
 ---
 
 ## 5. Data & Technical Constraints
@@ -68,4 +79,9 @@ The UI is strictly bound to a `minerals.json` schema. All incoming data (current
 
 - **Performance:** Pages must lazy-load. Heavy charting libraries (Recharts) must be tree-shaken and only loaded when navigating to a detail page.
 - **Design System:** The application uses a custom design system built over `shadcn/ui`. No custom CSS files are allowed; all styling must use Tailwind utility classes mapping to defined design tokens (e.g., `bg-bg-base`, `text-risk-high`).
+- **Visual Tokens & Colors:** Risk levels must follow a strict, unified semantic mapping across the entire application: Critical (Crimson), High (Amber), Medium (Yellow), Low (Green). Chemical symbols must never inherit risk-based colors; they must remain neutral.
+- **Accessibility (WCAG 2.1 AA):** 
+  - Risk states cannot rely on color alone (must use explicit geometric icons like 🔴/🔺).
+  - High contrast for all text (minimum 4.5:1 ratio).
+  - All interactive elements must have clear focus rings (`focus-visible:ring-2`) for keyboard navigation.
 - **Responsiveness:** The layout must be built mobile-first, targeting smooth scaling across mobile (375px), tablet (768px), and desktop (1440px).

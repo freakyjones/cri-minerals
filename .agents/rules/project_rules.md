@@ -22,8 +22,12 @@
 ## RULE 2 — Styling (Tailwind Only)
 
 ### 2.1 No Inline Styles
-- `style={{}}` props are **strictly forbidden** on any component. No exceptions.
-- All styling is done via Tailwind utility classes.
+- `style={{}}` props are **strictly forbidden** on any component, with the exception defined below.
+
+### 2.1.1 Exception: Data-Driven Dynamic Values
+- Inline styles are permitted **only** for values that are dynamically derived from data at runtime and cannot be expressed as Tailwind utility classes (e.g., mineral hex colors from the schema, percentage-based widths for progress bars).
+- Each usage **must** include a comment explaining why an inline style is necessary (e.g., `// Dynamic color from data — Rule 2.1.1 exception`).
+- All styling MUST use Tailwind utility classes except for these documented exceptions.
 
 ### 2.2 No Hardcoded Values
 - No hardcoded hex colors, pixel values, or font sizes anywhere in JSX or CSS.

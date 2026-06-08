@@ -12,8 +12,7 @@ export function useMinerals() {
     try {
       cachedMinerals = mineralsArraySchema.parse(mineralsDataRaw);
       return cachedMinerals;
-    } catch (err) {
-      console.error("Data validation failed:", err);
+    } catch {
       return [];
     }
   });
@@ -35,8 +34,7 @@ export function useMineral(slug: string | undefined) {
         return mineralSchema.parse(found);
       }
       return null;
-    } catch (err) {
-      console.error("Data validation failed:", err);
+    } catch {
       return null;
     }
   });
