@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useMinerals } from './useMineral';
 
 export const CATEGORIES = [
@@ -13,8 +14,32 @@ export const CATEGORIES = [
 
 export function useMineralDashboard() {
   const { minerals, loading } = useMinerals();
-  const [activeCategory, setActiveCategory] = useState<string>('all');
-  const [activeRisk, setActiveRisk] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const activeCategory = searchParams.get('category') || 'all';
+  const activeRisk = searchParams.get('risk') || null;
+
+  const setActiveCategory = (category: string) => {
+    setSearchParams(prev => {
+      if (category === 'all') {
+        prev.delete('category');
+      } else {
+        prev.set('category', category);
+      }
+      return prev;
+    });
+  };
+
+  const setActiveRisk = (risk: string | null) => {
+    setSearchParams(prev => {
+      if (!risk) {
+        prev.delete('risk');
+      } else {
+        prev.set('risk', risk);
+      }
+      return prev;
+    });
+  };
 
   const filteredMinerals = useMemo(() => {
     let result = minerals;
