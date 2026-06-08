@@ -12,6 +12,8 @@ vi.mock('../features/minerals', async (importOriginal) => {
       loading: false,
       activeCategory: 'all',
       setActiveCategory: vi.fn(),
+      activeRisk: null,
+      setActiveRisk: vi.fn(),
       categories: [
         { label: 'All', value: 'all' },
         { label: 'Battery Metals', value: 'battery-metal' }
@@ -59,8 +61,7 @@ describe('HomePage Integration', () => {
       </MemoryRouter>
     );
     
-    expect(screen.getByText('Risk Overview')).toBeInTheDocument();
-    expect(screen.getByText('Critical')).toBeInTheDocument();
-    expect(screen.getByText('High')).toBeInTheDocument();
+    expect(screen.getByText('Critical Risk')).toBeInTheDocument();
+    expect(screen.getByText('High Risk')).toBeInTheDocument();
   });
 });

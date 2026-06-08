@@ -32,7 +32,9 @@ export default function HomePage() {
     setActiveCategory, 
     filteredMinerals, 
     riskCounts,
-    categories
+    categories,
+    activeRisk,
+    setActiveRisk
   } = useMineralDashboard();
 
   const pageVariants = useAccessibleVariants(pageVariantsFull);
@@ -54,7 +56,11 @@ export default function HomePage() {
       </header>
 
       {!loading && (
-        <RiskHeatmap riskCounts={riskCounts} />
+        <RiskHeatmap 
+          riskCounts={riskCounts} 
+          activeRisk={activeRisk}
+          onRiskClick={setActiveRisk}
+        />
       )}
 
       <CategoryFilter
