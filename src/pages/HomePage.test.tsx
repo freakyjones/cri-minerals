@@ -23,7 +23,7 @@ vi.mock('../features/minerals', async (importOriginal) => {
       ],
       riskCounts: { CRITICAL: 6, HIGH: 4, MEDIUM: 0, LOW: 0 }
     }),
-    MineralCard: ({ mineral }: any) => <div data-testid="mineral-card">{mineral.name}</div>
+    MineralCard: ({ mineral }: { mineral: { name: string } }) => <div data-testid="mineral-card">{mineral.name}</div>
   };
 });
 

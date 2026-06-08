@@ -1,18 +1,14 @@
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { Mineral } from '../schema/mineralSchema';
 
-const getRiskColor = (score: string) => {
-  if (score === 'HIGH') return 'bg-risk-high hover:bg-risk-high/80';
-  if (score === 'MEDIUM') return 'bg-risk-medium hover:bg-risk-medium/80';
-  return 'bg-risk-low hover:bg-risk-low/80';
-};
+import { getRiskColorSolid } from '../utils';
 
 interface MineralCardProps {
   mineral: Mineral;
-  variants?: any;
+  variants?: Variants;
 }
 
 export default function MineralCard({ mineral, variants }: MineralCardProps) {
@@ -37,7 +33,7 @@ export default function MineralCard({ mineral, variants }: MineralCardProps) {
             {mineral.symbol}
           </motion.span>
           <motion.div layoutId={`risk-${mineral.slug}`}>
-             <Badge className={`${getRiskColor(mineral.riskScore)} text-white border-none font-bold tracking-wider rounded-md`}>
+             <Badge className={`${getRiskColorSolid(mineral.riskScore)} text-white border-none font-bold tracking-wider rounded-md`}>
               {mineral.riskScore}
              </Badge>
           </motion.div>

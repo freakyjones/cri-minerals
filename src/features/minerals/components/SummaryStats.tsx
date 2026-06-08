@@ -6,12 +6,7 @@ interface SummaryStatsProps {
   mineral: Mineral;
 }
 
-const getRiskColor = (score: string) => {
-  if (score === 'CRITICAL') return 'bg-red-500/20 text-red-400 border-red-500/30';
-  if (score === 'HIGH') return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
-  if (score === 'MEDIUM') return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
-  return 'bg-green-500/20 text-green-400 border-green-500/30';
-};
+import { getRiskColorTransparent } from '../utils';
 
 const getSubColor = (score: string) => {
   if (score === 'HIGH') return 'text-green-400'; // HIGH substitutability = good
@@ -36,7 +31,7 @@ export default function SummaryStats({ mineral }: SummaryStatsProps) {
           <ShieldAlert className="h-4 w-4 text-slate-400" />
           <span className="text-xs text-slate-400 uppercase tracking-wider font-medium">Supply Risk</span>
         </div>
-        <Badge className={`${getRiskColor(mineral.riskScore)} border font-bold text-sm px-3 py-1`}>
+        <Badge className={`${getRiskColorTransparent(mineral.riskScore)} border font-bold text-sm px-3 py-1`}>
           {mineral.riskScore}
         </Badge>
       </div>

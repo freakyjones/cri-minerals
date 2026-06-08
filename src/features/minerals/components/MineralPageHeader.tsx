@@ -6,11 +6,7 @@ interface MineralPageHeaderProps {
   mineral: Mineral;
 }
 
-const getRiskColor = (score: string) => {
-  if (score === 'CRITICAL' || score === 'HIGH') return 'bg-risk-high text-white';
-  if (score === 'MEDIUM') return 'bg-risk-medium text-white';
-  return 'bg-risk-low text-white';
-};
+import { getRiskColorSolid } from '../utils';
 
 export default function MineralPageHeader({ mineral }: MineralPageHeaderProps) {
   return (
@@ -20,7 +16,7 @@ export default function MineralPageHeader({ mineral }: MineralPageHeaderProps) {
           {mineral.symbol}
         </motion.span>
         <motion.div layoutId={`risk-${mineral.slug}`}>
-          <Badge className={`${getRiskColor(mineral.riskScore)} border-none font-bold tracking-wider rounded-md`}>
+          <Badge className={`${getRiskColorSolid(mineral.riskScore)} border-none font-bold tracking-wider rounded-md`}>
             {mineral.riskScore} RISK
           </Badge>
         </motion.div>
