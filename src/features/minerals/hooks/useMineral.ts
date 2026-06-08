@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import mineralsDataRaw from '../data/minerals.json';
+import mineralsDataRaw from '../../../data/minerals.json';
 import { mineralsArraySchema, mineralSchema } from '../schema/mineralSchema';
 import type { Mineral } from '../schema/mineralSchema';
 

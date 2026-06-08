@@ -1,8 +1,11 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { lazy, Suspense } from 'react';
-import ErrorBoundary from './components/ErrorBoundary';
 import MainLayout from './components/layout/MainLayout';
+import ErrorBoundary from './components/ErrorBoundary';
+
+import { SearchProvider } from './context/SearchContext';
+import CommandPalette from './components/layout/CommandPalette';
 
 // Lazy load pages for performance (Rule 8.1)
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -12,7 +15,10 @@ function App() {
   return (
     <ErrorBoundary>
       <BrowserRouter>
-        <AppRoutes />
+        <SearchProvider>
+          <AppRoutes />
+          <CommandPalette />
+        </SearchProvider>
       </BrowserRouter>
     </ErrorBoundary>
   );
