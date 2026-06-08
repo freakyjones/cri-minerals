@@ -10,7 +10,7 @@ export default {
       colors: {
         bg: { base: '#080d1a', surface: 'rgba(255,255,255,0.04)' },
         accent: { blue: '#3b82f6', gold: '#f59e0b' },
-        risk: { high: '#ef4444', medium: '#f59e0b', low: '#22c55e' },
+        risk: { critical: '#dc2626', high: '#f97316', medium: '#f59e0b', low: '#22c55e' },
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],

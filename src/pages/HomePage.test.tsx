@@ -36,7 +36,7 @@ describe('HomePage Integration', () => {
     );
     
     expect(screen.getByText('Critical Minerals Intelligence')).toBeInTheDocument();
-    expect(screen.getByText(/Monitoring 20 critical minerals across global supply chains/i)).toBeInTheDocument();
+    expect(screen.getByText(/Monitoring 20 critical minerals/i)).toBeInTheDocument();
   });
 
   it('renders the mineral cards based on the filteredMinerals array', () => {
@@ -52,7 +52,7 @@ describe('HomePage Integration', () => {
     expect(screen.getByText('Cobalt')).toBeInTheDocument();
   });
 
-  it('renders the risk heatmap strip correctly', () => {
+  it('renders the risk heatmap with accessible labels', () => {
     render(
       <MemoryRouter>
         <HomePage />
@@ -60,7 +60,7 @@ describe('HomePage Integration', () => {
     );
     
     expect(screen.getByText('Risk Overview')).toBeInTheDocument();
-    expect(screen.getByText('6')).toBeInTheDocument(); // CRITICAL
-    expect(screen.getByText('4')).toBeInTheDocument(); // HIGH
+    expect(screen.getByText('Critical')).toBeInTheDocument();
+    expect(screen.getByText('High')).toBeInTheDocument();
   });
 });

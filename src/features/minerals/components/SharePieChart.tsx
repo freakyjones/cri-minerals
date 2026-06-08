@@ -1,14 +1,13 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts';
 import ChartTooltip from './ChartTooltip';
 import type { Mineral } from '../schema/mineralSchema';
-
 import { CHART_COLORS } from '../utils';
 
-interface ReservesChartProps {
+interface SharePieChartProps {
   data: Mineral['reserves'] | Mineral['refining'];
 }
 
-export default function ReservesChart({ data }: ReservesChartProps) {
+export default function SharePieChart({ data }: SharePieChartProps) {
   if (!data || data.length === 0) return null;
   
   return (

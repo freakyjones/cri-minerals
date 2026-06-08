@@ -1,12 +1,11 @@
 import { ShieldAlert, Repeat, Recycle, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { Mineral } from '../schema/mineralSchema';
+import { getRiskColorTransparent } from '../utils';
 
 interface SummaryStatsProps {
   mineral: Mineral;
 }
-
-import { getRiskColorTransparent } from '../utils';
 
 const getSubColor = (score: string) => {
   if (score === 'HIGH') return 'text-green-400'; // HIGH substitutability = good

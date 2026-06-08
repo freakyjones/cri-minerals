@@ -61,6 +61,11 @@ export const COUNTRY_COORDINATES: Record<string, [number, number]> = {
 };
 
 export const getCoordinates = (countryName: string): [number, number] => {
-  return COUNTRY_COORDINATES[countryName] || [0, 0];
+  const coords = COUNTRY_COORDINATES[countryName];
+  if (!coords && import.meta.env.DEV) {
+    // Dev-only warning — stripped from production builds by Vite.
+    console.warn(`[coordinates] Missing mapping for country: "${countryName}". Marker will render at [0,0].`);
+  }
+  return coords || [0, 0];
 };
 
