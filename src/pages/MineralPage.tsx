@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -5,14 +6,15 @@ import {
   MineralPageHeader, 
   PrimaryApplications, 
   ChokePoints, 
-  ReservesChart, 
-  ProductionChart, 
-  GlobalMap, 
   SummaryStats, 
   EsgAlertCard,
   MineralTimeline 
 } from '../features/minerals';
 import { Card } from '@/components/ui/card';
+
+const ReservesChart = lazy(() => import('../features/minerals/components/ReservesChart'));
+const ProductionChart = lazy(() => import('../features/minerals/components/ProductionChart'));
+const GlobalMap = lazy(() => import('../features/minerals/components/GlobalMap').then(m => ({ default: m.GlobalMap })));
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -79,18 +81,24 @@ export default function MineralPage() {
             <Card className="bg-bg-surface border-white/10 p-6 shadow-glass">
               <h2 className="text-xl font-bold mb-2 text-white">Global Reserves</h2>
               <p className="text-xs text-gray-400 mb-6 border-b border-white/10 pb-2">Where the mineral physically exists in the ground.</p>
-              <ReservesChart data={mineral.reserves} />
+              <Suspense fallback={<div className="h-64 w-full flex items-center justify-center text-slate-500 animate-pulse">Loading chart...</div>}>
+                <ReservesChart data={mineral.reserves} />
+              </Suspense>
             </Card>
 
             <Card className="bg-bg-surface border-white/10 p-6 shadow-glass">
               <h2 className="text-xl font-bold mb-2 text-white">Active Production</h2>
               <p className="text-xs text-gray-400 mb-6 border-b border-white/10 pb-2">Which countries are currently extracting it.</p>
-              <ProductionChart data={mineral.production} />
+              <Suspense fallback={<div className="h-64 w-full flex items-center justify-center text-slate-500 animate-pulse">Loading chart...</div>}>
+                <ProductionChart data={mineral.production} />
+              </Suspense>
             </Card>
           </div>
 
           <div className="w-full">
-            <GlobalMap mineral={mineral} />
+            <Suspense fallback={<div className="h-[400px] w-full bg-slate-900/50 rounded-xl border border-slate-800 flex items-center justify-center text-slate-500 animate-pulse">Loading map...</div>}>
+              <GlobalMap mineral={mineral} />
+            </Suspense>
           </div>
 
           <ChokePoints mineral={mineral} />
