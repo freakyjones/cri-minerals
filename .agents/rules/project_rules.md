@@ -192,3 +192,14 @@
 ### 11.3 Component Props
 - All React components must type their props using an interface or type alias.
 - `PropTypes` or basic JSDoc are no longer sufficient; use strict TS types.
+
+---
+
+## RULE 12 — PRD Compliance
+
+### 12.1 Source of Truth
+- The product requirements documented in `.agents/prd.md` are the single source of truth for the project's scope, features, and constraints.
+- Before writing any new implementation plans or source code, an agent MUST cross-reference `.agents/prd.md` to ensure alignment.
+
+### 12.2 Strict Scope Management
+- Agents are explicitly forbidden from adding new pages, charts, or features that contradict the defined scope in the PRD, unless a scope-change is formally requested by the user.
