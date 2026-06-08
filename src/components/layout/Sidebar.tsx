@@ -39,13 +39,15 @@ export default function Sidebar() {
                 <button
                   onClick={() => setIsOpenOverride(!isIndexOpen)}
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all focus-visible:ring-2 focus-visible:ring-accent-blue outline-none w-full text-left ${
-                    isActive || isIndexOpen
+                    isActive
                       ? 'bg-accent-blue/10 text-accent-blue font-medium' 
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                      : isIndexOpen
+                        ? 'text-white bg-white/5' // subtle highlight when open but not active route
+                        : 'text-slate-400 hover:text-white hover:bg-white/5'
                   }`}
                   aria-expanded={isIndexOpen}
                 >
-                  <item.icon className={`h-4 w-4 shrink-0 ${isActive || isIndexOpen ? 'text-accent-blue' : 'text-slate-500'}`} />
+                  <item.icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-accent-blue' : 'text-slate-500'}`} />
                   <span className="flex-1">{item.name}</span>
                   {isIndexOpen ? (
                     <ChevronDown className="ml-auto w-4 h-4 text-slate-500 shrink-0" />
