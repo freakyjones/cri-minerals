@@ -47,6 +47,7 @@ describe('mineralSchema', () => {
   });
 
   it('fails if required fields are missing', () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { name, ...invalidData } = validData;
     const result = mineralSchema.safeParse(invalidData);
     expect(result.success).toBe(false);

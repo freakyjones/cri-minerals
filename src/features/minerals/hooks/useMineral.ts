@@ -30,7 +30,7 @@ export function useMineral(slug: string | undefined) {
     const dataList = cachedMinerals || mineralsDataRaw;
     
     try {
-      const found = dataList.find((m: any) => m.slug === slug);
+      const found = dataList.find((m: { slug?: string }) => m.slug === slug);
       if (found) {
         return mineralSchema.parse(found);
       }

@@ -7,11 +7,7 @@ interface ChokePointsProps {
   mineral: Mineral;
 }
 
-const getRiskColor = (score: string) => {
-  if (score === 'CRITICAL' || score === 'HIGH') return 'bg-risk-high text-white';
-  if (score === 'MEDIUM') return 'bg-risk-medium text-white';
-  return 'bg-risk-low text-white';
-};
+import { getRiskColorSolid } from '../utils';
 
 export default function ChokePoints({ mineral }: ChokePointsProps) {
   return (
@@ -32,7 +28,7 @@ export default function ChokePoints({ mineral }: ChokePointsProps) {
             <div key={i} className="bg-black/40 border border-white/5 p-4 rounded-lg">
               <div className="flex items-start justify-between mb-2">
                 <h4 className="font-bold text-white text-lg">{cp.title}</h4>
-                <Badge className={`${getRiskColor(cp.severity)} border-none uppercase text-xs animate-pulse-glow`}>{cp.severity}</Badge>
+                <Badge className={`${getRiskColorSolid(cp.severity)} border-none uppercase text-xs animate-pulse-glow`}>{cp.severity}</Badge>
               </div>
               <p className="text-gray-300 text-sm mb-3">{cp.description}</p>
               <div className="flex flex-wrap gap-2 mt-2">

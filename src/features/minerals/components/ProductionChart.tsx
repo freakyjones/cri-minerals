@@ -2,7 +2,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
 import ChartTooltip from './ChartTooltip';
 import type { Mineral } from '../schema/mineralSchema';
 
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#64748b'];
+import { CHART_COLORS } from '../utils';
 
 interface ProductionChartProps {
   data: Mineral['production'];
@@ -24,7 +24,7 @@ export default function ProductionChart({ data }: ProductionChartProps) {
           />
           <Bar dataKey="share" radius={[0, 4, 4, 0]} barSize={24}>
              {data.map((_, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
             ))}
           </Bar>
         </BarChart>
