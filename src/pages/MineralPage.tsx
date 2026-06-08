@@ -68,7 +68,9 @@ export default function MineralPage() {
         {/* Left Column - Stats & Usage */}
         <div className="space-y-8 lg:col-span-1">
           <PrimaryApplications useCases={mineral.useCases} />
-          <EsgAlertCard mineral={mineral} />
+          <div id="esg-alerts" className="scroll-mt-24">
+            <EsgAlertCard mineral={mineral} />
+          </div>
           {mineral.timeline && mineral.timeline.length > 0 && (
             <MineralTimeline timeline={mineral.timeline} color={mineral.color} />
           )}
@@ -109,7 +111,9 @@ export default function MineralPage() {
             </Suspense>
           </div>
 
-          <ChokePoints mineral={mineral} />
+          <div id="supply-risk" className="scroll-mt-24">
+            <ChokePoints mineral={mineral} />
+          </div>
         </div>
       </div>
     </motion.div>

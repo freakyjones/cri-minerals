@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { mineralSchema, mineralsArraySchema } from './mineralSchema';
-import mineralsData from '../data/minerals.json';
+import mineralsData from "../../../data/minerals.json";
 
 describe('mineralSchema', () => {
   const validData = {

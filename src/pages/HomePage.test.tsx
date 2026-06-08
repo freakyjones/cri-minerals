@@ -12,6 +12,8 @@ vi.mock('../features/minerals', async (importOriginal) => {
       loading: false,
       activeCategory: 'all',
       setActiveCategory: vi.fn(),
+      activeRisk: null,
+      setActiveRisk: vi.fn(),
       categories: [
         { label: 'All', value: 'all' },
         { label: 'Battery Metals', value: 'battery-metal' }
@@ -23,7 +25,6 @@ vi.mock('../features/minerals', async (importOriginal) => {
       ],
       riskCounts: { CRITICAL: 6, HIGH: 4, MEDIUM: 0, LOW: 0 }
     }),
-    MineralCard: ({ mineral }: { mineral: { name: string } }) => <div data-testid="mineral-card">{mineral.name}</div>
   };
 });
 
@@ -39,17 +40,16 @@ describe('HomePage Integration', () => {
     expect(screen.getByText(/Monitoring 20 critical minerals/i)).toBeInTheDocument();
   });
 
-  it('renders the mineral cards based on the filteredMinerals array', () => {
+  it('renders the Intelligence Index table with the filteredMinerals array', () => {
     render(
       <MemoryRouter>
         <HomePage />
       </MemoryRouter>
     );
     
-    const cards = screen.getAllByTestId('mineral-card');
-    expect(cards).toHaveLength(3);
     expect(screen.getByText('Lithium')).toBeInTheDocument();
     expect(screen.getByText('Cobalt')).toBeInTheDocument();
+    expect(screen.getByText('Gallium')).toBeInTheDocument();
   });
 
   it('renders the risk heatmap with accessible labels', () => {
@@ -59,8 +59,7 @@ describe('HomePage Integration', () => {
       </MemoryRouter>
     );
     
-    expect(screen.getByText('Risk Overview')).toBeInTheDocument();
-    expect(screen.getByText('Critical')).toBeInTheDocument();
-    expect(screen.getByText('High')).toBeInTheDocument();
+    expect(screen.getByText('Critical Risk')).toBeInTheDocument();
+    expect(screen.getByText('High Risk')).toBeInTheDocument();
   });
 });

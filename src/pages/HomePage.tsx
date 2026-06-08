@@ -1,28 +1,17 @@
 import { motion } from 'framer-motion';
-import { useMineralDashboard, MineralCard } from '../features/minerals';
+import { useMineralDashboard } from '../features/minerals';
 import RiskHeatmap from '../features/minerals/components/RiskHeatmap';
 import CategoryFilter from '../features/minerals/components/CategoryFilter';
+import MineralTable from '../features/minerals/components/MineralTable';
+import MineralListMobile from '../features/minerals/components/MineralListMobile';
+import MarketAlerts from '../features/minerals/components/MarketAlerts';
 import { useAccessibleVariants } from '../lib/useAccessibleVariants';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 const pageVariantsFull = {
   initial: { opacity: 0 },
   animate: { opacity: 1 },
   exit: { opacity: 0 }
-};
-
-const listVariantsFull = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.08
-    }
-  }
-};
-
-const cardVariantsFull = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 }
 };
 
 export default function HomePage() {
@@ -32,12 +21,13 @@ export default function HomePage() {
     setActiveCategory, 
     filteredMinerals, 
     riskCounts,
-    categories
+    categories,
+    activeRisk,
+    setActiveRisk
   } = useMineralDashboard();
 
+  const isMobile = useIsMobile();
   const pageVariants = useAccessibleVariants(pageVariantsFull);
-  const listVariants = useAccessibleVariants(listVariantsFull);
-  const cardVariants = useAccessibleVariants(cardVariantsFull);
 
   return (
     <motion.div 
@@ -54,34 +44,44 @@ export default function HomePage() {
       </header>
 
       {!loading && (
-        <RiskHeatmap riskCounts={riskCounts} />
+        <RiskHeatmap 
+          riskCounts={riskCounts} 
+          activeRisk={activeRisk}
+          onRiskClick={setActiveRisk}
+        />
       )}
 
-      <CategoryFilter
-        categories={categories}
-        activeCategory={activeCategory}
-        onCategoryChange={setActiveCategory}
-      />
-      
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className="h-48 bg-bg-surface rounded-card animate-pulse shadow-glass"></div>
-          ))}
+      <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex-1">
+          <div className="mb-4">
+            <div className="overflow-x-auto pb-2 md:pb-0 hide-scrollbar w-full">
+              <CategoryFilter
+                categories={categories}
+                activeCategory={activeCategory}
+                onCategoryChange={setActiveCategory}
+              />
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="h-96 bg-bg-surface rounded-card animate-pulse shadow-glass"></div>
+          ) : (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              key={`${activeCategory}-${activeRisk}-${isMobile ? 'mobile' : 'desktop'}`}
+            >
+              {isMobile ? (
+                <MineralListMobile minerals={filteredMinerals} />
+              ) : (
+                <MineralTable minerals={filteredMinerals} />
+              )}
+            </motion.div>
+          )}
         </div>
-      ) : (
-        <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-          variants={listVariants}
-          initial="hidden"
-          animate="show"
-          key={activeCategory}
-        >
-          {filteredMinerals.map(m => (
-            <MineralCard key={m.id} mineral={m} variants={cardVariants} />
-          ))}
-        </motion.div>
-      )}
+        
+        <MarketAlerts />
+      </div>
     </motion.div>
   );
 }

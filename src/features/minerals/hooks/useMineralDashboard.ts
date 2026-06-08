@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useMinerals } from './useMineral';
 
 export const CATEGORIES = [
@@ -13,12 +14,43 @@ export const CATEGORIES = [
 
 export function useMineralDashboard() {
   const { minerals, loading } = useMinerals();
-  const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const activeCategory = searchParams.get('category') || 'all';
+  const activeRisk = searchParams.get('risk') || null;
+
+  const setActiveCategory = (category: string) => {
+    setSearchParams(prev => {
+      if (category === 'all') {
+        prev.delete('category');
+      } else {
+        prev.set('category', category);
+      }
+      return prev;
+    });
+  };
+
+  const setActiveRisk = (risk: string | null) => {
+    setSearchParams(prev => {
+      if (!risk) {
+        prev.delete('risk');
+      } else {
+        prev.set('risk', risk);
+      }
+      return prev;
+    });
+  };
 
   const filteredMinerals = useMemo(() => {
-    if (activeCategory === 'all') return minerals;
-    return minerals.filter(m => m.category === activeCategory);
-  }, [minerals, activeCategory]);
+    let result = minerals;
+    if (activeCategory !== 'all') {
+      result = result.filter(m => m.category === activeCategory);
+    }
+    if (activeRisk) {
+      result = result.filter(m => m.riskScore === activeRisk);
+    }
+    return result;
+  }, [minerals, activeCategory, activeRisk]);
 
   const riskCounts = useMemo(() => {
     return {
@@ -33,6 +65,8 @@ export function useMineralDashboard() {
     loading,
     activeCategory,
     setActiveCategory,
+    activeRisk,
+    setActiveRisk,
     filteredMinerals,
     riskCounts,
     categories: CATEGORIES

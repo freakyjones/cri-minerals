@@ -22,3 +22,18 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Environment variables (Critical Security)
+.env
+.env.*
+!.env.example
+
+# Test coverage reports (Vitest/Jest)
+coverage/
+
+# Vercel / Netlify deployment folders
+.vercel/
+.netlify/
