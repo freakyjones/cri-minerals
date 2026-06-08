@@ -29,14 +29,14 @@ function AppRoutes() {
   
   return (
     <Suspense fallback={<div className="min-h-screen bg-bg-base flex items-center justify-center"><div className="animate-pulse bg-bg-surface h-8 w-32 rounded"></div></div>}>
-      <AnimatePresence mode="wait">
-        <Routes location={location} key={location.pathname}>
-          <Route element={<MainLayout />}>
+      <MainLayout>
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
             <Route path="/" element={<HomePage />} />
             <Route path="/mineral/:slug" element={<MineralPage />} />
-          </Route>
-        </Routes>
-      </AnimatePresence>
+          </Routes>
+        </AnimatePresence>
+      </MainLayout>
     </Suspense>
   );
 }
