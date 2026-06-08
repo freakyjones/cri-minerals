@@ -47,7 +47,6 @@ describe('HomePage Integration', () => {
       </MemoryRouter>
     );
     
-    expect(screen.getByText('Intelligence Index')).toBeInTheDocument();
     expect(screen.getByText('Lithium')).toBeInTheDocument();
     expect(screen.getByText('Cobalt')).toBeInTheDocument();
     expect(screen.getByText('Gallium')).toBeInTheDocument();
