@@ -22,7 +22,7 @@ export default function ChartTooltip({ active, payload, label }: ChartTooltipPro
         <div key={index} className="flex items-center gap-2">
           <span
             className="w-2.5 h-2.5 rounded-full shrink-0"
-            style={{ backgroundColor: entry.color || '#3b82f6' }}
+            style={{ backgroundColor: entry.color || '#3b82f6' }} // eslint-disable-line react/forbid-dom-props
           />
           <span className="text-sm text-slate-300">
             {entry.name}:

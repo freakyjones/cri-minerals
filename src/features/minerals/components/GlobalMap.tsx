@@ -83,6 +83,7 @@ export const GlobalMap = ({ mineral }: GlobalMapProps) => {
                 <Popup className="custom-popup">
                   <div className="p-1">
                     <div className="font-bold text-slate-900">{point.country}</div>
+                    {/* eslint-disable-next-line react/forbid-dom-props */}
                     <div className="text-sm font-medium" style={{ color: mineral.color }}>
                       {point.type}
                     </div>
