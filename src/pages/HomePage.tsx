@@ -53,13 +53,15 @@ export default function HomePage() {
 
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="flex-1">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-white">Intelligence Index</h2>
-            <CategoryFilter
-              categories={categories}
-              activeCategory={activeCategory}
-              onCategoryChange={setActiveCategory}
-            />
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-4">
+            <h2 className="text-xl font-bold text-white whitespace-nowrap">Intelligence Index</h2>
+            <div className="overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
+              <CategoryFilter
+                categories={categories}
+                activeCategory={activeCategory}
+                onCategoryChange={setActiveCategory}
+              />
+            </div>
           </div>
 
           {loading ? (

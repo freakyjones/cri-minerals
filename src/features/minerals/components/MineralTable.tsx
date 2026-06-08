@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import type { Mineral } from '../schema/mineralSchema';
 import { getRiskIcon, getRiskColorSolid } from '../utils';
@@ -8,6 +8,8 @@ interface MineralTableProps {
 }
 
 export default function MineralTable({ minerals }: MineralTableProps) {
+  const navigate = useNavigate();
+
   return (
     <div className="bg-bg-surface border border-white/10 rounded-xl shadow-glass overflow-hidden">
       <div className="overflow-x-auto">
@@ -25,7 +27,8 @@ export default function MineralTable({ minerals }: MineralTableProps) {
             {minerals.map((mineral) => (
               <tr 
                 key={mineral.id}
-                className="hover:bg-white/5 transition-colors duration-150 group"
+                onClick={() => navigate(`/mineral/${mineral.slug}`)}
+                className="hover:bg-white/5 transition-colors duration-150 group cursor-pointer"
               >
                 <td className="px-6 py-4">
                   <Link 
