@@ -17,6 +17,7 @@ const pageVariantsFull = {
 export default function HomePage() {
   const { 
     loading, 
+    error,
     activeCategory, 
     setActiveCategory, 
     filteredMinerals, 
@@ -28,6 +29,23 @@ export default function HomePage() {
 
   const isMobile = useIsMobile();
   const pageVariants = useAccessibleVariants(pageVariantsFull);
+
+  if (error) {
+    return (
+      <div className="min-h-screen p-8 flex items-center justify-center">
+        <div className="bg-red-900/20 border border-red-500/50 p-6 rounded-lg max-w-md text-center">
+          <h2 className="text-xl font-bold text-red-400 mb-2">Failed to load dashboard</h2>
+          <p className="text-slate-300">{error.message || 'An error occurred while fetching data.'}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-4 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div 
@@ -43,13 +61,12 @@ export default function HomePage() {
         <p className="text-xs text-slate-600 mt-4 uppercase tracking-widest">Data for illustrative purposes only. Sources: USGS, IEA, World Bank.</p>
       </header>
 
-      {!loading && (
-        <RiskHeatmap 
-          riskCounts={riskCounts} 
-          activeRisk={activeRisk}
-          onRiskClick={setActiveRisk}
-        />
-      )}
+      <RiskHeatmap 
+        riskCounts={riskCounts} 
+        activeRisk={activeRisk}
+        onRiskClick={setActiveRisk}
+        loading={loading}
+      />
 
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="flex-1">

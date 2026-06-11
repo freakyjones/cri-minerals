@@ -15,7 +15,7 @@ export { default as EsgAlertCard } from './components/EsgAlertCard';
 export { default as MineralTimeline } from './components/MineralTimeline';
 export { default as RiskHeatmap } from './components/RiskHeatmap';
 export { default as CategoryFilter } from './components/CategoryFilter';
-
+export { default as GeopoliticsSection } from './components/GeopoliticsSection';
 // Types and Schema
 export { mineralSchema, mineralsArraySchema } from './schema/mineralSchema';
 export type { Mineral } from './schema/mineralSchema';

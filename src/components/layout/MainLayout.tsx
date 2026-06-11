@@ -1,4 +1,5 @@
-import { Outlet } from 'react-router-dom';
+import { useState } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 
@@ -7,11 +8,20 @@ interface MainLayoutProps {
 }
 
 export default function MainLayout({ children }: MainLayoutProps) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const [prevPathname, setPrevPathname] = useState(location.pathname);
+
+  if (location.pathname !== prevPathname) {
+    setPrevPathname(location.pathname);
+    setIsMobileMenuOpen(false);
+  }
+
   return (
-    <div className="flex h-screen overflow-hidden bg-bg-base">
-      <Sidebar />
+    <div className="flex h-screen overflow-hidden bg-bg-base relative">
+      <Sidebar isMobileMenuOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <Topbar />
+        <Topbar onMenuClick={() => setIsMobileMenuOpen(true)} />
         <main className="flex-1 overflow-y-auto scroll-smooth">
           {children || <Outlet />}
         </main>
