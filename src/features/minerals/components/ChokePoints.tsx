@@ -1,8 +1,10 @@
+import { lazy, Suspense } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import SharePieChart from './SharePieChart';
 import type { Mineral } from '../schema/mineralSchema';
 import { getRiskColorSolid } from '../utils';
+
+const SharePieChart = lazy(() => import('./SharePieChart'));
 
 interface ChokePointsProps {
   mineral: Mineral;
@@ -19,7 +21,9 @@ export default function ChokePoints({ mineral }: ChokePointsProps) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="col-span-1 border-r border-white/10 pr-6">
           <h3 className="text-sm text-gray-400 mb-4 font-bold uppercase tracking-wider">Refining Dominance</h3>
-          <SharePieChart data={mineral.refining} /> 
+          <Suspense fallback={<div className="h-48 w-full flex items-center justify-center text-slate-500 animate-pulse">Loading chart...</div>}>
+            <SharePieChart data={mineral.refining} /> 
+          </Suspense>
         </div>
         <div className="col-span-1 md:col-span-2 space-y-4">
           <h3 className="text-sm text-gray-400 mb-4 font-bold uppercase tracking-wider">Identified Choke Points</h3>
