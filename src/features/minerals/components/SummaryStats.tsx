@@ -1,23 +1,11 @@
 import { ShieldAlert, Repeat, Recycle, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { Mineral } from '../schema/mineralSchema';
-import { getRiskColorTransparent } from '../utils';
+import { getRiskColorTransparent, getSubstitutabilityColor, getRecyclingRateColor } from '../utils';
 
 interface SummaryStatsProps {
   mineral: Mineral;
 }
-
-const getSubColor = (score: string) => {
-  if (score === 'HIGH') return 'text-green-400'; // HIGH substitutability = good
-  if (score === 'MEDIUM') return 'text-yellow-400';
-  return 'text-red-400'; // LOW substitutability = risky
-};
-
-const getRecycleColor = (rate: number) => {
-  if (rate >= 50) return 'text-green-400';
-  if (rate >= 20) return 'text-yellow-400';
-  return 'text-red-400';
-};
 
 export default function SummaryStats({ mineral }: SummaryStatsProps) {
   const esgCount = mineral.esgRisks?.length ?? 0;
@@ -41,11 +29,11 @@ export default function SummaryStats({ mineral }: SummaryStatsProps) {
           <Repeat className="h-4 w-4 text-slate-400" />
           <span className="text-xs text-slate-400 uppercase tracking-wider font-medium">Substitutability</span>
         </div>
-        <span className={`text-lg font-bold ${getSubColor(mineral.substitutability)}`}>
+        <span className={`px-2 py-1 rounded-md text-xs font-semibold inline-block ${getSubstitutabilityColor(mineral.substitutability)}`}>
           {mineral.substitutability}
         </span>
         {mineral.substituteMineral && (
-          <p className="text-xs text-slate-500 mt-1 line-clamp-2">{mineral.substituteMineral}</p>
+          <p className="text-xs text-slate-500 mt-2 line-clamp-2">{mineral.substituteMineral}</p>
         )}
       </div>
 
@@ -55,7 +43,7 @@ export default function SummaryStats({ mineral }: SummaryStatsProps) {
           <Recycle className="h-4 w-4 text-slate-400" />
           <span className="text-xs text-slate-400 uppercase tracking-wider font-medium">Recycling Rate</span>
         </div>
-        <span className={`text-2xl font-bold font-mono tabular-nums tracking-tight ${getRecycleColor(mineral.recyclingRate)}`}>
+        <span className={`px-2 py-1 rounded-md text-sm font-bold font-mono tabular-nums tracking-tight inline-block ${getRecyclingRateColor(mineral.recyclingRate)}`}>
           {mineral.recyclingRate}%
         </span>
       </div>

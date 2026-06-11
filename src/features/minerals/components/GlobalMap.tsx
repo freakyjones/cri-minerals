@@ -4,7 +4,7 @@ import { Mineral } from '../schema/mineralSchema';
 import { getCoordinates } from '../../../lib/coordinates';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Globe } from 'lucide-react';
-
+import { isValidMapLocation } from '../utils';
 interface GlobalMapProps {
   mineral: Mineral;
 }
@@ -34,7 +34,7 @@ export default function GlobalMap({ mineral }: GlobalMapProps) {
   const mapPoints: Array<{ type: string; country: string; share: number; amount_mt?: number; lat: number; lng: number }> = [];
 
   mineral.reserves.forEach(r => {
-    if (r.country !== 'Other' && r.country !== 'Global' && !r.country.startsWith('Uncertain') && r.country !== 'Abundant') {
+    if (isValidMapLocation(r.country)) {
       const [lat, lng] = getCoordinates(r.country);
       if (lat !== 0 || lng !== 0) {
         mapPoints.push({ type: 'Reserves', ...r, lat, lng });
@@ -43,7 +43,7 @@ export default function GlobalMap({ mineral }: GlobalMapProps) {
   });
 
   mineral.production.forEach(p => {
-    if (p.country !== 'Other' && p.country !== 'Global' && !p.country.startsWith('Uncertain') && p.country !== 'Abundant') {
+    if (isValidMapLocation(p.country)) {
       const [lat, lng] = getCoordinates(p.country);
       if (lat !== 0 || lng !== 0) {
         // Slightly offset production markers if they overlap with reserves

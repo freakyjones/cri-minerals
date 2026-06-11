@@ -1,21 +1,15 @@
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { lazy, Suspense } from 'react';
 import { 
   useMineral, 
   MineralPageHeader, 
   PrimaryApplications, 
-  ChokePoints, 
   SummaryStats, 
   EsgAlertCard,
-  MineralTimeline 
+  MineralTimeline,
+  GeopoliticsSection
 } from '../features/minerals';
-import { Card } from '@/components/ui/card';
 import { useAccessibleVariants } from '../lib/useAccessibleVariants';
-
-const SharePieChart = lazy(() => import('../features/minerals/components/SharePieChart'));
-const ProductionChart = lazy(() => import('../features/minerals/components/ProductionChart'));
-const GlobalMap = lazy(() => import('../features/minerals/components/GlobalMap'));
 
 const pageVariantsFull = {
   initial: { opacity: 0, y: 20 },
@@ -30,8 +24,17 @@ export default function MineralPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen p-8 max-w-7xl mx-auto flex items-center justify-center">
-        <motion.div className="animate-pulse bg-bg-surface h-8 w-32 rounded shadow-glass"></motion.div>
+      <div className="min-h-screen p-8 md:p-12 max-w-7xl mx-auto">
+        <div className="animate-pulse bg-bg-surface h-6 w-32 rounded shadow-glass mb-8"></div>
+        <div className="animate-pulse bg-bg-surface h-20 w-3/4 md:w-1/2 rounded-xl shadow-glass mb-12"></div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+           <div className="space-y-8 lg:col-span-1">
+             <div className="animate-pulse bg-bg-surface h-64 rounded-xl shadow-glass"></div>
+           </div>
+           <div className="lg:col-span-2">
+             <div className="animate-pulse bg-bg-surface h-96 rounded-xl shadow-glass"></div>
+           </div>
+        </div>
       </div>
     );
   }
@@ -86,35 +89,7 @@ export default function MineralPage() {
         </div>
         
         {/* Right Column - Geopolitics & Supply Chain */}
-        <div className="space-y-8 lg:col-span-2">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Card className="bg-bg-surface border-white/10 p-6 shadow-glass">
-              <h2 className="text-xl font-bold mb-2 text-white">Global Reserves</h2>
-              <p className="text-xs text-slate-400 mb-6 border-b border-white/10 pb-2">Where the mineral physically exists in the ground.</p>
-              <Suspense fallback={<div className="h-64 w-full flex items-center justify-center text-slate-500 animate-pulse">Loading chart...</div>}>
-                <SharePieChart data={mineral.reserves} />
-              </Suspense>
-            </Card>
-
-            <Card className="bg-bg-surface border-white/10 p-6 shadow-glass">
-              <h2 className="text-xl font-bold mb-2 text-white">Active Production</h2>
-              <p className="text-xs text-slate-400 mb-6 border-b border-white/10 pb-2">Which countries are currently extracting it.</p>
-              <Suspense fallback={<div className="h-64 w-full flex items-center justify-center text-slate-500 animate-pulse">Loading chart...</div>}>
-                <ProductionChart data={mineral.production} />
-              </Suspense>
-            </Card>
-          </div>
-
-          <div className="w-full">
-            <Suspense fallback={<div className="h-[400px] w-full bg-slate-900/50 rounded-xl border border-slate-800 flex items-center justify-center text-slate-500 animate-pulse">Loading map...</div>}>
-              <GlobalMap mineral={mineral} />
-            </Suspense>
-          </div>
-
-          <div id="supply-risk" className="scroll-mt-24">
-            <ChokePoints mineral={mineral} />
-          </div>
-        </div>
+        <GeopoliticsSection mineral={mineral} />
       </div>
     </motion.div>
   );

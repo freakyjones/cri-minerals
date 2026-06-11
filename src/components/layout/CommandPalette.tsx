@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { Command } from 'cmdk';
 import { Search } from 'lucide-react';
 import { useSearch } from '../../context/SearchContext';
-import mineralsData from '../../data/minerals.json';
+import { useMinerals } from '@/features/minerals';
 
 export default function CommandPalette() {
   const { isOpen, closeSearch, toggleSearch } = useSearch();
   const navigate = useNavigate();
+  const { minerals } = useMinerals();
 
   // Toggle the menu when ⌘K / Ctrl K is pressed
   useEffect(() => {
@@ -56,7 +57,7 @@ export default function CommandPalette() {
           </Command.Empty>
 
           <Command.Group heading="Minerals" className="text-xs font-medium text-slate-500 px-2 py-1.5 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:pb-1.5">
-            {mineralsData.map((mineral) => (
+            {minerals.map((mineral) => (
               <Command.Item
                 key={mineral.id}
                 value={`${mineral.name} ${mineral.symbol} ${mineral.category}`}

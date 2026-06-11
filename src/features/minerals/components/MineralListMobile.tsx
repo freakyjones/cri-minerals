@@ -1,11 +1,20 @@
 import { Link } from 'react-router-dom';
 import type { Mineral } from '../schema/mineralSchema';
+import { getRiskColorTransparent } from '../utils';
 
 interface MineralListMobileProps {
   minerals: Mineral[];
 }
 
 export default function MineralListMobile({ minerals }: MineralListMobileProps) {
+  if (minerals.length === 0) {
+    return (
+      <div className="bg-bg-surface border border-white/5 rounded-xl p-8 shadow-glass text-center text-slate-500">
+        No minerals match the selected filters.
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-4">
       {minerals.map((mineral) => (
@@ -25,12 +34,7 @@ export default function MineralListMobile({ minerals }: MineralListMobileProps) 
               </div>
             </div>
             
-            <div className={`px-2.5 py-1 rounded-full text-xs font-bold border
-              ${mineral.riskScore === 'CRITICAL' ? 'bg-risk-critical/10 text-risk-critical border-risk-critical/20' : ''}
-              ${mineral.riskScore === 'HIGH' ? 'bg-risk-high/10 text-risk-high border-risk-high/20' : ''}
-              ${mineral.riskScore === 'MEDIUM' ? 'bg-risk-medium/10 text-risk-medium border-risk-medium/20' : ''}
-              ${mineral.riskScore === 'LOW' ? 'bg-risk-low/10 text-risk-low border-risk-low/20' : ''}
-            `}>
+            <div className={`px-2.5 py-1 rounded-full text-xs font-bold border ${getRiskColorTransparent(mineral.riskScore)}`}>
               {mineral.riskScore}
             </div>
           </div>

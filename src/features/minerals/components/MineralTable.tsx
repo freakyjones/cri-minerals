@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import type { Mineral } from '../schema/mineralSchema';
-import { getRiskIcon, getRiskColorSolid } from '../utils';
+import { getRiskIcon, getRiskColorSolid, getSubstitutabilityColor, getRecyclingRateColor } from '../utils';
 
 interface MineralTableProps {
   minerals: Mineral[];
@@ -52,18 +52,12 @@ export default function MineralTable({ minerals }: MineralTableProps) {
                   </Badge>
                 </td>
                 <td className="px-6 py-4">
-                  <span className={`font-medium ${
-                    mineral.substitutability === 'HIGH' ? 'text-green-400' :
-                    mineral.substitutability === 'MEDIUM' ? 'text-yellow-400' : 'text-red-400'
-                  }`}>
+                  <span className={`px-2 py-1 rounded-md text-xs font-semibold ${getSubstitutabilityColor(mineral.substitutability)}`}>
                     {mineral.substitutability}
                   </span>
                 </td>
                 <td className="px-6 py-4">
-                  <span className={`font-mono tabular-nums tracking-tight font-medium ${
-                    mineral.recyclingRate >= 50 ? 'text-green-400' :
-                    mineral.recyclingRate >= 20 ? 'text-yellow-400' : 'text-red-400'
-                  }`}>
+                  <span className={`px-2 py-1 rounded-md text-xs font-semibold tabular-nums tracking-tight ${getRecyclingRateColor(mineral.recyclingRate)}`}>
                     {mineral.recyclingRate}%
                   </span>
                 </td>

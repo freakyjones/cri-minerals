@@ -1,0 +1,107 @@
+import { supabase } from '../lib/supabase';
+
+export interface RawMineralDBRecord {
+  id?: string;
+  slug?: string;
+  atomic_number?: number;
+  risk_score?: string;
+  substitute_mineral?: string | null;
+  recycling_rate?: number | string;
+  recycling_sources?: string[];
+  mineral_use_cases?: Array<{ label: string; share: number | string }>;
+  mineral_reserves?: Array<{ country: string; share: number | string; amount_mt?: number | string | null }>;
+  mineral_production?: Array<{ country: string; share: number | string; amount_mt?: number | string | null }>;
+  mineral_refining?: Array<{ country: string; share: number | string }>;
+  mineral_choke_points?: Array<{ title: string; severity: string; description: string; affected_countries: string[] }>;
+  mineral_data_sources?: Array<{ label: string; url: string }>;
+  mineral_esg_risks?: Array<{ country: string; category: string; severity: string; summary: string }>;
+  mineral_timeline?: Array<{ year: number; event: string; impact: string }>;
+  [key: string]: unknown;
+}
+
+export function mapMineralFromDB(dbMineral: RawMineralDBRecord): unknown {
+  return {
+    ...dbMineral,
+    atomicNumber: dbMineral.atomic_number,
+    riskScore: dbMineral.risk_score,
+    substituteMineral: dbMineral.substitute_mineral ?? undefined,
+    recyclingRate: Number(dbMineral.recycling_rate),
+    recyclingSources: dbMineral.recycling_sources,
+    useCases: (dbMineral.mineral_use_cases || []).map((u) => ({ ...u, share: Number(u.share) })),
+    reserves: (dbMineral.mineral_reserves || []).map((r) => ({
+      ...r,
+      share: Number(r.share),
+      amount_mt: r.amount_mt ? Number(r.amount_mt) : undefined
+    })),
+    production: (dbMineral.mineral_production || []).map((p) => ({
+      ...p,
+      share: Number(p.share),
+      amount_mt: p.amount_mt ? Number(p.amount_mt) : undefined
+    })),
+    refining: (dbMineral.mineral_refining || []).map((r) => ({ ...r, share: Number(r.share) })),
+    chokePoints: (dbMineral.mineral_choke_points || []).map((c) => ({
+      ...c,
+      affectedCountries: c.affected_countries
+    })),
+    dataSources: dbMineral.mineral_data_sources || [],
+    esgRisks: dbMineral.mineral_esg_risks?.length ? dbMineral.mineral_esg_risks : undefined,
+    timeline: dbMineral.mineral_timeline?.length ? dbMineral.mineral_timeline : undefined
+  };
+}
+
+export const MINERAL_LIST_SELECT_QUERY = `
+  id,
+  slug,
+  name,
+  symbol,
+  atomic_number,
+  category,
+  risk_score,
+  color,
+  tagline,
+  substitutability,
+  recycling_rate,
+  recycling_sources,
+  mineral_reserves(country, share, amount_mt),
+  mineral_production(country, share, amount_mt)
+`;
+
+export const MINERAL_DETAIL_SELECT_QUERY = `
+  *,
+  mineral_use_cases(label, share),
+  mineral_reserves(country, share, amount_mt),
+  mineral_production(country, share, amount_mt),
+  mineral_refining(country, share),
+  mineral_choke_points(title, severity, description, affected_countries),
+  mineral_data_sources(label, url),
+  mineral_esg_risks(country, category, severity, summary),
+  mineral_timeline(year, event, impact)
+`;
+
+export async function fetchMineralsFromDB(abortSignal?: AbortSignal) {
+  let query = supabase.from('minerals').select(MINERAL_LIST_SELECT_QUERY);
+  if (abortSignal) {
+    query = query.abortSignal(abortSignal);
+  }
+  
+  const { data, error } = await query;
+  if (error) throw error;
+  
+  return data;
+}
+
+export async function fetchMineralBySlugFromDB(slug: string, abortSignal?: AbortSignal) {
+  let query = supabase
+    .from('minerals')
+    .select(MINERAL_DETAIL_SELECT_QUERY)
+    .eq('slug', slug);
+    
+  if (abortSignal) {
+    query = query.abortSignal(abortSignal);
+  }
+  
+  const { data, error } = await query.single();
+  if (error) throw error;
+  
+  return data;
+}

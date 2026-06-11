@@ -14,10 +14,28 @@ export const getRiskColorTransparent = (score: string) => {
   return 'bg-green-500/20 text-green-400 border-green-500/30';
 };
 
-/** Geometric icon prefix for risk badges (WCAG 2.1 AA — never rely on color alone) */
 export const getRiskIcon = (score: string) => {
   if (score === 'CRITICAL') return '🔺';
   if (score === 'HIGH') return '🔶';
   if (score === 'MEDIUM') return '⏺';
   return '🟢';
+};
+
+export const getSubstitutabilityColor = (val: string) => {
+  switch (val) {
+    case 'Low': return 'text-red-400 bg-red-400/10 border border-red-400/20';
+    case 'Medium': return 'text-amber-400 bg-amber-400/10 border border-amber-400/20';
+    case 'High': return 'text-green-400 bg-green-400/10 border border-green-400/20';
+    default: return 'text-slate-400 bg-slate-800 border border-slate-700';
+  }
+};
+
+export const getRecyclingRateColor = (val: number) => {
+  if (val < 10) return 'text-red-400 bg-red-400/10 border border-red-400/20';
+  if (val < 30) return 'text-amber-400 bg-amber-400/10 border border-amber-400/20';
+  return 'text-green-400 bg-green-400/10 border border-green-400/20';
+};
+
+export const isValidMapLocation = (country: string) => {
+  return country !== 'Other' && country !== 'Global' && !country.startsWith('Uncertain') && country !== 'Abundant';
 };
