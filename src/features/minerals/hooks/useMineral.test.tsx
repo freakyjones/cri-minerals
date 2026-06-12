@@ -42,6 +42,8 @@ const mockMineralData = {
   substitutability: 'LOW',
   recycling_rate: 10,
   recycling_sources: ['Batteries'],
+  mineral_reserves: [],
+  mineral_production: [],
 };
 
 describe('useMineral Hooks', () => {
