@@ -10,6 +10,7 @@
 - Code belonging to the `minerals` feature lives **exclusively** inside `src/features/minerals/`.
 - A feature component **MUST NOT** import directly from another feature's folder.
 - If two features need to share something, it is extracted into `src/components/` (shared UI) or `src/lib/` (shared utilities). Never import across feature boundaries.
+- Data fetching and API calls must be feature-scoped (e.g., `src/features/minerals/services/`). Global `api.ts` files or "God Objects" are strictly forbidden.
 
 ### 1.2 Page Components are Thin
 - Files inside `src/pages/` are **routing shells only**. They import feature components and compose them. They contain zero business logic, zero data fetching, and zero styling beyond layout wrappers.
@@ -147,6 +148,7 @@
 
 ### 8.4 Automated Testing Required
 - All critical data parsing, validation, and utility functions MUST have accompanying unit tests using Vitest.
+- All critical user flows MUST have accompanying End-to-End smoke tests using Playwright (`tests/e2e/`).
 
 ---
 

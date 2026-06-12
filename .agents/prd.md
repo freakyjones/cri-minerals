@@ -91,3 +91,4 @@ The UI fetches live data from a hosted Supabase PostgreSQL database. All incomin
   - High contrast for all text (minimum 4.5:1 ratio).
   - All interactive elements must have clear focus rings (`focus-visible:ring-2`) for keyboard navigation.
 - **Responsiveness:** The layout must be built mobile-first, targeting smooth scaling across mobile (375px), tablet (768px), and desktop (1440px).
+- **End-to-End Testing:** Critical paths (Home Dashboard, Mineral Detail View, Market Alerts) must be verified via automated Playwright smoke tests to ensure structural integrity across builds.
