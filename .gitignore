@@ -37,3 +37,7 @@ coverage/
 # Vercel / Netlify deployment folders
 .vercel/
 .netlify/
+
+# Playwright reports
+playwright-report/
+test-results/
