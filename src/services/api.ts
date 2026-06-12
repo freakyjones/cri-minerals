@@ -132,3 +132,38 @@ export async function fetchMarketAlertsFromDB(abortSignal?: AbortSignal) {
 
   return data as RawMarketAlertDBRecord[];
 }
+
+export async function fetchDraftAlertsFromDB(abortSignal?: AbortSignal) {
+  let query = supabase
+    .from('market_alerts')
+    .select('*')
+    .eq('status', 'DRAFT')
+    .order('created_at', { ascending: false });
+
+  if (abortSignal) {
+    query = query.abortSignal(abortSignal);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+
+  return data as RawMarketAlertDBRecord[];
+}
+
+export async function publishMarketAlertInDB(id: string) {
+  const { error } = await supabase
+    .from('market_alerts')
+    .update({ status: 'PUBLISHED' })
+    .eq('id', id);
+    
+  if (error) throw error;
+}
+
+export async function rejectMarketAlertInDB(id: string) {
+  const { error } = await supabase
+    .from('market_alerts')
+    .delete()
+    .eq('id', id);
+    
+  if (error) throw error;
+}

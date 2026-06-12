@@ -10,6 +10,7 @@ import CommandPalette from './components/layout/CommandPalette';
 // Lazy load pages for performance (Rule 8.1)
 const HomePage = lazy(() => import('./pages/HomePage'));
 const MineralPage = lazy(() => import('./pages/MineralPage'));
+const AnalystDashboard = lazy(() => import('./pages/AnalystDashboard'));
 
 function App() {
   return (
@@ -46,6 +47,7 @@ function AppRoutes() {
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={<HomePage />} />
+            <Route path="/analyst" element={<AnalystDashboard />} />
             <Route path="/mineral/:slug" element={<MineralPage />} />
           </Routes>
         </AnimatePresence>
