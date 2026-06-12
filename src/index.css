@@ -18,3 +18,31 @@
     scrollbar-width: none;  /* Firefox */
   }
 }
+
+@layer components {
+  /* Leaflet custom dark popup styles */
+  .custom-dark-popup .leaflet-popup-content-wrapper {
+    @apply bg-slate-900 border border-slate-700/80 shadow-2xl rounded-xl p-0 overflow-hidden;
+  }
+  
+  .custom-dark-popup .leaflet-popup-content {
+    @apply m-0;
+  }
+  
+  .custom-dark-popup .leaflet-popup-tip {
+    @apply bg-slate-900 shadow-2xl;
+  }
+
+  /* Flow Arc Animation */
+  @keyframes flowDash {
+    to {
+      stroke-dashoffset: -20;
+    }
+  }
+
+  .flow-arc-animation {
+    stroke-dasharray: 4 6;
+    animation: flowDash 0.8s linear infinite;
+    stroke-linecap: round;
+  }
+}

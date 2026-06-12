@@ -11,6 +11,7 @@ import CommandPalette from './components/layout/CommandPalette';
 const HomePage = lazy(() => import('./pages/HomePage'));
 const MineralPage = lazy(() => import('./pages/MineralPage'));
 const AnalystDashboard = lazy(() => import('./pages/AnalystDashboard'));
+const SupplyChainPage = lazy(() => import('./pages/SupplyChainPage'));
 
 function App() {
   return (
@@ -52,6 +53,7 @@ function AppRoutes() {
             <Route path="/" element={<HomePage />} />
             <Route path="/analyst" element={<AnalystDashboard />} />
             <Route path="/mineral/:slug" element={<MineralPage />} />
+            <Route path="/supply-chain" element={<SupplyChainPage />} />
           </Routes>
         </Suspense>
       </AnimatePresence>
