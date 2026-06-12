@@ -65,13 +65,13 @@ The Critical Minerals Intelligence Dashboard is a strategic intelligence platfor
 - **Data Validation:** Zod
 
 ### 5.2 The Data Contract
-The UI is strictly bound to a `minerals.json` schema. All incoming data (currently mock, eventually via an API) must pass strict runtime validation using Zod.
+The UI fetches live data from a hosted Supabase PostgreSQL database. All incoming data must pass strict runtime validation using Zod.
 - If data fails to parse, it must gracefully fail or be rejected rather than crashing the UI.
 - All numbers representing percentages must fall between `0` and `100`.
 - All color codes must be valid Hex strings.
 
 > [!CAUTION]  
-> The dashboard currently operates on mock data for MVP purposes. Every page displaying figures must include a visible watermark: *"Data for illustrative purposes only. Sources: USGS, IEA, World Bank."*
+> While the dashboard fetches from a live database, it operates on demonstration data for MVP purposes. Every page displaying figures must include a visible watermark: *"Data for illustrative purposes only. Sources: USGS, IEA, World Bank."*
 
 ---
 
