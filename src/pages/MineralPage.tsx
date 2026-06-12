@@ -11,6 +11,7 @@ import {
 } from '../features/minerals';
 import { useAccessibleVariants } from '../lib/useAccessibleVariants';
 import { ErrorState } from '../components/ui/ErrorState';
+import { SEO } from '../components/SEO';
 
 const pageVariantsFull = {
   initial: { opacity: 0, y: 20 },
@@ -58,6 +59,8 @@ export default function MineralPage() {
   }
 
   return (
+    <>
+    <SEO title={`${mineral.name} Intelligence | CriMinerals`} description={mineral.tagline} />
     <motion.div 
       className="min-h-screen p-8 md:p-12 max-w-7xl mx-auto"
       variants={pageVariants}
@@ -68,6 +71,8 @@ export default function MineralPage() {
       <Link
         to="/"
         className="text-slate-400 hover:text-white mb-8 inline-flex items-center gap-2 transition-colors focus-visible:ring-2 focus-visible:ring-accent-blue rounded px-1"
+        onMouseEnter={() => import('./HomePage')}
+        onFocus={() => import('./HomePage')}
       >
         &larr; Back to Dashboard
         <kbd className="text-xs bg-white/10 border border-white/10 rounded px-1.5 py-0.5 text-slate-500 ml-1">Esc</kbd>
@@ -101,5 +106,6 @@ export default function MineralPage() {
         <GeopoliticsSection mineral={mineral} />
       </div>
     </motion.div>
+    </>
   );
 }

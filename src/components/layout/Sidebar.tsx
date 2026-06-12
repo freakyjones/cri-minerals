@@ -19,6 +19,12 @@ interface SidebarProps {
 export default function Sidebar({ isMobileMenuOpen, onClose }: SidebarProps) {
   const location = useLocation();
 
+  // Preload chunks on hover to prevent Suspense fallback from breaking Framer Motion layoutId animations
+  const preloadRoute = (path: string) => {
+    if (path === '/') import('../../pages/HomePage');
+    if (path === '/analyst') import('../../pages/AnalystDashboard');
+  };
+
   return (
     <>
       {/* Mobile Overlay */}
@@ -31,7 +37,13 @@ export default function Sidebar({ isMobileMenuOpen, onClose }: SidebarProps) {
       )}
       <aside className={`fixed md:sticky top-0 left-0 z-50 w-64 border-r border-white/10 bg-bg-base/95 backdrop-blur flex flex-col flex-shrink-0 h-screen transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         <div className="h-16 flex items-center justify-between px-6 border-b border-white/10 shrink-0">
-          <Link to="/" className="text-xl font-bold tracking-tighter text-white flex items-center gap-2 focus-visible:ring-2 focus-visible:ring-accent-blue rounded outline-none" onClick={onClose}>
+          <Link 
+            to="/" 
+            className="text-xl font-bold tracking-tighter text-white flex items-center gap-2 focus-visible:ring-2 focus-visible:ring-accent-blue rounded outline-none" 
+            onClick={onClose}
+            onMouseEnter={() => preloadRoute('/')}
+            onFocus={() => preloadRoute('/')}
+          >
             <span className="w-6 h-6 rounded bg-gradient-to-br from-accent-blue to-purple-600 flex items-center justify-center text-xs">C</span>
             Minerals<span className="text-accent-blue font-light">Intel</span>
           </Link>
@@ -65,7 +77,12 @@ export default function Sidebar({ isMobileMenuOpen, onClose }: SidebarProps) {
                     ? 'text-slate-600 cursor-not-allowed'
                     : 'text-slate-400 hover:text-white hover:bg-white/5'
               }`}
-              onClick={(e) => item.disabled && e.preventDefault()}
+              onClick={(e) => {
+                if (item.disabled) e.preventDefault();
+                else onClose?.();
+              }}
+              onMouseEnter={() => preloadRoute(item.path)}
+              onFocus={() => preloadRoute(item.path)}
               aria-disabled={item.disabled}
               aria-current={isActive ? 'page' : undefined}
             >
