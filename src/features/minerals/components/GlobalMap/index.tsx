@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Globe } from 'lucide-react';
 import { MapContainer, TileLayer } from 'react-leaflet';
@@ -6,8 +6,8 @@ import L from 'leaflet';
 import { Mineral } from '../../schema/mineralSchema';
 import MapControls from './MapControls';
 
-const MarkerLayer = lazy(() => import('./Layers/MarkerLayer'));
-const ChoroplethLayer = lazy(() => import('./Layers/ChoroplethLayer'));
+import MarkerLayer from './Layers/MarkerLayer';
+import ChoroplethLayer from './Layers/ChoroplethLayer';
 
 export type MapLayerType = 'reserves' | 'production' | 'refining' | 'esg' | 'chokePoints';
 
@@ -45,12 +45,10 @@ export default function GlobalMap({ mineral }: GlobalMapProps) {
               url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
             />
             
-            <Suspense fallback={null}>
-              {showChoropleth && (
-                <ChoroplethLayer mineral={mineral} activeLayer={activeLayer} />
-              )}
-              <MarkerLayer mineral={mineral} activeLayer={activeLayer} />
-            </Suspense>
+            {showChoropleth && (
+              <ChoroplethLayer mineral={mineral} activeLayer={activeLayer} />
+            )}
+            <MarkerLayer mineral={mineral} activeLayer={activeLayer} />
           </MapContainer>
 
           {/* Floating Controls Overlay */}
