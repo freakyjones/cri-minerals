@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Globe } from 'lucide-react';
 import { MapContainer, TileLayer } from 'react-leaflet';
-import L from 'leaflet';
+
 import { Mineral } from '../../schema/mineralSchema';
 import MapControls from './MapControls';
 
@@ -36,7 +36,7 @@ export default function GlobalMap({ mineral }: GlobalMapProps) {
             center={[20, 0]} 
             zoom={2} 
             scrollWheelZoom={false}
-            dragging={!L.Browser.mobile}
+            dragging={true}
             zoomControl={false}
             attributionControl={false}
             className="h-full w-full bg-slate-950"

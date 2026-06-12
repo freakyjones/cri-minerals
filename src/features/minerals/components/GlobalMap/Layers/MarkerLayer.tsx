@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Marker } from 'react-leaflet';
-import L from 'leaflet';
+import * as L from 'leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import { Mineral } from '../../../schema/mineralSchema';
 import { getCoordinates } from '../../../../../lib/coordinates';
