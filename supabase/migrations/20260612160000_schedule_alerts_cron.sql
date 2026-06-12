@@ -5,6 +5,8 @@ CREATE EXTENSION IF NOT EXISTS pg_net;
 -- if deploying this migration to production. Or configure this schedule
 -- directly in the Supabase Dashboard under Database -> Cron Jobs.
 
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+
 SELECT cron.schedule(
   'generate-daily-market-alerts',
   '0 8 * * *', -- Runs every day at 8:00 AM UTC
