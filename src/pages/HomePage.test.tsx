@@ -3,6 +3,18 @@ import { describe, it, expect, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import HomePage from './HomePage';
 
+// Mock useMarketAlerts
+vi.mock('../features/minerals/hooks/useMarketAlerts', () => ({
+  useMarketAlerts: () => ({
+    alerts: [
+      { id: '1', title: 'Test Alert', description: 'Test', severity: 'CRITICAL' }
+    ],
+    loading: false,
+    error: null,
+    refetch: vi.fn(),
+  }),
+}));
+
 // Mock the public API hook directly
 vi.mock('../features/minerals', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../features/minerals')>();

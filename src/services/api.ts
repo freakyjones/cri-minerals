@@ -105,3 +105,30 @@ export async function fetchMineralBySlugFromDB(slug: string, abortSignal?: Abort
   
   return data;
 }
+
+export interface RawMarketAlertDBRecord {
+  id: string;
+  title: string;
+  description: string;
+  severity: string;
+  status: string;
+  created_at: string;
+}
+
+export async function fetchMarketAlertsFromDB(abortSignal?: AbortSignal) {
+  let query = supabase
+    .from('market_alerts')
+    .select('*')
+    .eq('status', 'PUBLISHED')
+    .order('created_at', { ascending: false })
+    .limit(5);
+
+  if (abortSignal) {
+    query = query.abortSignal(abortSignal);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+
+  return data as RawMarketAlertDBRecord[];
+}
