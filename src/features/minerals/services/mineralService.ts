@@ -1,6 +1,7 @@
-import { supabase } from '../lib/supabase';
+import { supabase } from '../../../lib/supabase';
+import { mineralSchema, type Mineral } from '../schema/mineralSchema';
 
-export interface RawMineralDBRecord {
+interface RawMineralDBRecord {
   id?: string;
   slug?: string;
   atomic_number?: number;
@@ -19,7 +20,7 @@ export interface RawMineralDBRecord {
   [key: string]: unknown;
 }
 
-export function mapMineralFromDB(dbMineral: RawMineralDBRecord): unknown {
+const mapMineralFromDB = (dbMineral: RawMineralDBRecord): unknown => {
   return {
     ...dbMineral,
     atomicNumber: dbMineral.atomic_number,
@@ -47,9 +48,19 @@ export function mapMineralFromDB(dbMineral: RawMineralDBRecord): unknown {
     esgRisks: dbMineral.mineral_esg_risks?.length ? dbMineral.mineral_esg_risks : undefined,
     timeline: dbMineral.mineral_timeline?.length ? dbMineral.mineral_timeline : undefined
   };
-}
+};
 
-export const MINERAL_LIST_SELECT_QUERY = `
+const parseMineral = (row: RawMineralDBRecord): Mineral | null => {
+  const mapped = mapMineralFromDB(row);
+  const parsed = mineralSchema.safeParse(mapped);
+  
+  if (parsed.success) return parsed.data;
+  
+  console.warn(`Validation failed for mineral ${row.slug || row.id}:`, parsed.error);
+  return null;
+};
+
+const MINERAL_LIST_SELECT_QUERY = `
   id,
   slug,
   name,
@@ -66,7 +77,7 @@ export const MINERAL_LIST_SELECT_QUERY = `
   mineral_production(country, share, amount_mt)
 `;
 
-export const MINERAL_DETAIL_SELECT_QUERY = `
+const MINERAL_DETAIL_SELECT_QUERY = `
   *,
   mineral_use_cases(label, share),
   mineral_reserves(country, share, amount_mt),
@@ -78,57 +89,43 @@ export const MINERAL_DETAIL_SELECT_QUERY = `
   mineral_timeline(year, event, impact)
 `;
 
-export async function fetchMineralsFromDB(abortSignal?: AbortSignal) {
-  let query = supabase.from('minerals').select(MINERAL_LIST_SELECT_QUERY);
-  if (abortSignal) {
-    query = query.abortSignal(abortSignal);
-  }
-  
-  const { data, error } = await query;
-  if (error) throw error;
-  
-  return data;
-}
-
-export async function fetchMineralBySlugFromDB(slug: string, abortSignal?: AbortSignal) {
-  let query = supabase
-    .from('minerals')
-    .select(MINERAL_DETAIL_SELECT_QUERY)
-    .eq('slug', slug);
+export const mineralService = {
+  async getMinerals(abortSignal?: AbortSignal): Promise<Mineral[]> {
+    let query = supabase.from('minerals').select(MINERAL_LIST_SELECT_QUERY);
+    if (abortSignal) {
+      query = query.abortSignal(abortSignal);
+    }
     
-  if (abortSignal) {
-    query = query.abortSignal(abortSignal);
+    const { data, error } = await query;
+    if (error) throw error;
+    
+    if (!data) return [];
+    
+    return (data as RawMineralDBRecord[])
+      .map(parseMineral)
+      .filter((m): m is Mineral => m !== null);
+  },
+
+  async getMineralBySlug(slug: string, abortSignal?: AbortSignal): Promise<Mineral | null> {
+    let query = supabase
+      .from('minerals')
+      .select(MINERAL_DETAIL_SELECT_QUERY)
+      .eq('slug', slug);
+      
+    if (abortSignal) {
+      query = query.abortSignal(abortSignal);
+    }
+    
+    const { data, error } = await query.single();
+    if (error) throw error;
+    
+    if (!data) return null;
+    
+    const validMineral = parseMineral(data as RawMineralDBRecord);
+    if (!validMineral) {
+      throw new Error(`Data validation failed for specific mineral: ${slug}`);
+    }
+    
+    return validMineral;
   }
-  
-  const { data, error } = await query.single();
-  if (error) throw error;
-  
-  return data;
-}
-
-export interface RawMarketAlertDBRecord {
-  id: string;
-  title: string;
-  description: string;
-  severity: string;
-  status: string;
-  created_at: string;
-}
-
-export async function fetchMarketAlertsFromDB(abortSignal?: AbortSignal) {
-  let query = supabase
-    .from('market_alerts')
-    .select('*')
-    .eq('status', 'PUBLISHED')
-    .order('created_at', { ascending: false })
-    .limit(5);
-
-  if (abortSignal) {
-    query = query.abortSignal(abortSignal);
-  }
-
-  const { data, error } = await query;
-  if (error) throw error;
-
-  return data as RawMarketAlertDBRecord[];
-}
+};

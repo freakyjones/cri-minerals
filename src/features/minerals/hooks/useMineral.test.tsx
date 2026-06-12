@@ -2,17 +2,16 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useMinerals, useMineral } from './useMineral';
-import * as api from '../../../services/api';
+import { mineralService } from '../services/mineralService';
+import type { Mineral } from '../schema/mineralSchema';
 
 // Mock the API calls
-vi.mock('../../../services/api', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../../services/api')>();
-  return {
-    ...actual,
-    fetchMineralsFromDB: vi.fn(),
-    fetchMineralBySlugFromDB: vi.fn(),
-  };
-});
+vi.mock('../services/mineralService', () => ({
+  mineralService: {
+    getMinerals: vi.fn(),
+    getMineralBySlug: vi.fn(),
+  }
+}));
 
 // Helper to create a clean QueryClient for each test
 const createTestQueryClient = () => new QueryClient({
@@ -29,21 +28,25 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   </QueryClientProvider>
 );
 
-const mockMineralData = {
+const mockMineralData: Mineral = {
   id: '123',
   slug: 'lithium',
   name: 'Lithium',
   symbol: 'Li',
-  atomic_number: 3,
+  atomicNumber: 3,
   category: 'battery-metal',
-  risk_score: 'HIGH',
+  riskScore: 'HIGH',
   color: '#ff0000',
   tagline: 'Battery stuff',
   substitutability: 'LOW',
-  recycling_rate: 10,
-  recycling_sources: ['Batteries'],
-  mineral_reserves: [],
-  mineral_production: [],
+  recyclingRate: 10,
+  recyclingSources: ['Batteries'],
+  reserves: [],
+  production: [],
+  refining: [],
+  chokePoints: [],
+  dataSources: [],
+  useCases: [],
 };
 
 describe('useMineral Hooks', () => {
@@ -53,7 +56,7 @@ describe('useMineral Hooks', () => {
 
   describe('useMinerals', () => {
     it('should fetch and return minerals', async () => {
-      vi.mocked(api.fetchMineralsFromDB).mockResolvedValue([mockMineralData]);
+      vi.mocked(mineralService.getMinerals).mockResolvedValue([mockMineralData]);
 
       const { result } = renderHook(() => useMinerals(), { wrapper });
 
@@ -69,7 +72,7 @@ describe('useMineral Hooks', () => {
     });
 
     it('should handle API errors gracefully', async () => {
-      vi.mocked(api.fetchMineralsFromDB).mockRejectedValue(new Error('API Failure'));
+      vi.mocked(mineralService.getMinerals).mockRejectedValue(new Error('API Failure'));
 
       const { result } = renderHook(() => useMinerals(), { wrapper });
 
@@ -82,7 +85,7 @@ describe('useMineral Hooks', () => {
 
   describe('useMineral', () => {
     it('should fetch a single mineral by slug', async () => {
-      vi.mocked(api.fetchMineralBySlugFromDB).mockResolvedValue(mockMineralData);
+      vi.mocked(mineralService.getMineralBySlug).mockResolvedValue(mockMineralData);
 
       const { result } = renderHook(() => useMineral('lithium'), { wrapper });
 
@@ -98,7 +101,7 @@ describe('useMineral Hooks', () => {
 
       expect(result.current.loading).toBe(false);
       expect(result.current.mineral).toBeNull();
-      expect(api.fetchMineralBySlugFromDB).not.toHaveBeenCalled();
+      expect(mineralService.getMineralBySlug).not.toHaveBeenCalled();
     });
   });
 });
