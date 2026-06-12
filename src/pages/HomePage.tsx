@@ -8,6 +8,7 @@ import MarketAlerts from '../features/minerals/components/MarketAlerts';
 import { useAccessibleVariants } from '../lib/useAccessibleVariants';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { ErrorState } from '../components/ui/ErrorState';
+import { SEO } from '../components/SEO';
 
 const pageVariantsFull = {
   initial: { opacity: 0 },
@@ -41,6 +42,8 @@ export default function HomePage() {
   }
 
   return (
+    <>
+    <SEO title="Overview Dashboard | CriMinerals" description="Monitoring 20 critical minerals across global supply chains, choke points, and geopolitical risks." />
     <motion.div 
       className="min-h-screen p-8 md:p-12 max-w-7xl mx-auto"
       variants={pageVariants}
@@ -93,5 +96,6 @@ export default function HomePage() {
         <MarketAlerts />
       </div>
     </motion.div>
+    </>
   );
 }

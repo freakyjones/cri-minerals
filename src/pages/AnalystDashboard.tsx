@@ -1,7 +1,10 @@
 import AnalystQueue from '../features/minerals/components/AnalystQueue';
+import { SEO } from '../components/SEO';
 
 export default function AnalystDashboard() {
   return (
+    <>
+    <SEO title="Analyst Queue | CriMinerals" description="Review AI-generated market alerts before they are published to the main dashboard." />
     <div className="min-h-screen p-8 md:p-12 max-w-5xl mx-auto w-full">
       <header className="mb-12">
         <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent mb-4">
@@ -17,5 +20,6 @@ export default function AnalystDashboard() {
         <AnalystQueue />
       </section>
     </div>
+    </>
   );
 }
