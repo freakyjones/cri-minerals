@@ -10,6 +10,7 @@ import {
   GeopoliticsSection
 } from '../features/minerals';
 import { useAccessibleVariants } from '../lib/useAccessibleVariants';
+import { ErrorState } from '../components/ui/ErrorState';
 
 const pageVariantsFull = {
   initial: { opacity: 0, y: 20 },
@@ -19,7 +20,7 @@ const pageVariantsFull = {
 
 export default function MineralPage() {
   const { slug } = useParams();
-  const { mineral, loading } = useMineral(slug);
+  const { mineral, loading, error, refetch } = useMineral(slug);
   const pageVariants = useAccessibleVariants(pageVariantsFull);
 
   if (loading) {
@@ -35,6 +36,14 @@ export default function MineralPage() {
              <div className="animate-pulse bg-bg-surface h-96 rounded-xl shadow-glass"></div>
            </div>
         </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen p-8 flex items-center justify-center">
+        <ErrorState error={error} onRetry={refetch} title="Failed to load mineral data" />
       </div>
     );
   }

@@ -24,6 +24,9 @@ export function useMinerals() {
   const [minerals, setMinerals] = useState<Mineral[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [refetchTrigger, setRefetchTrigger] = useState(0);
+
+  const refetch = () => setRefetchTrigger(prev => prev + 1);
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -49,9 +52,9 @@ export function useMinerals() {
     loadMinerals();
 
     return () => abortController.abort();
-  }, []);
+  }, [refetchTrigger]);
 
-  return { minerals, loading, error };
+  return { minerals, loading, error, refetch };
 }
 
 export function useMineral(slug: string | undefined) {
@@ -61,6 +64,9 @@ export function useMineral(slug: string | undefined) {
   const [mineral, setMineral] = useState<Mineral | null>(null);
   const [loading, setLoading] = useState(!!slug);
   const [error, setError] = useState<Error | null>(null);
+  const [refetchTrigger, setRefetchTrigger] = useState(0);
+
+  const refetch = () => setRefetchTrigger(prev => prev + 1);
 
   if (slug !== prevSlug) {
     setPrevSlug(slug);
@@ -101,7 +107,7 @@ export function useMineral(slug: string | undefined) {
     loadMineral();
 
     return () => abortController.abort();
-  }, [slug]);
+  }, [slug, refetchTrigger]);
 
-  return { mineral, loading, error };
+  return { mineral, loading, error, refetch };
 }
