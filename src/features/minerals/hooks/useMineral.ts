@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { fetchMineralsFromDB, fetchMineralBySlugFromDB, mapMineralFromDB, RawMineralDBRecord } from '../../../services/api';
 import { mineralSchema } from '../schema/mineralSchema';
 import type { Mineral } from '../schema/mineralSchema';
@@ -21,93 +21,44 @@ const parseMineral = (row: RawMineralDBRecord): Mineral | null => {
 // --- Hooks ---
 
 export function useMinerals() {
-  const [minerals, setMinerals] = useState<Mineral[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [refetchTrigger, setRefetchTrigger] = useState(0);
+  const { data, isLoading, error, refetch: rqRefetch } = useQuery({
+    queryKey: ['minerals'],
+    queryFn: async ({ signal }) => {
+      const dbData = await fetchMineralsFromDB(signal);
+      if (!dbData) return [];
+      
+      return (dbData as RawMineralDBRecord[])
+        .map(parseMineral)
+        .filter((m): m is Mineral => m !== null);
+    }
+  });
 
-  const refetch = () => setRefetchTrigger(prev => prev + 1);
+  const refetch = () => rqRefetch();
 
-  useEffect(() => {
-    const abortController = new AbortController();
-
-    const loadMinerals = async () => {
-      try {
-        const data = await fetchMineralsFromDB(abortController.signal);
-        
-        if (!abortController.signal.aborted && data) {
-          const validMinerals = (data as RawMineralDBRecord[])
-            .map(parseMineral)
-            .filter((m): m is Mineral => m !== null);
-            
-          setMinerals(validMinerals);
-        }
-      } catch (err) {
-        if (!abortController.signal.aborted) setError(toError(err));
-      } finally {
-        if (!abortController.signal.aborted) setLoading(false);
-      }
-    };
-
-    loadMinerals();
-
-    return () => abortController.abort();
-  }, [refetchTrigger]);
-
-  return { minerals, loading, error, refetch };
+  return { minerals: data || [], loading: isLoading, error: error ? toError(error) : null, refetch };
 }
 
 export function useMineral(slug: string | undefined) {
-  // Derive state during render when prop changes (React recommended pattern)
-  // Prevents flashing old data and avoids setState-in-useEffect cascading renders
-  const [prevSlug, setPrevSlug] = useState(slug);
-  const [mineral, setMineral] = useState<Mineral | null>(null);
-  const [loading, setLoading] = useState(!!slug);
-  const [error, setError] = useState<Error | null>(null);
-  const [refetchTrigger, setRefetchTrigger] = useState(0);
+  const { data, isLoading, error, refetch: rqRefetch } = useQuery({
+    queryKey: ['mineral', slug],
+    queryFn: async ({ signal }) => {
+      if (!slug) return null;
+      const dbData = await fetchMineralBySlugFromDB(slug, signal);
+      if (!dbData) return null;
 
-  const refetch = () => setRefetchTrigger(prev => prev + 1);
-
-  if (slug !== prevSlug) {
-    setPrevSlug(slug);
-    setMineral(null);
-    setLoading(!!slug);
-    setError(null);
-  }
-
-  useEffect(() => {
-    if (!slug) return;
-
-    const abortController = new AbortController();
-
-    const loadMineral = async () => {
-      try {
-        const data = await fetchMineralBySlugFromDB(slug, abortController.signal);
-        
-        if (!abortController.signal.aborted) {
-          if (!data) {
-            setMineral(null);
-            return;
-          }
-
-          const validMineral = parseMineral(data as RawMineralDBRecord);
-          if (validMineral) {
-            setMineral(validMineral);
-          } else {
-            throw new Error(`Data validation failed for specific mineral: ${slug}`);
-          }
-        }
-      } catch (err) {
-        if (!abortController.signal.aborted) setError(toError(err));
-      } finally {
-        if (!abortController.signal.aborted) setLoading(false);
+      const validMineral = parseMineral(dbData as RawMineralDBRecord);
+      if (!validMineral) {
+        throw new Error(`Data validation failed for specific mineral: ${slug}`);
       }
-    };
+      return validMineral;
+    },
+    enabled: !!slug
+  });
 
-    loadMineral();
+  const refetch = () => rqRefetch();
 
-    return () => abortController.abort();
-  }, [slug, refetchTrigger]);
+  // If slug is missing, we consider it not loading and no mineral.
+  const loading = !!slug && isLoading;
 
-  return { mineral, loading, error, refetch };
+  return { mineral: data || null, loading, error: error ? toError(error) : null, refetch };
 }

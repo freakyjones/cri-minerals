@@ -51,7 +51,7 @@
 ## RULE 3 — Data & Schema
 
 ### 3.1 Never Break the Data Contract
-- The `minerals.json` schema is the contract between the data layer and the UI. Every mineral entry MUST contain all required fields defined in the implementation plan.
+- The Supabase database schema is the contract between the data layer and the UI. Every mineral entry fetched MUST contain all required fields as validated by the Zod schema.
 - If adding a new field, add it to **all 10 mineral entries simultaneously**. Never add a field to only one entry.
 - **NEW:** All data MUST be validated at runtime using Zod schemas before entering the application state.
 
@@ -63,7 +63,7 @@
 - All data transformation lives in `src/features/minerals/hooks/useMineral.js` or in a utility file inside the feature.
 
 ### 3.4 Data Sourcing Watermark
-- Because the MVP uses mock data, **every page** that displays figures (charts, percentages, country shares) must include a small, non-intrusive watermark or footer note: `"Data for illustrative purposes only. Sources: USGS, IEA, World Bank."`
+- Because the MVP uses demonstration data, **every page** that displays figures (charts, percentages, country shares) must include a small, non-intrusive watermark or footer note: `"Data for illustrative purposes only. Sources: USGS, IEA, World Bank."`
 
 ---
 
@@ -99,7 +99,7 @@
 - A component with undocumented props will be flagged as incomplete.
 
 ### 5.4 Loading Skeleton Required
-- Any component that renders data from the JSON (or a future API) MUST have a corresponding skeleton/loading state.
+- Any component that renders data from the Supabase backend MUST have a corresponding skeleton/loading state.
 - Skeletons use Framer Motion opacity pulse, not CSS animations.
 - Blank screens on load are not acceptable.
 
