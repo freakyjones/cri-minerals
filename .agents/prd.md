@@ -43,8 +43,10 @@ The Critical Minerals Intelligence Dashboard is a strategic intelligence platfor
 > Reserves (in the ground) and Production (active mining) must **never** be conflated or merged. They must remain visually distinct on all dashboards.
 
 ### 4.3 Agentic Market Alerts (HITL)
-- **Live Sidebar:** A right-hand sidebar on the Dashboard displaying global market and geopolitical alerts.
-- **Human-in-the-Loop:** Alerts are fetched from a Supabase `market_alerts` table. The dashboard only displays alerts with a `PUBLISHED` status, ensuring AI-generated `DRAFT` alerts are reviewed by human analysts before appearing on the live dashboard.
+- **Automated Pipeline:** A Supabase Edge Function (`generate-market-alerts`), scheduled via `pg_cron`, autonomously fetches global mining RSS feeds and processes them using Google's `gemini-2.5-flash` LLM to structure critical geopolitical and supply chain alerts.
+- **Analyst Queue UI:** A dedicated dashboard for human analysts to review AI-generated `DRAFT` alerts. Analysts can seamlessly "Approve" (publish) or "Reject" (delete) drafts.
+- **Live Sidebar:** A right-hand sidebar on the Home Dashboard displaying only alerts with a `PUBLISHED` status.
+- **Human-in-the-Loop:** Strict Row Level Security (RLS) ensures that the public dashboard never displays unverified `DRAFT` alerts, guaranteeing human oversight over all AI-generated intelligence.
 
 ### 4.4 Global Layout (Hub-and-Spoke Navigation)
 - **Persistent Sidebar (The Hub):** A global left-hand sidebar containing navigation tabs (Dashboard, Minerals Index, Map, Alerts, Settings) to prevent users from getting lost in deep data.

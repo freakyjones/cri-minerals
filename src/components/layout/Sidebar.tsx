@@ -1,9 +1,10 @@
-import { LayoutDashboard, Map as MapIcon, ShieldAlert, Settings, X } from 'lucide-react';
+import { LayoutDashboard, Map as MapIcon, ShieldAlert, Settings, X, Inbox } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import MineralIndexAccordion from './MineralIndexAccordion';
 
 const navItems = [
   { name: 'Overview Dashboard', path: '/', icon: LayoutDashboard },
+  { name: 'Analyst Queue', path: '/analyst', icon: Inbox },
   { name: 'Minerals Index', path: '#', isAccordion: true },
   { name: 'Supply Chain Map', path: '#', icon: MapIcon, disabled: true },
   { name: 'ESG Watchlist', path: '#', icon: ShieldAlert, disabled: true },

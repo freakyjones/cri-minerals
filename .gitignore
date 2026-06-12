@@ -38,6 +38,10 @@ coverage/
 .vercel/
 .netlify/
 
+<<<<<<< HEAD
+# Playwright Test Reports
+=======
 # Playwright reports
+>>>>>>> origin/main
 playwright-report/
 test-results/
