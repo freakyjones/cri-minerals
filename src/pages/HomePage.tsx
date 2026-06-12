@@ -7,6 +7,7 @@ import MineralListMobile from '../features/minerals/components/MineralListMobile
 import MarketAlerts from '../features/minerals/components/MarketAlerts';
 import { useAccessibleVariants } from '../lib/useAccessibleVariants';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { ErrorState } from '../components/ui/ErrorState';
 
 const pageVariantsFull = {
   initial: { opacity: 0 },
@@ -24,7 +25,8 @@ export default function HomePage() {
     riskCounts,
     categories,
     activeRisk,
-    setActiveRisk
+    setActiveRisk,
+    refetch
   } = useMineralDashboard();
 
   const isMobile = useIsMobile();
@@ -33,16 +35,7 @@ export default function HomePage() {
   if (error) {
     return (
       <div className="min-h-screen p-8 flex items-center justify-center">
-        <div className="bg-red-900/20 border border-red-500/50 p-6 rounded-lg max-w-md text-center">
-          <h2 className="text-xl font-bold text-red-400 mb-2">Failed to load dashboard</h2>
-          <p className="text-slate-300">{error.message || 'An error occurred while fetching data.'}</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="mt-4 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded transition-colors"
-          >
-            Retry
-          </button>
-        </div>
+        <ErrorState error={error} onRetry={refetch} title="Failed to load dashboard" />
       </div>
     );
   }

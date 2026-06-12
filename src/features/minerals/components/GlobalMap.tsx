@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import { Mineral } from '../schema/mineralSchema';
@@ -31,27 +32,30 @@ export default function GlobalMap({ mineral }: GlobalMapProps) {
   const icon = createCustomIcon(mineral.color);
 
   // Combine reserves and production for mapping, filtering out non-specific locations
-  const mapPoints: Array<{ type: string; country: string; share: number; amount_mt?: number; lat: number; lng: number }> = [];
+  const mapPoints = useMemo(() => {
+    const points: Array<{ type: string; country: string; share: number; amount_mt?: number; lat: number; lng: number }> = [];
 
-  mineral.reserves.forEach(r => {
-    if (isValidMapLocation(r.country)) {
-      const [lat, lng] = getCoordinates(r.country);
-      if (lat !== 0 || lng !== 0) {
-        mapPoints.push({ type: 'Reserves', ...r, lat, lng });
+    mineral.reserves.forEach(r => {
+      if (isValidMapLocation(r.country)) {
+        const [lat, lng] = getCoordinates(r.country);
+        if (lat !== 0 || lng !== 0) {
+          points.push({ type: 'Reserves', ...r, lat, lng });
+        }
       }
-    }
-  });
+    });
 
-  mineral.production.forEach(p => {
-    if (isValidMapLocation(p.country)) {
-      const [lat, lng] = getCoordinates(p.country);
-      if (lat !== 0 || lng !== 0) {
-        // Slightly offset production markers if they overlap with reserves
-        mapPoints.push({ type: 'Production', ...p, lat: lat + 1, lng: lng + 1 });
+    mineral.production.forEach(p => {
+      if (isValidMapLocation(p.country)) {
+        const [lat, lng] = getCoordinates(p.country);
+        if (lat !== 0 || lng !== 0) {
+          // Slightly offset production markers if they overlap with reserves
+          points.push({ type: 'Production', ...p, lat: lat + 1, lng: lng + 1 });
+        }
       }
-    }
-  });
+    });
 
+    return points;
+  }, [mineral.reserves, mineral.production]);
   return (
     <Card className="col-span-1 lg:col-span-2 border-slate-800 bg-slate-900/50 backdrop-blur">
       <CardHeader>

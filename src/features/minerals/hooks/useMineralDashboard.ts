@@ -13,7 +13,7 @@ export const CATEGORIES = [
 ] as const;
 
 export function useMineralDashboard() {
-  const { minerals, loading, error } = useMinerals();
+  const { minerals, loading, error, refetch } = useMinerals();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const activeCategory = searchParams.get('category') || 'all';
@@ -70,6 +70,7 @@ export function useMineralDashboard() {
     setActiveRisk,
     filteredMinerals,
     riskCounts,
-    categories: CATEGORIES
+    categories: CATEGORIES,
+    refetch
   };
 }
