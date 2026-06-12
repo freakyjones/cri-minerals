@@ -207,3 +207,7 @@
 
 ### 12.2 Strict Scope Management
 - Agents are explicitly forbidden from adding new pages, charts, or features that contradict the defined scope in the PRD, unless a scope-change is formally requested by the user.
+
+### 12.3 Automated Documentation Updates
+- Whenever a database migration is created or a new feature is successfully implemented and tested, the agent **MUST** automatically update `.agents/prd.md` and `.agents/rules/project_rules.md` to reflect the new architecture, data contracts, and capabilities BEFORE declaring the task complete.
+- The user should **never** have to ask the agent to update the PRD or rules. It is an automated part of the Definition of Done.

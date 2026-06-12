@@ -42,7 +42,11 @@ The Critical Minerals Intelligence Dashboard is a strategic intelligence platfor
 > [!IMPORTANT]  
 > Reserves (in the ground) and Production (active mining) must **never** be conflated or merged. They must remain visually distinct on all dashboards.
 
-### 4.3 Global Layout (Hub-and-Spoke Navigation)
+### 4.3 Agentic Market Alerts (HITL)
+- **Live Sidebar:** A right-hand sidebar on the Dashboard displaying global market and geopolitical alerts.
+- **Human-in-the-Loop:** Alerts are fetched from a Supabase `market_alerts` table. The dashboard only displays alerts with a `PUBLISHED` status, ensuring AI-generated `DRAFT` alerts are reviewed by human analysts before appearing on the live dashboard.
+
+### 4.4 Global Layout (Hub-and-Spoke Navigation)
 - **Persistent Sidebar (The Hub):** A global left-hand sidebar containing navigation tabs (Dashboard, Minerals Index, Map, Alerts, Settings) to prevent users from getting lost in deep data.
 - **Global Topbar:** A sticky top navigation containing a universal Search Bar (to filter minerals or future entities), an Export utility, and Watchlist actions.
 - **Contextual Navigation (The Spokes):** 
@@ -66,6 +70,8 @@ The Critical Minerals Intelligence Dashboard is a strategic intelligence platfor
 
 ### 5.2 The Data Contract
 The UI fetches live data from a hosted Supabase PostgreSQL database. All incoming data must pass strict runtime validation using Zod.
+- **Minerals Data:** Minerals fetched from Supabase must validate against the Zod schema.
+- **Market Alerts:** The UI fetches from the `market_alerts` table and validates against `marketAlertSchema.ts`. Only `PUBLISHED` alerts are requested.
 - If data fails to parse, it must gracefully fail or be rejected rather than crashing the UI.
 - All numbers representing percentages must fall between `0` and `100`.
 - All color codes must be valid Hex strings.
