@@ -20,7 +20,7 @@ export default function MarketAlerts() {
   const { alerts, loading, error, refetch } = useMarketAlerts();
 
   return (
-    <div className="w-full lg:w-80 space-y-6 hidden lg:block">
+    <div className="w-full lg:w-80 space-y-6 hidden lg:block h-full">
       <div className="bg-bg-surface border border-white/10 rounded-xl p-6 shadow-glass h-full flex flex-col">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-bold text-white">Market Alerts</h3>
@@ -31,7 +31,7 @@ export default function MarketAlerts() {
           )}
         </div>
         
-        <div className="space-y-4 flex-1">
+        <div className="space-y-4 flex-1 overflow-y-auto custom-scrollbar pr-2">
           {loading ? (
             // Skeleton Loading State
             <>
