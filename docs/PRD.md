@@ -25,6 +25,17 @@ The Critical Minerals Intelligence Dashboard is a highly responsive, modern web 
 - **Testing:** Vitest
 
 ## 4. Architecture Updates (Latest)
+- **Authentication & Authorization:** 
+  - Integrated Supabase Auth utilizing Magic Links and OAuth. 
+  - Implemented Feature-Sliced Design pattern (`src/features/auth/`) to isolate Auth Context, UI pages, and Route Guards (`ProtectedRoute` / `GuestRoute`). 
+  - Created `public.profiles` table synced securely via Postgres triggers with Supabase `auth.users`, ensuring metadata resilience via `COALESCE` handling.
+- **UI Architecture & Layout:** 
+  - Transitioned to a dense "Bloomberg Terminal" three-pane architecture.
+  - Implemented a strict global `h-screen overflow-hidden` wrapper in `MainLayout.tsx` to completely eliminate global double-scrolling issues, moving `overflow-y-auto` logic strictly into isolated components.
+  - Resolved route-transition flash bugs by implementing "Nested Suspense Boundaries," isolating `MainLayout` outside the primary page-level Suspense trigger.
+- **Supply Chain Component Refactor:** 
+  - Refactored the massive `SupplyChainPage.tsx` into a streamlined orchestrator. 
+  - Extracted UI logic into `SupplyChainSidebar`, `SupplyChainMapArea`, and `SupplyChainAnalytics` to enforce separation of concerns and enable robust future iterations.
 - **Supabase Migration:** The application has migrated from local static JSON (`minerals.json`) to a live Supabase PostgreSQL backend. Data is fetched using foreign table joins to preserve a normalized structure.
 - **UI Polish:** 
   - Fixed an issue where the `RiskHeatmap` was removed from the DOM during data loading. It now uses a seamless loading skeleton.
@@ -34,5 +45,5 @@ The Critical Minerals Intelligence Dashboard is a highly responsive, modern web 
 ## 5. Security & Guardrails
 - **Dependency Pinning:** All dependencies in `package.json` are strictly pinned without carets (`^`) to mitigate supply chain attacks.
 - **Vercel Security Headers:** A `vercel.json` file applies strict HTTP security headers (`X-Frame-Options`, `X-Content-Type-Options`, `Strict-Transport-Security`, `Content-Security-Policy`).
-- **Content Security Policy (CSP):** Only allows connections to `self` and `https://*.supabase.co` to prevent unauthorized data exfiltration.
-- **Supabase RLS:** Database strictly prevents anonymous inserts/updates while allowing public read access.
+- **Content Security Policy (CSP):** CSP configured to safely permit `self`, Supabase API (`https://*.supabase.co`), external map tiles, and dynamically loaded external user avatars and web fonts, while aggressively blocking inline execution where possible.
+- **Supabase RLS:** Database strictly prevents anonymous inserts/updates while allowing public read access. Auth triggers operate under `security definer` context to manage profiles safely.
