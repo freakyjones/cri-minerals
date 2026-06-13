@@ -1,0 +1,37 @@
+[
+  {
+    "id": "malacca",
+    "name": "Strait of Malacca",
+    "lat": 4.0,
+    "lng": 100.0,
+    "description": "Crucial transit point for minerals moving from Australia/Africa to East Asian refineries."
+  },
+  {
+    "id": "suez",
+    "name": "Suez Canal",
+    "lat": 30.5852,
+    "lng": 32.3499,
+    "description": "Key route for European access to Asian and African critical mineral markets."
+  },
+  {
+    "id": "panama",
+    "name": "Panama Canal",
+    "lat": 9.1411,
+    "lng": -79.7621,
+    "description": "Connects South American lithium extraction to global processing hubs."
+  },
+  {
+    "id": "hormuz",
+    "name": "Strait of Hormuz",
+    "lat": 26.5667,
+    "lng": 56.25,
+    "description": "Major energy choke point, impacting the cost of energy-intensive mineral refining."
+  },
+  {
+    "id": "bab-el-mandeb",
+    "name": "Bab el-Mandeb",
+    "lat": 12.5833,
+    "lng": 43.3333,
+    "description": "Critical maritime chokepoint between the Red Sea and the Gulf of Aden."
+  }
+]

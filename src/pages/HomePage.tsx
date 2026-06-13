@@ -35,7 +35,7 @@ export default function HomePage() {
 
   if (error) {
     return (
-      <div className="min-h-screen p-8 flex items-center justify-center">
+      <div className="h-full w-full p-8 flex items-center justify-center">
         <ErrorState error={error} onRetry={refetch} title="Failed to load dashboard" />
       </div>
     );
@@ -45,28 +45,30 @@ export default function HomePage() {
     <>
     <SEO title="Overview Dashboard | CriMinerals" description="Monitoring 20 critical minerals across global supply chains, choke points, and geopolitical risks." />
     <motion.div 
-      className="min-h-screen p-8 md:p-12 max-w-7xl mx-auto"
+      className="h-full p-6 md:p-8 w-full flex flex-col overflow-y-auto custom-scrollbar"
       variants={pageVariants}
       initial="initial"
       animate="animate"
       exit="exit"
     >
-      <header className="mb-8">
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3 text-white">Critical Minerals Intelligence</h1>
-        <p className="text-lg text-slate-400">Monitoring 20 critical minerals across global supply chains, choke points, and geopolitical risks.</p>
-        <p className="text-xs text-slate-600 mt-4 uppercase tracking-widest">Data for illustrative purposes only. Sources: USGS, IEA, World Bank.</p>
+      <header className="mb-6 shrink-0">
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 text-white">Critical Minerals Intelligence</h1>
+        <p className="text-base text-slate-400">Monitoring 20 critical minerals across global supply chains, choke points, and geopolitical risks.</p>
+        <p className="text-[10px] text-slate-600 mt-2 uppercase tracking-widest">Data for illustrative purposes only. Sources: USGS, IEA, World Bank.</p>
       </header>
 
-      <RiskHeatmap 
-        riskCounts={riskCounts} 
-        activeRisk={activeRisk}
-        onRiskClick={setActiveRisk}
-        loading={loading}
-      />
+      <div className="shrink-0 mb-6">
+        <RiskHeatmap 
+          riskCounts={riskCounts} 
+          activeRisk={activeRisk}
+          onRiskClick={setActiveRisk}
+          loading={loading}
+        />
+      </div>
 
-      <div className="flex flex-col lg:flex-row gap-8">
-        <div className="flex-1">
-          <div className="mb-4">
+      <div className="flex-1 flex flex-col lg:flex-row gap-6">
+        <div className="flex-1 flex flex-col min-w-0">
+          <div className="mb-4 shrink-0">
             <div className="overflow-x-auto pb-2 md:pb-0 hide-scrollbar w-full">
               <CategoryFilter
                 categories={categories}
@@ -76,24 +78,28 @@ export default function HomePage() {
             </div>
           </div>
 
-          {loading ? (
-            <div className="h-96 bg-bg-surface rounded-card animate-pulse shadow-glass"></div>
-          ) : (
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              key={`${activeCategory}-${activeRisk}-${isMobile ? 'mobile' : 'desktop'}`}
-            >
-              {isMobile ? (
-                <MineralListMobile minerals={filteredMinerals} />
-              ) : (
-                <MineralTable minerals={filteredMinerals} />
-              )}
-            </motion.div>
-          )}
+          <div className="pb-8">
+            {loading ? (
+              <div className="h-96 bg-bg-surface rounded-card animate-pulse shadow-glass"></div>
+            ) : (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                key={`${activeCategory}-${activeRisk}-${isMobile ? 'mobile' : 'desktop'}`}
+              >
+                {isMobile ? (
+                  <MineralListMobile minerals={filteredMinerals} />
+                ) : (
+                  <MineralTable minerals={filteredMinerals} />
+                )}
+              </motion.div>
+            )}
+          </div>
         </div>
         
-        <MarketAlerts />
+        <div className="w-full lg:w-80 shrink-0 hidden lg:block pb-8">
+          <MarketAlerts />
+        </div>
       </div>
     </motion.div>
     </>
