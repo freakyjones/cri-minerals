@@ -29,6 +29,7 @@ The Critical Minerals Intelligence Dashboard is a highly responsive, modern web 
 - **UI Polish:** 
   - Fixed an issue where the `RiskHeatmap` was removed from the DOM during data loading. It now uses a seamless loading skeleton.
   - Global CSS scrollbars have been hidden (`-ms-overflow-style: none`, `::-webkit-scrollbar { display: none; }`) to provide a frictionless, native app aesthetic.
+- **Feature Deprecation:** Removed the interactive 3D Supply Chain Globe (`three.js`, `react-globe.gl`) and its corresponding route to streamline the application and reduce bundle size. The Supply Chain Map navigation link is now disabled.
 
 ## 5. Security & Guardrails
 - **Dependency Pinning:** All dependencies in `package.json` are strictly pinned without carets (`^`) to mitigate supply chain attacks.
