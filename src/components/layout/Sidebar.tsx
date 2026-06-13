@@ -6,7 +6,7 @@ const navItems = [
   { name: 'Overview Dashboard', path: '/', icon: LayoutDashboard },
   { name: 'Analyst Queue', path: '/analyst', icon: Inbox },
   { name: 'Minerals Index', path: '#', isAccordion: true },
-  { name: 'Supply Chain Map', path: '/supply-chain', icon: MapIcon },
+  { name: 'Supply Chain Map', path: '#', icon: MapIcon, disabled: true },
   { name: 'ESG Watchlist', path: '#', icon: ShieldAlert, disabled: true },
   { name: 'Settings', path: '#', icon: Settings, disabled: true },
 ];
@@ -23,7 +23,6 @@ export default function Sidebar({ isMobileMenuOpen, onClose }: SidebarProps) {
   const preloadRoute = (path: string) => {
     if (path === '/') import('../../pages/HomePage');
     if (path === '/analyst') import('../../pages/AnalystDashboard');
-    if (path === '/supply-chain') import('../../pages/SupplyChainPage');
   };
 
   return (
