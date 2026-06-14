@@ -71,7 +71,11 @@ function AppRoutes() {
               >
                 <Routes location={location}>
                   <Route path="/" element={<HomePage />} />
-                  <Route path="/analyst" element={<AnalystDashboard />} />
+                  <Route path="/analyst" element={
+                    <ProtectedRoute requireAdmin={true}>
+                      <AnalystDashboard />
+                    </ProtectedRoute>
+                  } />
                   <Route path="/mineral/:slug" element={<MineralPage />} />
                   <Route path="/supply-chain" element={<SupplyChainPage />} />
                 </Routes>

@@ -2,9 +2,13 @@ import { Navigate, useLocation } from 'react-router-dom';
 // eslint-disable-next-line no-restricted-imports
 import { useAuth } from '../../features/auth/contexts/AuthContext';
 
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+  requireAdmin?: boolean;
+}
 
-export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { session, isLoading } = useAuth();
+export default function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
+  const { session, role, isLoading } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
@@ -24,6 +28,11 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   if (!session) {
     // Redirect to login but save the attempted URL
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (requireAdmin && role !== 'admin') {
+    // Redirect non-admin users to the home dashboard
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
