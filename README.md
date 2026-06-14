@@ -8,6 +8,7 @@ A strategic intelligence platform designed for policymakers, supply chain manage
 - **Supply Chain Risk Scoring:** Visual badges mapping single points of failure.
 - **Geographic Visualizations:** Data charts highlighting country-by-country reserves vs. production.
 - **Data Guardrails:** Strict runtime validation using Zod to prevent data corruption.
+- **Role-Based Access Control:** Dual-tier user access (Admin vs Standard) natively integrated into Supabase Auth and synced via Postgres database triggers.
 - **Premium UI:** Built with Tailwind CSS, Framer Motion, and shadcn/ui for a highly responsive, modern dark-mode experience.
 
 ## Tech Stack

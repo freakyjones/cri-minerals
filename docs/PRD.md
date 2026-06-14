@@ -25,10 +25,11 @@ The Critical Minerals Intelligence Dashboard is a highly responsive, modern web 
 - **Testing:** Vitest
 
 ## 4. Architecture Updates (Latest)
-- **Authentication & Authorization:** 
-  - Integrated Supabase Auth utilizing Magic Links and OAuth. 
-  - Implemented Feature-Sliced Design pattern (`src/features/auth/`) to isolate Auth Context, UI pages, and Route Guards (`ProtectedRoute` / `GuestRoute`). 
-  - Created `public.profiles` table synced securely via Postgres triggers with Supabase `auth.users`, ensuring metadata resilience via `COALESCE` handling.
+- **Authentication, Authorization & RBAC:** 
+  - Integrated Supabase Auth utilizing Email/Password and OAuth (deprecated Magic Links).
+  - Implemented comprehensive Role-Based Access Control (RBAC) supporting `admin` and `user` tiers via PostgreSQL enums (`user_role`).
+  - Roles are fully protected against privilege escalation by database triggers (`ensure_profile_role_unchanged`) and synced into JWTs (`auth.users.raw_app_meta_data`) using synchronous Postgres triggers (`on_profile_role_change`) for instantaneous zero-latency frontend checks.
+  - Implemented strict route guards (`ProtectedRoute` / `GuestRoute`). The entire application strictly requires authentication, while specific interfaces (e.g. Analyst Dashboard / Analytics Queue) are hidden from standard users and accessible exclusively to administrators.
 - **UI Architecture & Layout:** 
   - Transitioned to a dense "Bloomberg Terminal" three-pane architecture.
   - Implemented a strict global `h-screen overflow-hidden` wrapper in `MainLayout.tsx` to completely eliminate global double-scrolling issues, moving `overflow-y-auto` logic strictly into isolated components.
@@ -46,4 +47,6 @@ The Critical Minerals Intelligence Dashboard is a highly responsive, modern web 
 - **Dependency Pinning:** All dependencies in `package.json` are strictly pinned without carets (`^`) to mitigate supply chain attacks.
 - **Vercel Security Headers:** A `vercel.json` file applies strict HTTP security headers (`X-Frame-Options`, `X-Content-Type-Options`, `Strict-Transport-Security`, `Content-Security-Policy`).
 - **Content Security Policy (CSP):** CSP configured to safely permit `self`, Supabase API (`https://*.supabase.co`), external map tiles, and dynamically loaded external user avatars and web fonts, while aggressively blocking inline execution where possible.
-- **Supabase RLS:** Database strictly prevents anonymous inserts/updates while allowing public read access. Auth triggers operate under `security definer` context to manage profiles safely.
+- **Supabase Row Level Security (RLS) & Triggers:** 
+  - Read access to standard app data tables remains public, but the application restricts access dynamically via route protection. Write/Delete actions (e.g. `market_alerts`) are completely locked down by Row-Level Security checks validating the user's role directly against `public.profiles`.
+  - Database strictly guards against user-tampering. Privilege escalation is blocked inherently by robust database triggers tracking `NEW` and `OLD` values. Triggers operate under `SECURITY DEFINER` context.

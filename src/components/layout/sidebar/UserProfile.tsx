@@ -1,9 +1,11 @@
 /* eslint-disable no-restricted-imports */
-import { LogOut } from 'lucide-react';
+import { LogOut, LogIn } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../features/auth/contexts/AuthContext';
 
 export default function UserProfile() {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   
   // Get initials from email or full_name
   const emailPrefix = user?.email?.split('@')[0] || '';
@@ -17,16 +19,29 @@ export default function UserProfile() {
         </div>
         <div className="flex-1 min-w-0 transition-opacity duration-300 md:opacity-0 md:group-hover:opacity-100 flex items-center justify-between gap-2 whitespace-nowrap">
           <div className="truncate">
-            <p className="text-sm font-medium text-white truncate">{user?.email || 'Guest'}</p>
-            <p className="text-[10px] text-slate-500 truncate uppercase tracking-wider">Enterprise Plan</p>
+            <p className="text-sm font-medium text-white truncate">{user?.email || 'Guest User'}</p>
+            <p className="text-[10px] text-slate-500 truncate uppercase tracking-wider">{user ? 'Enterprise Plan' : 'Public Access'}</p>
           </div>
-          <button 
-            onClick={() => signOut()}
-            className="text-slate-500 hover:text-white p-1 rounded transition-colors"
-            title="Sign Out"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
+          {user ? (
+            <button 
+              onClick={async () => {
+                await signOut();
+                navigate('/login');
+              }}
+              className="text-slate-500 hover:text-white p-1 rounded transition-colors"
+              title="Sign Out"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          ) : (
+            <button 
+              onClick={() => navigate('/login')}
+              className="text-slate-500 hover:text-white p-1 rounded transition-colors"
+              title="Sign In"
+            >
+              <LogIn className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
     </div>
