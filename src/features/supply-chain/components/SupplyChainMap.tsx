@@ -1,11 +1,15 @@
 import { useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
-import * as turf from '@turf/turf';
+import CustomZoomControls from './map/CustomZoomControls';
+import MapAutoFramer from './map/MapAutoFramer';
+import TradeRoutesLayer from './map/TradeRoutesLayer';
 import { Mineral } from '../../minerals/schema/mineralSchema';
 import { getCoordinates } from '../../../lib/coordinates';
 import chokePointsData from '../../../data/chokePoints.json';
+import { useSimulator } from '../../simulator/contexts/SimulatorContext';
+import { findMacroPath, smoothRawPath, getClosestMacroNode, MACRO_NODES } from '../utils/MacroGraph';
 
 const createCustomIcon = (color: string, isRefiner: boolean, share: number) => {
   const baseSize = isRefiner ? 28 : 18;
@@ -35,21 +39,25 @@ interface SupplyChainMapProps {
   mineral: Mineral | null;
   showTradeFlows?: boolean;
   showChokePoints?: boolean;
+  simulatedEvent?: { type: 'CHOKE_POINT' | 'ESG_BAN'; targetId: string } | null;
 }
 
-export default function SupplyChainMap({ mineral, showTradeFlows = true, showChokePoints = true }: SupplyChainMapProps) {
-  const { nodes, routes } = useMemo(() => {
-    if (!mineral || !mineral.production.length || !mineral.refining.length) return { nodes: [], routes: [] };
+export default function SupplyChainMap({ mineral, showTradeFlows = true, showChokePoints = true, simulatedEvent = null }: SupplyChainMapProps) {
+  const { state } = useSimulator();
+  const { activeScenario } = state;
+
+  const { nodes, routes, chokePointCoords } = useMemo(() => {
+    if (!mineral || !mineral.production.length || !mineral.refining.length) return { nodes: [], routes: [], chokePointCoords: null };
 
     const topRefiner = [...mineral.refining].sort((a, b) => b.share - a.share)[0];
     const destinationCoords = getCoordinates(topRefiner.country);
 
-    if (!destinationCoords) return { nodes: [], routes: [] };
+    if (!destinationCoords) return { nodes: [], routes: [], chokePointCoords: null };
 
-    const nodesData: Array<{key: string, coords: [number, number], isRefiner: boolean, country: string, share: number, color: string, icon: L.DivIcon}> = [];
-    const routesData: Array<{key: string, positions: [number, number][], color: string, weight: number}> = [];
+    const nodesData: Array<{key: string, coords: [number, number], isRefiner: boolean, country: string, share: number, color: string, icon: L.DivIcon, isDisrupted?: boolean}> = [];
+    const routesData: Array<{key: string, positions: [number, number][], color: string, weight: number, isDisrupted?: boolean}> = [];
 
-    // Refiner node
+    // Check if refiner is disrupted (not currently supported, but good for future)
     nodesData.push({
       key: `refiner-${topRefiner.country}`,
       coords: destinationCoords,
@@ -65,9 +73,20 @@ export default function SupplyChainMap({ mineral, showTradeFlows = true, showCho
       .slice(0, 10)
       .filter(p => p.country !== topRefiner.country);
 
+    // Choke point blocked polygon check (simple radius check)
+    let blockedChokePointCoords: [number, number] | null = null;
+    if (simulatedEvent?.type === 'CHOKE_POINT') {
+      const cp = chokePointsData.find(c => c.id === simulatedEvent.targetId);
+      if (cp) blockedChokePointCoords = [cp.lat, cp.lng];
+    }
+
+// ... (inside component)
+
     topProducers.forEach(producer => {
       const originCoords = getCoordinates(producer.country);
       if (!originCoords) return;
+
+      const isEsgBanned = simulatedEvent?.type === 'ESG_BAN' && simulatedEvent.targetId === producer.country;
 
       nodesData.push({
         key: `producer-${producer.country}`,
@@ -75,44 +94,82 @@ export default function SupplyChainMap({ mineral, showTradeFlows = true, showCho
         isRefiner: false,
         country: producer.country,
         share: producer.share,
-        color: mineral.color,
-        icon: createCustomIcon(mineral.color, false, producer.share)
+        color: isEsgBanned ? '#ef4444' : mineral.color,
+        icon: createCustomIcon(isEsgBanned ? '#ef4444' : mineral.color, false, producer.share),
+        isDisrupted: isEsgBanned
       });
 
-      // Fix Antimeridian Bug: add 360 to negative longitudes to force continuous drawing
-      const originLng = originCoords[1] < -30 ? originCoords[1] + 360 : originCoords[1];
-      const destLng = destinationCoords[1] < -30 ? destinationCoords[1] + 360 : destinationCoords[1];
-
-      // Turf uses [longitude, latitude]
-      const originPt = turf.point([originLng, originCoords[0]]);
-      const destPt = turf.point([destLng, destinationCoords[0]]);
+      // --- Macro-Declarative Waypoint Graph Logic ---
+      const startNodeId = getClosestMacroNode(originCoords[0], originCoords[1]);
+      const endNodeId = getClosestMacroNode(destinationCoords[0], destinationCoords[1]);
       
-      const line = turf.greatCircle(originPt, destPt, { properties: { name: 'route' }, npoints: 100 });
-      // Convert back to Leaflet's [latitude, longitude]
-      const positions = line.geometry.coordinates.map(coord => [coord[1], coord[0]] as [number, number]);
+      let isRouteDisrupted = isEsgBanned;
+      let isFrozen = false;
+      let routeColor = mineral.color;
+      const disabledNodes: string[] = [];
+
+      // DRC Freeze scenario check
+      if (activeScenario === 'DRC_FREEZE' && (producer.country.includes('Congo') || producer.country === 'DRC')) {
+        isFrozen = true;
+        routeColor = '#475569'; // Muted slate-600
+      } else if (isEsgBanned) {
+        routeColor = '#ef4444';
+      }
+
+      if (startNodeId && endNodeId) {
+        // If blockade is active, check if the normal route relies on the blocked node
+        if (activeScenario === 'MALACCA_BLOCKADE') {
+          const normalPath = findMacroPath(startNodeId, endNodeId, []);
+          if (normalPath.includes('Malacca')) {
+            isRouteDisrupted = true;
+            routeColor = '#ef4444';
+            disabledNodes.push('Malacca');
+          }
+        }
+      }
+
+      let positions: [number, number][] = [originCoords, destinationCoords];
+
+      if (startNodeId && endNodeId) {
+        const pathNodes = findMacroPath(startNodeId, endNodeId, disabledNodes);
+        if (pathNodes.length > 0) {
+          const rawCoords: [number, number][] = [
+            originCoords,
+            ...pathNodes.map((id: string) => [MACRO_NODES[id].lat, MACRO_NODES[id].lng] as [number, number]),
+            destinationCoords
+          ];
+          positions = smoothRawPath(rawCoords);
+        }
+      }
 
       routesData.push({
         key: `route-${producer.country}-${topRefiner.country}`,
         positions: positions,
-        color: mineral.color,
-        weight: Math.max(1, (producer.share / 100) * 8)
+        color: routeColor,
+        weight: Math.max(1, (producer.share / 100) * 8),
+        isDisrupted: isRouteDisrupted,
+        isFrozen: isFrozen
       });
     });
 
-    return { nodes: nodesData, routes: routesData };
-  }, [mineral]);
+    (window as any).__routes = routesData;
+    return { nodes: nodesData, routes: routesData, chokePointCoords: blockedChokePointCoords };
+  }, [mineral, simulatedEvent, activeScenario]);
 
   return (
     <div className="absolute inset-0 z-0 bg-slate-950">
       <MapContainer 
         center={[20, 0]} 
         zoom={2} 
-        scrollWheelZoom={false}
+        minZoom={2}
+        maxZoom={8}
         zoomControl={false}
+        scrollWheelZoom={true}
         attributionControl={false}
         className="w-full h-full bg-slate-950 z-0"
-        preferCanvas={true}
       >
+        <CustomZoomControls minZoom={2} maxZoom={8} />
+        <MapAutoFramer nodes={nodes} chokePointCoords={chokePointCoords} />
         <TileLayer
           url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
@@ -135,13 +192,7 @@ export default function SupplyChainMap({ mineral, showTradeFlows = true, showCho
         ))}
 
         {/* Trade Routes (Canvas Geodesic Arcs) */}
-        {showTradeFlows && routes.map(route => (
-          <Polyline 
-            key={route.key} 
-            positions={route.positions} 
-            pathOptions={{ color: route.color, weight: route.weight, opacity: 0.6, lineCap: 'round' }} 
-          />
-        ))}
+        <TradeRoutesLayer routes={routes} showTradeFlows={showTradeFlows} minZoomThreshold={2} />
 
         {/* Facilities (Clustered) */}
         <MarkerClusterGroup 

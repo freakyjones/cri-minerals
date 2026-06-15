@@ -48,14 +48,22 @@ The Critical Minerals Intelligence Dashboard is a strategic intelligence platfor
 - **Live Sidebar:** A right-hand sidebar on the Home Dashboard displaying only alerts with a `PUBLISHED` status.
 - **Human-in-the-Loop:** Strict Row Level Security (RLS) ensures that the public dashboard never displays unverified `DRAFT` alerts, guaranteeing human oversight over all AI-generated intelligence.
 
-### 4.4 Global Layout (Hub-and-Spoke Navigation)
+### 4.4 Supply Chain Map & What-If Simulator
+- **Interactive Global Map:** Visualizes extraction sources, refining hubs, and continuous trade flows.
+- **Macro-Declarative Waypoint Architecture:** The mapping engine relies on a pre-defined `MacroGraph` of global maritime choke points and open-water hubs. The routing algorithm dynamically snaps origin and destination points to these hubs, utilizing Dijkstra's algorithm to calculate and draw precise, perfectly-smoothed Bezier arcs that avoid landmass collisions without relying on external mapping APIs.
+- **What-If Simulator:** A dynamic control panel enabling users to simulate supply chain disruptions:
+  - **Choke Point Blockade:** Triggers dynamic geometric rerouting. When a primary chokepoint (e.g., Malacca Strait) is blocked, the engine instantly recalculates paths through predefined bypass routes (e.g., Sunda Strait/Southern Straits Bypass) and changes the route styling to a dashed red warning line.
+  - **DRC Cobalt Freeze:** Simulates a complete freeze of primary Cobalt extraction from the Democratic Republic of Congo. Visually "kills" the supply line by ghosting the primary flow (fading to a muted grey with low opacity), instantly representing the exact lost volume in the market.
+  - **ESG Violations:** Simulates export bans from specific producing countries, cascading visual warnings down the supply chain.
+
+### 4.5 Global Layout (Hub-and-Spoke Navigation)
 - **Persistent Sidebar (The Hub):** A global left-hand sidebar containing navigation tabs (Dashboard, Minerals Index, Map, Alerts, Settings) to prevent users from getting lost in deep data.
 - **Global Topbar:** A sticky top navigation containing a universal Search Bar (to filter minerals or future entities), an Export utility, and Watchlist actions.
 - **Contextual Navigation (The Spokes):** 
   - A Quick-Switch Dropdown on detail pages (e.g., "Cobalt ▾") to jump between entities.
   - A crisp `← Back to Dashboard` button with an explicitly visible `Esc` keyboard shortcut indicator.
 
-### 4.4 Actionable Data & Interactive Features
+### 4.6 Actionable Data & Interactive Features
 - **Clickable KPIs (Home):** The summary statistics strip must act as clickable filters (e.g., clicking "2 Critical Alerts" immediately filters the dashboard grid).
 - **Anchor Link Cards (Detail View):** The Summary Stats cards (Supply Risk, ESG Alerts) must act as quick-navigation anchor links, smooth-scrolling the user to the detailed sections below.
 

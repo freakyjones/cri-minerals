@@ -17,16 +17,20 @@ import { AuthProvider } from './features/auth/contexts/AuthContext';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import GuestRoute from './components/layout/GuestRoute';
 
+import { SimulatorProvider } from './features/simulator/contexts/SimulatorContext';
+
 function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <BrowserRouter>
-          <SearchProvider>
-            <AppRoutes />
-            <CommandPalette />
-          </SearchProvider>
-        </BrowserRouter>
+        <SimulatorProvider>
+          <BrowserRouter>
+            <SearchProvider>
+              <AppRoutes />
+              <CommandPalette />
+            </SearchProvider>
+          </BrowserRouter>
+        </SimulatorProvider>
       </AuthProvider>
     </ErrorBoundary>
   );

@@ -1,17 +1,20 @@
 import { MapIcon } from 'lucide-react';
 import { Mineral } from '../../minerals/schema/mineralSchema';
 import SupplyChainMap from './SupplyChainMap';
+import { SimulatedEvent } from './SupplyChainSimulator';
 
 interface SupplyChainMapAreaProps {
   selectedMineral: Mineral | null;
   showTradeFlows: boolean;
   showChokePoints: boolean;
+  simulatedEvent?: SimulatedEvent;
 }
 
 export default function SupplyChainMapArea({
   selectedMineral,
   showTradeFlows,
-  showChokePoints
+  showChokePoints,
+  simulatedEvent
 }: SupplyChainMapAreaProps) {
   return (
     <div className="flex-1 relative z-0 h-full">
@@ -19,6 +22,7 @@ export default function SupplyChainMapArea({
         mineral={selectedMineral} 
         showTradeFlows={showTradeFlows} 
         showChokePoints={showChokePoints} 
+        simulatedEvent={simulatedEvent}
       />
 
       {/* Map Overlays (z-10) */}
