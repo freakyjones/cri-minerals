@@ -1,4 +1,4 @@
-import { Activity, AlertTriangle, Ship, BatteryWarning } from 'lucide-react';
+import { Activity, Ship, BatteryWarning } from 'lucide-react';
 import { Mineral } from '../../minerals/schema/mineralSchema';
 import { useSimulator } from '../../simulator/contexts/SimulatorContext';
 

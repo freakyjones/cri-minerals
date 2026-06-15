@@ -55,7 +55,7 @@ export default function SupplyChainMap({ mineral, showTradeFlows = true, showCho
     if (!destinationCoords) return { nodes: [], routes: [], chokePointCoords: null };
 
     const nodesData: Array<{key: string, coords: [number, number], isRefiner: boolean, country: string, share: number, color: string, icon: L.DivIcon, isDisrupted?: boolean}> = [];
-    const routesData: Array<{key: string, positions: [number, number][], color: string, weight: number, isDisrupted?: boolean}> = [];
+    const routesData: Array<{key: string, positions: [number, number][], color: string, weight: number, isDisrupted?: boolean, isFrozen?: boolean}> = [];
 
     // Check if refiner is disrupted (not currently supported, but good for future)
     nodesData.push({
@@ -152,7 +152,6 @@ export default function SupplyChainMap({ mineral, showTradeFlows = true, showCho
       });
     });
 
-    (window as any).__routes = routesData;
     return { nodes: nodesData, routes: routesData, chokePointCoords: blockedChokePointCoords };
   }, [mineral, simulatedEvent, activeScenario]);
 
