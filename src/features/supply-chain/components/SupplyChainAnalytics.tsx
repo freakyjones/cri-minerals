@@ -1,14 +1,19 @@
 import { FileText, AlertTriangle, ArrowRightLeft } from 'lucide-react';
 import { Mineral } from '../../minerals/schema/mineralSchema';
+import SupplyChainSimulator, { SimulatedEvent } from './SupplyChainSimulator';
 
 interface SupplyChainAnalyticsProps {
   selectedMineral: Mineral | null;
   isMobile: boolean;
+  simulatedEvent: SimulatedEvent;
+  setSimulatedEvent: (event: SimulatedEvent) => void;
 }
 
 export default function SupplyChainAnalytics({
   selectedMineral,
-  isMobile
+  isMobile,
+  simulatedEvent,
+  setSimulatedEvent
 }: SupplyChainAnalyticsProps) {
   return (
     <div className={`w-full md:w-[360px] flex-shrink-0 border-l border-slate-800 bg-slate-950/80 z-20 flex flex-col md:h-full overflow-hidden transition-all duration-300 ${isMobile && selectedMineral ? 'h-[40vh]' : isMobile ? 'h-0 border-none' : 'h-auto'}`}>
@@ -75,6 +80,12 @@ export default function SupplyChainAnalytics({
                 </button>
               </div>
             </div>
+
+            <SupplyChainSimulator 
+              selectedMineral={selectedMineral} 
+              simulatedEvent={simulatedEvent} 
+              setSimulatedEvent={setSimulatedEvent} 
+            />
 
           </div>
         </>

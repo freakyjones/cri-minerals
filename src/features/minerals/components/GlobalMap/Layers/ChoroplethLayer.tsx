@@ -1,6 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState, useMemo } from 'react';
+ 
+import { useMemo } from 'react';
 import { GeoJSON } from 'react-leaflet';
+import { useQuery } from '@tanstack/react-query';
 import { Mineral } from '../../../schema/mineralSchema';
 import { MapLayerType } from '../index';
 
@@ -10,14 +11,15 @@ interface ChoroplethLayerProps {
 }
 
 export default function ChoroplethLayer({ mineral, activeLayer }: ChoroplethLayerProps) {
-  const [geoData, setGeoData] = useState<any>(null);
-
-  useEffect(() => {
-    fetch('/world.geojson')
-      .then(res => res.json())
-      .then(data => setGeoData(data))
-      .catch(err => console.error("Failed to load geojson", err));
-  }, []);
+  const { data: geoData } = useQuery({
+    queryKey: ['world-geojson'],
+    queryFn: async () => {
+      const res = await fetch('/world.geojson');
+      if (!res.ok) throw new Error('Failed to load geojson');
+      return res.json();
+    },
+    staleTime: Infinity,
+  });
 
   // Compute a map of country name -> numeric value for the active layer
   const countryValues = useMemo(() => {

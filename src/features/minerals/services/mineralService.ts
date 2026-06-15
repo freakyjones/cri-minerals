@@ -74,7 +74,8 @@ const MINERAL_LIST_SELECT_QUERY = `
   recycling_rate,
   recycling_sources,
   mineral_reserves(country, share, amount_mt),
-  mineral_production(country, share, amount_mt)
+  mineral_production(country, share, amount_mt),
+  mineral_refining(country, share)
 `;
 
 const MINERAL_DETAIL_SELECT_QUERY = `
