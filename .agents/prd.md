@@ -75,6 +75,7 @@ The Critical Minerals Intelligence Dashboard is a strategic intelligence platfor
 - **Framework:** React 19 + Vite
 - **Language:** TypeScript (Strict Mode)
 - **Styling:** Tailwind CSS (Dark mode default, no inline styles)
+- **State Management:** Zustand
 - **Animations:** Framer Motion (Must respect `prefers-reduced-motion`)
 - **Data Validation:** Zod
 

@@ -1,6 +1,9 @@
 import { Navigate, useLocation } from 'react-router-dom';
-// eslint-disable-next-line no-restricted-imports
-import { useAuth } from '../../features/auth/contexts/AuthContext';
+ 
+import { useAuthStore } from '../../stores/useAuthStore';
+
+
+
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -8,7 +11,7 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
-  const { session, role, isLoading } = useAuth();
+  const { session, role, isLoading } = useAuthStore();
   const location = useLocation();
 
   if (isLoading) {

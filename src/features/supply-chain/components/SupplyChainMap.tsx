@@ -8,7 +8,7 @@ import TradeRoutesLayer from './map/TradeRoutesLayer';
 import { Mineral } from '../../minerals/schema/mineralSchema';
 import { getCoordinates } from '../../../lib/coordinates';
 import chokePointsData from '../../../data/chokePoints.json';
-import { useSimulator } from '../../simulator/contexts/SimulatorContext';
+import { useSimulatorStore } from '../../../stores/useSimulatorStore';
 import { findMacroPath, smoothRawPath, getClosestMacroNode, MACRO_NODES } from '../utils/MacroGraph';
 
 const createCustomIcon = (color: string, isRefiner: boolean, share: number) => {
@@ -43,7 +43,7 @@ interface SupplyChainMapProps {
 }
 
 export default function SupplyChainMap({ mineral, showTradeFlows = true, showChokePoints = true, simulatedEvent = null }: SupplyChainMapProps) {
-  const { state } = useSimulator();
+  const { state } = useSimulatorStore();
   const { activeScenario } = state;
 
   const { nodes, routes, chokePointCoords } = useMemo(() => {

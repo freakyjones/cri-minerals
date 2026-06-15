@@ -4,8 +4,10 @@ import { lazy, Suspense } from 'react';
 import MainLayout from './components/layout/MainLayout';
 import ErrorBoundary from './components/ErrorBoundary';
 
-import { SearchProvider } from './context/SearchContext';
+
 import CommandPalette from './components/layout/CommandPalette';
+import { useEffect } from 'react';
+import { useAuthStore } from './stores/useAuthStore';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
 const MineralPage = lazy(() => import('./pages/MineralPage'));
@@ -13,25 +15,22 @@ const AnalystDashboard = lazy(() => import('./pages/AnalystDashboard'));
 const SupplyChainPage = lazy(() => import('./pages/SupplyChainPage'));
 const AuthPage = lazy(() => import('./features/auth/pages/AuthPage'));
 
-import { AuthProvider } from './features/auth/contexts/AuthContext';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import GuestRoute from './components/layout/GuestRoute';
 
-import { SimulatorProvider } from './features/simulator/contexts/SimulatorContext';
-
 function App() {
+  const { initializeAuth } = useAuthStore();
+  
+  useEffect(() => {
+    initializeAuth();
+  }, [initializeAuth]);
+
   return (
     <ErrorBoundary>
-      <AuthProvider>
-        <SimulatorProvider>
-          <BrowserRouter>
-            <SearchProvider>
-              <AppRoutes />
-              <CommandPalette />
-            </SearchProvider>
-          </BrowserRouter>
-        </SimulatorProvider>
-      </AuthProvider>
+      <BrowserRouter>
+        <AppRoutes />
+        <CommandPalette />
+      </BrowserRouter>
     </ErrorBoundary>
   );
 }
