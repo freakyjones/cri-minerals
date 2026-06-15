@@ -2,12 +2,12 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Command } from 'cmdk';
 import { Search } from 'lucide-react';
-import { useSearch } from '../../context/SearchContext';
+import { useSearchStore } from '../../stores/useSearchStore';
 import { useMinerals } from '@/features/minerals';
 
 export default function CommandPalette() {
-  const { isOpen, closeSearch, toggleSearch } = useSearch();
   const navigate = useNavigate();
+  const { isOpen, closeSearch, toggleSearch } = useSearchStore();
   const { minerals } = useMinerals();
 
   // Toggle the menu when ⌘K / Ctrl K is pressed

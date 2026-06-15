@@ -1,10 +1,10 @@
-/* eslint-disable no-restricted-imports */
+ 
 import { LogOut, LogIn } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../features/auth/contexts/AuthContext';
+import { useAuthStore } from '../../../stores/useAuthStore';
 
 export default function UserProfile() {
-  const { user, signOut } = useAuth();
+  const { user, signOut } = useAuthStore();
   const navigate = useNavigate();
   
   // Get initials from email or full_name

@@ -1,6 +1,6 @@
 import { Activity, Ship, BatteryWarning } from 'lucide-react';
 import { Mineral } from '../../minerals/schema/mineralSchema';
-import { useSimulator } from '../../simulator/contexts/SimulatorContext';
+import { useSimulatorStore } from '../../../stores/useSimulatorStore';
 
 export type SimulatedEvent = { type: 'CHOKE_POINT' | 'ESG_BAN'; targetId: string } | null;
 
@@ -13,7 +13,7 @@ interface SupplyChainSimulatorProps {
 export default function SupplyChainSimulator({
   selectedMineral
 }: SupplyChainSimulatorProps) {
-  const { state, setActiveScenario } = useSimulator();
+  const { state, setActiveScenario } = useSimulatorStore();
   const { activeScenario, globalModifiers } = state;
 
   return (

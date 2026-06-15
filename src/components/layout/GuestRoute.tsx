@@ -1,10 +1,10 @@
 import { Navigate, useLocation } from 'react-router-dom';
-// eslint-disable-next-line no-restricted-imports
-import { useAuth } from '../../features/auth/contexts/AuthContext';
+ 
+import { useAuthStore } from '../../stores/useAuthStore';
 import { Loader2 } from 'lucide-react';
 
 export default function GuestRoute({ children }: { children: React.ReactNode }) {
-  const { session, isLoading } = useAuth();
+  const { session, isLoading } = useAuthStore();
   const location = useLocation();
 
   if (isLoading) {

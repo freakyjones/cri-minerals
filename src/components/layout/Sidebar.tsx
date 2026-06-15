@@ -4,8 +4,8 @@ import MineralIndexAccordion from './MineralIndexAccordion';
 import NavItem from './sidebar/NavItem';
 import UserProfile from './sidebar/UserProfile';
 import { navItems, preloadRoute } from './sidebar/navigation.config';
-// eslint-disable-next-line no-restricted-imports
-import { useAuth } from '../../features/auth/contexts/AuthContext';
+ 
+import { useAuthStore } from '../../stores/useAuthStore';
 
 interface SidebarProps {
   isMobileMenuOpen?: boolean;
@@ -13,7 +13,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isMobileMenuOpen, onClose }: SidebarProps) {
-  const { role } = useAuth();
+  const { role } = useAuthStore();
   
   return (
     <>

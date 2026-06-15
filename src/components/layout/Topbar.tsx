@@ -1,12 +1,12 @@
 import { Search, Bell, Download, Menu } from 'lucide-react';
-import { useSearch } from '../../context/SearchContext';
+import { useSearchStore } from '../../stores/useSearchStore';
 
 interface TopbarProps {
   onMenuClick?: () => void;
 }
 
 export default function Topbar({ onMenuClick }: TopbarProps) {
-  const { openSearch } = useSearch();
+  const { openSearch } = useSearchStore();
 
   return (
     <header className="h-16 border-b border-white/10 bg-bg-base/95 backdrop-blur sticky top-0 z-40 flex items-center justify-between px-4 sm:px-6">
