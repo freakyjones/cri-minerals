@@ -69,6 +69,7 @@ export const SimulatorProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useSimulator = () => {
   const context = useContext(SimulatorContext);
   if (!context) throw new Error('useSimulator must be used within SimulatorProvider');
