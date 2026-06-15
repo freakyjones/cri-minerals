@@ -8,7 +8,7 @@ import TradeRoutesLayer from './map/TradeRoutesLayer';
 import { Mineral } from '../../minerals/schema/mineralSchema';
 import { getCoordinates } from '../../../lib/coordinates';
 import chokePointsData from '../../../data/chokePoints.json';
-import { useSimulator } from '../../simulator/contexts/SimulatorContext';
+import { useSimulatorStore } from '../../simulator/store/simulatorStore';
 import { findMacroPath, smoothRawPath, getClosestMacroNode, MACRO_NODES } from '../utils/MacroGraph';
 
 const createCustomIcon = (color: string, isRefiner: boolean, share: number) => {
@@ -39,12 +39,10 @@ interface SupplyChainMapProps {
   mineral: Mineral | null;
   showTradeFlows?: boolean;
   showChokePoints?: boolean;
-  simulatedEvent?: { type: 'CHOKE_POINT' | 'ESG_BAN'; targetId: string } | null;
 }
 
-export default function SupplyChainMap({ mineral, showTradeFlows = true, showChokePoints = true, simulatedEvent = null }: SupplyChainMapProps) {
-  const { state } = useSimulator();
-  const { activeScenario } = state;
+export default function SupplyChainMap({ mineral, showTradeFlows = true, showChokePoints = true }: SupplyChainMapProps) {
+  const activeScenario = useSimulatorStore((state) => state.activeScenario);
 
   const { nodes, routes, chokePointCoords } = useMemo(() => {
     if (!mineral || !mineral.production.length || !mineral.refining.length) return { nodes: [], routes: [], chokePointCoords: null };
@@ -73,10 +71,10 @@ export default function SupplyChainMap({ mineral, showTradeFlows = true, showCho
       .slice(0, 10)
       .filter(p => p.country !== topRefiner.country);
 
-    // Choke point blocked polygon check (simple radius check)
+    // Choke point blocked polygon check
     let blockedChokePointCoords: [number, number] | null = null;
-    if (simulatedEvent?.type === 'CHOKE_POINT') {
-      const cp = chokePointsData.find(c => c.id === simulatedEvent.targetId);
+    if (activeScenario === 'MALACCA_BLOCKADE') {
+      const cp = chokePointsData.find(c => c.id === 'Malacca');
       if (cp) blockedChokePointCoords = [cp.lat, cp.lng];
     }
 
@@ -86,24 +84,11 @@ export default function SupplyChainMap({ mineral, showTradeFlows = true, showCho
       const originCoords = getCoordinates(producer.country);
       if (!originCoords) return;
 
-      const isEsgBanned = simulatedEvent?.type === 'ESG_BAN' && simulatedEvent.targetId === producer.country;
-
-      nodesData.push({
-        key: `producer-${producer.country}`,
-        coords: originCoords,
-        isRefiner: false,
-        country: producer.country,
-        share: producer.share,
-        color: isEsgBanned ? '#ef4444' : mineral.color,
-        icon: createCustomIcon(isEsgBanned ? '#ef4444' : mineral.color, false, producer.share),
-        isDisrupted: isEsgBanned
-      });
-
       // --- Macro-Declarative Waypoint Graph Logic ---
       const startNodeId = getClosestMacroNode(originCoords[0], originCoords[1]);
       const endNodeId = getClosestMacroNode(destinationCoords[0], destinationCoords[1]);
       
-      let isRouteDisrupted = isEsgBanned;
+      let isRouteDisrupted = false;
       let isFrozen = false;
       let routeColor = mineral.color;
       const disabledNodes: string[] = [];
@@ -112,8 +97,6 @@ export default function SupplyChainMap({ mineral, showTradeFlows = true, showCho
       if (activeScenario === 'DRC_FREEZE' && (producer.country.includes('Congo') || producer.country === 'DRC')) {
         isFrozen = true;
         routeColor = '#475569'; // Muted slate-600
-      } else if (isEsgBanned) {
-        routeColor = '#ef4444';
       }
 
       if (startNodeId && endNodeId) {
@@ -122,11 +105,22 @@ export default function SupplyChainMap({ mineral, showTradeFlows = true, showCho
           const normalPath = findMacroPath(startNodeId, endNodeId, []);
           if (normalPath.includes('Malacca')) {
             isRouteDisrupted = true;
-            routeColor = '#ef4444';
+            routeColor = '#f59e0b'; // Amber bypass warning color
             disabledNodes.push('Malacca');
           }
         }
       }
+
+      nodesData.push({
+        key: `producer-${producer.country}`,
+        coords: originCoords,
+        isRefiner: false,
+        country: producer.country,
+        share: producer.share,
+        color: isFrozen ? '#475569' : mineral.color,
+        icon: createCustomIcon(isFrozen ? '#475569' : mineral.color, false, producer.share),
+        isDisrupted: false
+      });
 
       let positions: [number, number][] = [originCoords, destinationCoords];
 
@@ -153,7 +147,7 @@ export default function SupplyChainMap({ mineral, showTradeFlows = true, showCho
     });
 
     return { nodes: nodesData, routes: routesData, chokePointCoords: blockedChokePointCoords };
-  }, [mineral, simulatedEvent, activeScenario]);
+  }, [mineral, activeScenario]);
 
   return (
     <div className="absolute inset-0 z-0 bg-slate-950">

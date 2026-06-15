@@ -11,7 +11,6 @@ import { useIsMobile } from '../hooks/useIsMobile';
 import SupplyChainSidebar from '../features/supply-chain/components/SupplyChainSidebar';
 import SupplyChainMapArea from '../features/supply-chain/components/SupplyChainMapArea';
 import SupplyChainAnalytics from '../features/supply-chain/components/SupplyChainAnalytics';
-import { SimulatedEvent } from '../features/supply-chain/components/SupplyChainSimulator';
 
 const pageVariantsFull = {
   initial: { opacity: 0 },
@@ -28,8 +27,7 @@ export default function SupplyChainPage() {
   const [showTradeFlows, setShowTradeFlows] = useState(true);
   const [showChokePoints, setShowChokePoints] = useState(true);
   
-  // Simulator State
-  const [simulatedEvent, setSimulatedEvent] = useState<SimulatedEvent>(null);
+
 
   const pageVariants = useAccessibleVariants(pageVariantsFull);
 
@@ -67,14 +65,11 @@ export default function SupplyChainPage() {
           selectedMineral={selectedMineral}
           showTradeFlows={showTradeFlows}
           showChokePoints={showChokePoints}
-          simulatedEvent={simulatedEvent}
         />
 
         <SupplyChainAnalytics 
           selectedMineral={selectedMineral}
           isMobile={isMobile}
-          simulatedEvent={simulatedEvent}
-          setSimulatedEvent={setSimulatedEvent}
         />
       </motion.div>
     </>

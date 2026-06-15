@@ -2,38 +2,50 @@ export interface MacroNode {
   id: string;
   lat: number;
   lng: number;
+  isPort: boolean;
+}
+
+function getHaversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Earth radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
 }
 
 export const MACRO_NODES: Record<string, MacroNode> = {
   // Ports / Coastal Hubs
-  Peru_Coast: { id: 'Peru_Coast', lat: -12.0, lng: -77.0 },
-  Chile_Coast: { id: 'Chile_Coast', lat: -33.0, lng: -71.6 },
-  DRC_Coast: { id: 'DRC_Coast', lat: -4.0, lng: 39.6 }, // Optimized north-east angle to clear Madagascar/Somalia
-  China_Coast: { id: 'China_Coast', lat: 31.2, lng: 121.5 },
-  Europe_Port: { id: 'Europe_Port', lat: 51.9, lng: 4.4 }, // Rotterdam
-  US_West: { id: 'US_West', lat: 33.7, lng: -118.2 }, // LA
-  Australia_Coast: { id: 'Australia_Coast', lat: -18.0, lng: 116.0 }, // Clear deep water north-west of Port Hedland
-  Indonesia_Coast: { id: 'Indonesia_Coast', lat: -0.8, lng: 113.9 },
+  Peru_Coast: { id: 'Peru_Coast', lat: -12.0, lng: -77.0, isPort: true },
+  Chile_Coast: { id: 'Chile_Coast', lat: -33.0, lng: -71.6, isPort: true },
+  DRC_Coast: { id: 'DRC_Coast', lat: -4.0, lng: 39.6, isPort: true }, 
+  China_Coast: { id: 'China_Coast', lat: 31.2, lng: 121.5, isPort: true },
+  Europe_Port: { id: 'Europe_Port', lat: 51.9, lng: 4.4, isPort: true }, 
+  US_West: { id: 'US_West', lat: 33.7, lng: -118.2, isPort: true }, 
+  Australia_Coast: { id: 'Australia_Coast', lat: -18.0, lng: 116.0, isPort: true }, 
+  Indonesia_Coast: { id: 'Indonesia_Coast', lat: -0.8, lng: 113.9, isPort: true },
 
   // Chokepoints
-  Panama: { id: 'Panama', lat: 9.1, lng: -79.6 },
-  Suez: { id: 'Suez', lat: 29.9, lng: 32.5 },
-  Cape_of_Good_Hope: { id: 'Cape_of_Good_Hope', lat: -35.3, lng: 20.0 },
-  Malacca: { id: 'Malacca', lat: 2.5, lng: 101.5 }, // Aligned to the true center of the Malacca Strait waterway
+  Panama: { id: 'Panama', lat: 9.1, lng: -79.6, isPort: false },
+  Suez: { id: 'Suez', lat: 29.9, lng: 32.5, isPort: false },
+  Cape_of_Good_Hope: { id: 'Cape_of_Good_Hope', lat: -35.3, lng: 20.0, isPort: false },
+  Malacca: { id: 'Malacca', lat: 2.5, lng: 101.5, isPort: false }, 
 
   // Transit Hubs (Open Ocean Intersections)
-  Sri_Lanka_Open_Water: { id: 'Sri_Lanka_Open_Water', lat: 5.0, lng: 80.0 },
-  South_Indian_Ocean: { id: 'South_Indian_Ocean', lat: -30.0, lng: 80.0 },
-  South_Australia: { id: 'South_Australia', lat: -45.0, lng: 130.0 },
-  Southern_Straits_Bypass: { id: 'Southern_Straits_Bypass', lat: -7.5, lng: 105.0 }, // Aligned for clean Sunda Strait entry
-  Java_Sea: { id: 'Java_Sea', lat: -1.0, lng: 108.0 },
-  Makassar_Strait: { id: 'Makassar_Strait', lat: 0.0, lng: 118.5 },
-  South_China_Sea: { id: 'South_China_Sea', lat: 15.0, lng: 115.0 },
-  Pacific_South: { id: 'Pacific_South', lat: -30.0, lng: -100.0 },
-  Pacific_Mid: { id: 'Pacific_Mid', lat: 0.0, lng: -150.0 },
-  Pacific_West: { id: 'Pacific_West', lat: 10.0, lng: 140.0 },
-  Atlantic_Mid: { id: 'Atlantic_Mid', lat: 0.0, lng: -30.0 },
-  Mediterranean: { id: 'Mediterranean', lat: 35.0, lng: 18.0 }
+  Sri_Lanka_Open_Water: { id: 'Sri_Lanka_Open_Water', lat: 5.0, lng: 80.0, isPort: false },
+  South_Indian_Ocean: { id: 'South_Indian_Ocean', lat: -30.0, lng: 80.0, isPort: false },
+  South_Australia: { id: 'South_Australia', lat: -45.0, lng: 130.0, isPort: false },
+  Southern_Straits_Bypass: { id: 'Southern_Straits_Bypass', lat: -7.5, lng: 105.0, isPort: false }, 
+  Java_Sea: { id: 'Java_Sea', lat: -1.0, lng: 108.0, isPort: false },
+  Makassar_Strait: { id: 'Makassar_Strait', lat: 0.0, lng: 118.5, isPort: false },
+  South_China_Sea: { id: 'South_China_Sea', lat: 15.0, lng: 115.0, isPort: false },
+  Pacific_South: { id: 'Pacific_South', lat: -30.0, lng: -100.0, isPort: false },
+  Pacific_Mid: { id: 'Pacific_Mid', lat: 0.0, lng: -150.0, isPort: false },
+  Pacific_West: { id: 'Pacific_West', lat: 10.0, lng: 140.0, isPort: false },
+  Atlantic_Mid: { id: 'Atlantic_Mid', lat: 0.0, lng: -30.0, isPort: false },
+  Mediterranean: { id: 'Mediterranean', lat: 35.0, lng: 18.0, isPort: false }
 };
 
 // Define bi-directional edges with distances
@@ -49,8 +61,8 @@ function addEdge(n1: string, n2: string) {
   const node2 = MACRO_NODES[n2];
   if (!node1 || !node2) return;
   
-  // Approximate distance
-  const dist = Math.sqrt(Math.pow(node1.lat - node2.lat, 2) + Math.pow(node1.lng - node2.lng, 2));
+  // Accurate distance using Haversine
+  const dist = getHaversineDistance(node1.lat, node1.lng, node2.lat, node2.lng);
   
   if (!edges[n1]) edges[n1] = [];
   if (!edges[n2]) edges[n2] = [];
@@ -168,7 +180,12 @@ export function smoothRawPath(rawCoords: [number, number][]): [number, number][]
   const points: [number, number][] = [];
   for (let i = 0; i < rawCoords.length - 1; i++) {
     const p1 = rawCoords[i];
-    const p2 = rawCoords[i+1];
+    const p2 = [...rawCoords[i+1]];
+    
+    // Dateline wrap handling
+    if (Math.abs(p2[1] - p1[1]) > 180) {
+      p2[1] += p1[1] > p2[1] ? 360 : -360;
+    }
     
     const midLat = (p1[0] + p2[0]) / 2;
     const midLng = (p1[1] + p2[1]) / 2;
@@ -179,7 +196,10 @@ export function smoothRawPath(rawCoords: [number, number][]): [number, number][]
     for (let j = 0; j <= segments; j++) {
       const t = j / segments;
       const lat = (1 - t) * (1 - t) * p1[0] + 2 * (1 - t) * t * cpLat + t * t * p2[0];
-      const lng = (1 - t) * (1 - t) * p1[1] + 2 * (1 - t) * t * cpLng + t * t * p2[1];
+      let lng = (1 - t) * (1 - t) * p1[1] + 2 * (1 - t) * t * cpLng + t * t * p2[1];
+      // Normalize lng back to -180 to 180
+      if (lng > 180) lng -= 360;
+      if (lng < -180) lng += 360;
       points.push([lat, lng]);
     }
   }
@@ -193,12 +213,9 @@ export function getClosestMacroNode(lat: number, lng: number, allowedNodes?: str
 
   Object.values(MACRO_NODES).forEach(node => {
     if (allowedNodes && !allowedNodes.includes(node.id)) return;
+    if (!allowedNodes && !node.isPort) return; // Only snap to ports by default!
     
-    // Normalize longitude difference to handle international date line if needed
-    let lngDiff = Math.abs(node.lng - lng);
-    if (lngDiff > 180) lngDiff = 360 - lngDiff;
-    
-    const dist = Math.sqrt(Math.pow(node.lat - lat, 2) + Math.pow(lngDiff, 2));
+    const dist = getHaversineDistance(lat, lng, node.lat, node.lng);
     if (dist < minDistance) {
       minDistance = dist;
       closestId = node.id;
