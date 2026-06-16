@@ -149,6 +149,8 @@ ${newsText}`;
     // 5. Send Email via Resend
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
     const emailTo = Deno.env.get('EMAIL_TO');
+    
+    let emailStatus = "Not attempted (missing API key or email)";
 
     if (resendApiKey && emailTo) {
       try {
@@ -173,16 +175,23 @@ ${newsText}`;
         if (!resendRes.ok) {
           const resendErr = await resendRes.text();
           console.error("Resend API error:", resendErr);
+          emailStatus = `Failed: HTTP ${resendRes.status} - ${resendErr}`;
         } else {
           console.log("Email sent successfully via Resend.");
+          emailStatus = "Success";
         }
       } catch (e) {
         console.error("Error sending email:", e);
+        emailStatus = `Exception: ${e.message}`;
       }
     }
 
     return new Response(
-      JSON.stringify({ message: `Successfully inserted ${alerts.length} draft alerts`, alerts }),
+      JSON.stringify({ 
+        message: `Successfully inserted ${alerts.length} draft alerts`, 
+        alerts,
+        email_status: emailStatus
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
