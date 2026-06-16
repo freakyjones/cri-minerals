@@ -3,7 +3,7 @@ import { Mineral } from '../../minerals/schema/mineralSchema';
 import { getCoordinates } from '../../../lib/coordinates';
 import chokePointsData from '../../../data/chokePoints.json';
 import { findMacroPath, smoothRawPath, getClosestMacroNode, MACRO_NODES } from '../utils/MacroGraph';
-import { getCountryComplianceStatus, ComplianceStatus, getCountryComplianceTags } from '../utils/countryCompliance';
+import { useComplianceStore, ComplianceStatus } from '../../../stores/useComplianceStore';
 import { SimulatedEvent } from '../components/SupplyChainSimulator';
 
 export const useSupplyChainGraph = (
@@ -12,6 +12,10 @@ export const useSupplyChainGraph = (
   simulatedEvent: SimulatedEvent,
   activeScenario: string
 ) => {
+  const countries = useComplianceStore(state => state.countries);
+  const getStatus = useComplianceStore(state => state.getStatus);
+  const getTags = useComplianceStore(state => state.getTags);
+
   return useMemo(() => {
     if (!mineral || !mineral.production.length || !mineral.refining.length) {
       return { nodes: [], routes: [], chokePointCoords: null };
@@ -45,13 +49,13 @@ export const useSupplyChainGraph = (
     // Compliance color helper
     const getComplianceColor = (country: string, defaultColor: string) => {
       if (!showCompliance) return defaultColor;
-      const status = getCountryComplianceStatus(country);
+      const status = getStatus(country);
       if (status === 'FEOC') return '#ef4444'; // Red
       if (status === 'FTA') return '#10b981'; // Green
       return '#94a3b8'; // Neutral gray
     };
 
-    const refinerStatus = showCompliance ? getCountryComplianceStatus(topRefiner.country) : 'NEUTRAL';
+    const refinerStatus = showCompliance ? getStatus(topRefiner.country) : 'NEUTRAL';
     const refinerColor = getComplianceColor(topRefiner.country, mineral.color);
 
     nodesData.push({
@@ -62,7 +66,7 @@ export const useSupplyChainGraph = (
       share: topRefiner.share,
       baseColor: refinerColor,
       complianceStatus: refinerStatus,
-      complianceTags: showCompliance ? getCountryComplianceTags(topRefiner.country) : []
+      complianceTags: showCompliance ? getTags(topRefiner.country) : []
     });
 
     const topProducers = [...mineral.production]
@@ -81,7 +85,7 @@ export const useSupplyChainGraph = (
       if (!originCoords) return;
 
       const isEsgBanned = simulatedEvent?.type === 'ESG_BAN' && simulatedEvent.targetId === producer.country;
-      const producerStatus = showCompliance ? getCountryComplianceStatus(producer.country) : 'NEUTRAL';
+      const producerStatus = showCompliance ? getStatus(producer.country) : 'NEUTRAL';
       const producerColor = getComplianceColor(producer.country, mineral.color);
       const finalColor = isEsgBanned ? '#ef4444' : producerColor;
 
@@ -93,7 +97,7 @@ export const useSupplyChainGraph = (
         share: producer.share,
         baseColor: finalColor,
         complianceStatus: producerStatus,
-        complianceTags: showCompliance ? getCountryComplianceTags(producer.country) : [],
+        complianceTags: showCompliance ? getTags(producer.country) : [],
         isDisrupted: isEsgBanned
       });
 
@@ -146,5 +150,6 @@ export const useSupplyChainGraph = (
     });
 
     return { nodes: nodesData, routes: routesData, chokePointCoords: blockedChokePointCoords };
-  }, [mineral, simulatedEvent, activeScenario, showCompliance]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mineral, simulatedEvent, activeScenario, showCompliance, countries, getStatus, getTags]);
 };

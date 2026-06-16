@@ -1,5 +1,5 @@
 import { AlertCircle, FileSearch, ShieldAlert } from 'lucide-react';
-import { getCountryComplianceTags, getCountryComplianceStatus } from '../../supply-chain/utils/countryCompliance';
+import { useComplianceStore } from '../../../stores/useComplianceStore';
 
 interface Props {
   country: string;
@@ -7,8 +7,10 @@ interface Props {
 }
 
 export default function CountryRiskProfile({ country, activeTag }: Props) {
-  const status = getCountryComplianceStatus(country);
-  const tags = getCountryComplianceTags(country);
+  const getStatus = useComplianceStore(state => state.getStatus);
+  const getTags = useComplianceStore(state => state.getTags);
+  const status = getStatus(country);
+  const tags = getTags(country);
 
   return (
     <div className="bg-slate-900/50 rounded-xl p-6 border border-white/10 shadow-glass flex flex-col h-full">
