@@ -146,6 +146,41 @@ ${newsText}`;
       throw new Error(`DB Insert Error: ${insertError.message}`);
     }
 
+    // 5. Send Email via Resend
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
+    const emailTo = Deno.env.get('EMAIL_TO');
+
+    if (resendApiKey && emailTo) {
+      try {
+        const emailHtml = alerts.map((a: { title: string; description: string; severity: string }) => 
+          `<p><strong>${a.title}</strong> [${a.severity}]<br/>${a.description}</p>`
+        ).join('<hr/>');
+
+        const resendRes = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${resendApiKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            from: 'Market Alerts <onboarding@resend.dev>',
+            to: emailTo,
+            subject: `Daily Critical Minerals Alerts (${alerts.length})`,
+            html: `<h2>Today's Market Alerts</h2>${emailHtml}`
+          })
+        });
+
+        if (!resendRes.ok) {
+          const resendErr = await resendRes.text();
+          console.error("Resend API error:", resendErr);
+        } else {
+          console.log("Email sent successfully via Resend.");
+        }
+      } catch (e) {
+        console.error("Error sending email:", e);
+      }
+    }
+
     return new Response(
       JSON.stringify({ message: `Successfully inserted ${alerts.length} draft alerts`, alerts }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
