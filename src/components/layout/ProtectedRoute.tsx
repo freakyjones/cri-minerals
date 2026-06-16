@@ -14,6 +14,12 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
   const { session, role, isLoading } = useAuthStore();
   const location = useLocation();
 
+  const isE2E = import.meta.env.VITE_E2E_BYPASS_AUTH === 'true';
+
+  if (isE2E) {
+    return <>{children}</>;
+  }
+
   if (isLoading) {
     // App Shell Loading State to prevent FOUC
     return (

@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
@@ -6,21 +7,36 @@ import CustomZoomControls from './map/CustomZoomControls';
 import MapAutoFramer from './map/MapAutoFramer';
 import TradeRoutesLayer from './map/TradeRoutesLayer';
 import { Mineral } from '../../minerals/schema/mineralSchema';
-import { getCoordinates } from '../../../lib/coordinates';
 import chokePointsData from '../../../data/chokePoints.json';
 import { useSimulatorStore } from '../../../stores/useSimulatorStore';
-import { findMacroPath, smoothRawPath, getClosestMacroNode, MACRO_NODES } from '../utils/MacroGraph';
+import { useSupplyChainGraph } from '../hooks/useSupplyChainGraph';
+import { SimulatedEvent } from './SupplyChainSimulator';
 
-const createCustomIcon = (color: string, isRefiner: boolean, share: number) => {
+const createCustomIcon = (color: string, isRefiner: boolean, share: number, complianceStatus: string = 'NEUTRAL') => {
   const baseSize = isRefiner ? 28 : 18;
   const sizeAddition = (share / 100) * 20; 
   const finalSize = Math.round(baseSize + sizeAddition);
   const anchor = Math.round(finalSize / 2);
 
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${isRefiner ? 'transparent' : color}" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-hexagon"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>`;
+  let svg;
+  if (complianceStatus === 'FEOC') {
+    svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${isRefiner ? 'transparent' : color}" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-triangle"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+  } else if (complianceStatus === 'FTA') {
+    svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${isRefiner ? 'transparent' : color}" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle-2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>`;
+  } else {
+    svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${isRefiner ? 'transparent' : color}" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-hexagon"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>`;
+  }
+
+  let className = 'custom-leaflet-icon';
+  if (complianceStatus === 'FEOC') {
+    className += ' animate-pulse drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]';
+  } else if (complianceStatus === 'FTA') {
+    className += ' drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]';
+  }
+
   return L.divIcon({
     html: svg,
-    className: 'custom-leaflet-icon',
+    className,
     iconSize: [finalSize, finalSize],
     iconAnchor: [anchor, anchor],
     popupAnchor: [0, -anchor],
@@ -39,121 +55,32 @@ interface SupplyChainMapProps {
   mineral: Mineral | null;
   showTradeFlows?: boolean;
   showChokePoints?: boolean;
-  simulatedEvent?: { type: 'CHOKE_POINT' | 'ESG_BAN'; targetId: string } | null;
+  showCompliance?: boolean;
+  simulatedEvent?: SimulatedEvent;
 }
 
-export default function SupplyChainMap({ mineral, showTradeFlows = true, showChokePoints = true, simulatedEvent = null }: SupplyChainMapProps) {
+export default function SupplyChainMap({ 
+  mineral, 
+  showTradeFlows = true, 
+  showChokePoints = true, 
+  showCompliance = false,
+  simulatedEvent = null 
+}: SupplyChainMapProps) {
   const { state } = useSimulatorStore();
   const { activeScenario } = state;
 
-  const { nodes, routes, chokePointCoords } = useMemo(() => {
-    if (!mineral || !mineral.production.length || !mineral.refining.length) return { nodes: [], routes: [], chokePointCoords: null };
+  // Use the decoupled Scenario Engine hook
+  const rawGraph = useSupplyChainGraph(mineral, showCompliance, simulatedEvent || null, activeScenario);
 
-    const topRefiner = [...mineral.refining].sort((a, b) => b.share - a.share)[0];
-    const destinationCoords = getCoordinates(topRefiner.country);
+  // Map pure data nodes to UI icons
+  const nodes = useMemo(() => {
+    return rawGraph.nodes.map(node => ({
+      ...node,
+      icon: createCustomIcon(node.baseColor, node.isRefiner, node.share, node.complianceStatus)
+    }));
+  }, [rawGraph.nodes]);
 
-    if (!destinationCoords) return { nodes: [], routes: [], chokePointCoords: null };
-
-    const nodesData: Array<{key: string, coords: [number, number], isRefiner: boolean, country: string, share: number, color: string, icon: L.DivIcon, isDisrupted?: boolean}> = [];
-    const routesData: Array<{key: string, positions: [number, number][], color: string, weight: number, isDisrupted?: boolean, isFrozen?: boolean}> = [];
-
-    // Check if refiner is disrupted (not currently supported, but good for future)
-    nodesData.push({
-      key: `refiner-${topRefiner.country}`,
-      coords: destinationCoords,
-      isRefiner: true,
-      country: topRefiner.country,
-      share: topRefiner.share,
-      color: mineral.color,
-      icon: createCustomIcon(mineral.color, true, topRefiner.share)
-    });
-
-    const topProducers = [...mineral.production]
-      .sort((a, b) => b.share - a.share)
-      .slice(0, 10)
-      .filter(p => p.country !== topRefiner.country);
-
-    // Choke point blocked polygon check (simple radius check)
-    let blockedChokePointCoords: [number, number] | null = null;
-    if (simulatedEvent?.type === 'CHOKE_POINT') {
-      const cp = chokePointsData.find(c => c.id === simulatedEvent.targetId);
-      if (cp) blockedChokePointCoords = [cp.lat, cp.lng];
-    }
-
-// ... (inside component)
-
-    topProducers.forEach(producer => {
-      const originCoords = getCoordinates(producer.country);
-      if (!originCoords) return;
-
-      const isEsgBanned = simulatedEvent?.type === 'ESG_BAN' && simulatedEvent.targetId === producer.country;
-
-      nodesData.push({
-        key: `producer-${producer.country}`,
-        coords: originCoords,
-        isRefiner: false,
-        country: producer.country,
-        share: producer.share,
-        color: isEsgBanned ? '#ef4444' : mineral.color,
-        icon: createCustomIcon(isEsgBanned ? '#ef4444' : mineral.color, false, producer.share),
-        isDisrupted: isEsgBanned
-      });
-
-      // --- Macro-Declarative Waypoint Graph Logic ---
-      const startNodeId = getClosestMacroNode(originCoords[0], originCoords[1]);
-      const endNodeId = getClosestMacroNode(destinationCoords[0], destinationCoords[1]);
-      
-      let isRouteDisrupted = isEsgBanned;
-      let isFrozen = false;
-      let routeColor = mineral.color;
-      const disabledNodes: string[] = [];
-
-      // DRC Freeze scenario check
-      if (activeScenario === 'DRC_FREEZE' && (producer.country.includes('Congo') || producer.country === 'DRC')) {
-        isFrozen = true;
-        routeColor = '#475569'; // Muted slate-600
-      } else if (isEsgBanned) {
-        routeColor = '#ef4444';
-      }
-
-      if (startNodeId && endNodeId) {
-        // If blockade is active, check if the normal route relies on the blocked node
-        if (activeScenario === 'MALACCA_BLOCKADE') {
-          const normalPath = findMacroPath(startNodeId, endNodeId, []);
-          if (normalPath.includes('Malacca')) {
-            isRouteDisrupted = true;
-            routeColor = '#ef4444';
-            disabledNodes.push('Malacca');
-          }
-        }
-      }
-
-      let positions: [number, number][] = [originCoords, destinationCoords];
-
-      if (startNodeId && endNodeId) {
-        const pathNodes = findMacroPath(startNodeId, endNodeId, disabledNodes);
-        if (pathNodes.length > 0) {
-          const rawCoords: [number, number][] = [
-            originCoords,
-            ...pathNodes.map((id: string) => [MACRO_NODES[id].lat, MACRO_NODES[id].lng] as [number, number]),
-            destinationCoords
-          ];
-          positions = smoothRawPath(rawCoords);
-        }
-      }
-
-      routesData.push({
-        key: `route-${producer.country}-${topRefiner.country}`,
-        positions: positions,
-        color: routeColor,
-        weight: Math.max(1, (producer.share / 100) * 8),
-        isDisrupted: isRouteDisrupted,
-        isFrozen: isFrozen
-      });
-    });
-
-    return { nodes: nodesData, routes: routesData, chokePointCoords: blockedChokePointCoords };
-  }, [mineral, simulatedEvent, activeScenario]);
+  const { routes, chokePointCoords } = rawGraph;
 
   return (
     <div className="absolute inset-0 z-0 bg-slate-950">
@@ -212,10 +139,23 @@ export default function SupplyChainMap({ mineral, showTradeFlows = true, showCho
                   <p className="text-xs text-slate-400 mb-2">
                     {node.isRefiner ? 'Primary Refining Hub' : 'Extraction Source'}
                   </p>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 mb-2">
                     <span className="text-xl font-mono text-white">{node.share.toFixed(1)}%</span>
                     <span className="text-[10px] text-slate-400 uppercase">Global Share</span>
                   </div>
+                  {node.complianceTags && node.complianceTags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2 pt-2 border-t border-slate-700/50">
+                      {node.complianceTags.map((tag: string, idx: number) => (
+                        <Link 
+                          key={idx} 
+                          to={`/compliance?tag=${encodeURIComponent(tag)}&country=${encodeURIComponent(node.country)}`}
+                          className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider hover:opacity-80 transition-opacity cursor-pointer ${node.complianceStatus === 'FEOC' ? 'bg-red-500/20 text-red-300 border border-red-500/30' : node.complianceStatus === 'FTA' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-orange-500/20 text-orange-300 border border-orange-500/30'}`}
+                        >
+                          {tag}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </Popup>
             </Marker>

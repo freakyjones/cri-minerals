@@ -13,6 +13,7 @@ const HomePage = lazy(() => import('./pages/HomePage'));
 const MineralPage = lazy(() => import('./pages/MineralPage'));
 const AnalystDashboard = lazy(() => import('./pages/AnalystDashboard'));
 const SupplyChainPage = lazy(() => import('./pages/SupplyChainPage'));
+const CompliancePage = lazy(() => import('./pages/CompliancePage'));
 const AuthPage = lazy(() => import('./features/auth/pages/AuthPage'));
 
 import ProtectedRoute from './components/layout/ProtectedRoute';
@@ -81,6 +82,7 @@ function AppRoutes() {
                   } />
                   <Route path="/mineral/:slug" element={<MineralPage />} />
                   <Route path="/supply-chain" element={<SupplyChainPage />} />
+                  <Route path="/compliance" element={<CompliancePage />} />
                 </Routes>
               </Suspense>
             </AnimatePresence>

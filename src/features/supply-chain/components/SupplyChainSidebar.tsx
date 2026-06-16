@@ -11,6 +11,8 @@ interface SupplyChainSidebarProps {
   setShowTradeFlows: (val: boolean) => void;
   showChokePoints: boolean;
   setShowChokePoints: (val: boolean) => void;
+  showCompliance: boolean;
+  setShowCompliance: (val: boolean) => void;
   isMobile: boolean;
 }
 
@@ -23,6 +25,8 @@ export default function SupplyChainSidebar({
   setShowTradeFlows,
   showChokePoints,
   setShowChokePoints,
+  showCompliance,
+  setShowCompliance,
   isMobile
 }: SupplyChainSidebarProps) {
   // Local state pushed down
@@ -123,6 +127,15 @@ export default function SupplyChainSidebar({
                   className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-red-500 focus:ring-red-500 focus:ring-offset-slate-900" 
                 />
                 <span className="text-sm text-slate-300 group-hover:text-white transition-colors">Geopolitical Choke Points</span>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <input 
+                  type="checkbox" 
+                  checked={showCompliance} 
+                  onChange={() => setShowCompliance(!showCompliance)}
+                  className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-900" 
+                />
+                <span className="text-sm text-slate-300 group-hover:text-white transition-colors">IRA / Policy Compliance</span>
               </label>
             </div>
           </div>

@@ -1,5 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
+// Inject bypass flag so the web server starts with auth bypassed (for Node scripts run by Playwright)
+process.env.VITE_E2E_BYPASS_AUTH = 'true';
+
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
@@ -8,7 +11,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: 'http://localhost:5174',
     trace: 'on-first-retry',
   },
   projects: [
@@ -18,8 +21,11 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:5173',
+    command: 'npm run dev -- --port 5174 --strictPort',
+    url: 'http://localhost:5174',
     reuseExistingServer: !process.env.CI,
+    env: {
+      VITE_E2E_BYPASS_AUTH: 'true',
+    }
   },
 });
