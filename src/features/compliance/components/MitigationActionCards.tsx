@@ -1,5 +1,5 @@
 import { ArrowRight, Box, Cpu, Recycle } from 'lucide-react';
-import { getCountryComplianceStatus } from '../../supply-chain/utils/countryCompliance';
+import { useComplianceStore } from '../../../stores/useComplianceStore';
 
 interface Props {
   country: string;
@@ -7,7 +7,8 @@ interface Props {
 }
 
 export default function MitigationActionCards({ country }: Props) {
-  const status = getCountryComplianceStatus(country);
+  const getStatus = useComplianceStore(state => state.getStatus);
+  const status = getStatus(country);
 
   // Dynamic recommendations based on status
   const recommendations = [];

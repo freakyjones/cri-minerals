@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { FileText, AlertTriangle, ArrowRightLeft } from 'lucide-react';
 import { Mineral } from '../../minerals/schema/mineralSchema';
 import SupplyChainSimulator, { SimulatedEvent } from './SupplyChainSimulator';
-import { getCountryComplianceStatus } from '../utils/countryCompliance';
+import { useComplianceStore } from '../../../stores/useComplianceStore';
 
 interface SupplyChainAnalyticsProps {
   selectedMineral: Mineral | null;
@@ -19,18 +19,19 @@ export default function SupplyChainAnalytics({
   simulatedEvent,
   setSimulatedEvent
 }: SupplyChainAnalyticsProps) {
+  const getStatus = useComplianceStore(state => state.getStatus);
 
   const complianceMetrics = useMemo(() => {
     if (!selectedMineral) return null;
     let feoc = 0;
     let fta = 0;
     selectedMineral.refining.forEach(r => {
-      const status = getCountryComplianceStatus(r.country);
+      const status = getStatus(r.country);
       if (status === 'FEOC') feoc += r.share;
       if (status === 'FTA') fta += r.share;
     });
     return { feoc, fta };
-  }, [selectedMineral]);
+  }, [selectedMineral, getStatus]);
 
   return (
     <div className={`w-full md:w-[360px] flex-shrink-0 border-l border-slate-800 bg-slate-950/80 z-20 flex flex-col md:h-full overflow-hidden transition-all duration-300 ${isMobile && selectedMineral ? 'h-[40vh]' : isMobile ? 'h-0 border-none' : 'h-auto'}`}>

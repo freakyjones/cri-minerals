@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      countries: {
+        Row: {
+          compliance_status:
+            | Database["public"]["Enums"]["compliance_status_type"]
+            | null
+          compliance_tags: string[] | null
+          created_at: string | null
+          id: string
+          iso_code: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          compliance_status?:
+            | Database["public"]["Enums"]["compliance_status_type"]
+            | null
+          compliance_tags?: string[] | null
+          created_at?: string | null
+          id?: string
+          iso_code: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          compliance_status?:
+            | Database["public"]["Enums"]["compliance_status_type"]
+            | null
+          compliance_tags?: string[] | null
+          created_at?: string | null
+          id?: string
+          iso_code?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       market_alerts: {
         Row: {
           created_at: string
@@ -347,22 +383,22 @@ export type Database = {
           avatar_url: string | null
           full_name: string | null
           id: string
-          updated_at: string | null
           role: Database["public"]["Enums"]["user_role"]
+          updated_at: string | null
         }
         Insert: {
           avatar_url?: string | null
           full_name?: string | null
           id: string
-          updated_at?: string | null
           role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string | null
         }
         Update: {
           avatar_url?: string | null
           full_name?: string | null
           id?: string
-          updated_at?: string | null
           role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -375,6 +411,7 @@ export type Database = {
     }
     Enums: {
       alert_status: "DRAFT" | "PUBLISHED"
+      compliance_status_type: "FEOC" | "FTA" | "NEUTRAL"
       severity_level: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW"
       user_role: "user" | "admin"
     }
@@ -505,6 +542,7 @@ export const Constants = {
   public: {
     Enums: {
       alert_status: ["DRAFT", "PUBLISHED"],
+      compliance_status_type: ["FEOC", "FTA", "NEUTRAL"],
       severity_level: ["CRITICAL", "HIGH", "MEDIUM", "LOW"],
       user_role: ["user", "admin"],
     },

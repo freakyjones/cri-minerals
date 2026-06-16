@@ -8,6 +8,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import CommandPalette from './components/layout/CommandPalette';
 import { useEffect } from 'react';
 import { useAuthStore } from './stores/useAuthStore';
+import { useComplianceStore } from './stores/useComplianceStore';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
 const MineralPage = lazy(() => import('./pages/MineralPage'));
@@ -21,10 +22,12 @@ import GuestRoute from './components/layout/GuestRoute';
 
 function App() {
   const { initializeAuth } = useAuthStore();
+  const { fetchCountries } = useComplianceStore();
   
   useEffect(() => {
     initializeAuth();
-  }, [initializeAuth]);
+    fetchCountries();
+  }, [initializeAuth, fetchCountries]);
 
   return (
     <ErrorBoundary>
