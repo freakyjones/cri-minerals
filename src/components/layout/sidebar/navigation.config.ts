@@ -13,7 +13,7 @@ export const navItems: NavItemConfig[] = [
   { name: 'Analyst Queue', path: '/analyst', icon: Inbox },
   { name: 'Minerals Index', path: '#', isAccordion: true },
   { name: 'Supply Chain Map', path: '/supply-chain', icon: MapIcon },
-  { name: 'ESG Watchlist', path: '#', icon: ShieldAlert, disabled: true },
+  { name: 'ESG & Compliance', path: '/compliance', icon: ShieldAlert },
   { name: 'Settings', path: '#', icon: Settings, disabled: true },
 ];
 
@@ -21,4 +21,5 @@ export const preloadRoute = (path: string) => {
   if (path === '/') import('../../../pages/HomePage');
   if (path === '/analyst') import('../../../pages/AnalystDashboard');
   if (path === '/supply-chain') import('../../../pages/SupplyChainPage');
+  if (path === '/compliance') import('../../../pages/CompliancePage');
 };

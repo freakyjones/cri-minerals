@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useMineralDashboard } from '../features/minerals';
 import { useAccessibleVariants } from '../lib/useAccessibleVariants';
@@ -21,12 +22,29 @@ const pageVariantsFull = {
 
 export default function SupplyChainPage() {
   const { filteredMinerals, loading, error, refetch } = useMineralDashboard();
-  const [selectedMineral, setSelectedMineral] = useState<Mineral | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
   const isMobile = useIsMobile();
   
-  // Layer Toggles shared between Map and Sidebar
-  const [showTradeFlows, setShowTradeFlows] = useState(true);
-  const [showChokePoints, setShowChokePoints] = useState(true);
+  // URL-Based State Management
+  const mineralId = searchParams.get('mineral');
+  const selectedMineral = filteredMinerals.find(m => m.id === mineralId) || null;
+  
+  const setSelectedMineral = (mineral: Mineral | null) => {
+    setSearchParams(prev => {
+      if (mineral) prev.set('mineral', mineral.id);
+      else prev.delete('mineral');
+      return prev;
+    }, { replace: true });
+  };
+
+  const showTradeFlows = searchParams.get('flows') !== 'false'; // default true
+  const setShowTradeFlows = (val: boolean) => setSearchParams(prev => { prev.set('flows', String(val)); return prev; }, { replace: true });
+
+  const showChokePoints = searchParams.get('choke') !== 'false'; // default true
+  const setShowChokePoints = (val: boolean) => setSearchParams(prev => { prev.set('choke', String(val)); return prev; }, { replace: true });
+
+  const showCompliance = searchParams.get('compliance') === 'true'; // default false
+  const setShowCompliance = (val: boolean) => setSearchParams(prev => { prev.set('compliance', String(val)); return prev; }, { replace: true });
   
   // Simulator State
   const [simulatedEvent, setSimulatedEvent] = useState<SimulatedEvent>(null);
@@ -60,6 +78,8 @@ export default function SupplyChainPage() {
           setShowTradeFlows={setShowTradeFlows}
           showChokePoints={showChokePoints}
           setShowChokePoints={setShowChokePoints}
+          showCompliance={showCompliance}
+          setShowCompliance={setShowCompliance}
           isMobile={isMobile}
         />
 
@@ -67,12 +87,14 @@ export default function SupplyChainPage() {
           selectedMineral={selectedMineral}
           showTradeFlows={showTradeFlows}
           showChokePoints={showChokePoints}
+          showCompliance={showCompliance}
           simulatedEvent={simulatedEvent}
         />
 
         <SupplyChainAnalytics 
           selectedMineral={selectedMineral}
           isMobile={isMobile}
+          showCompliance={showCompliance}
           simulatedEvent={simulatedEvent}
           setSimulatedEvent={setSimulatedEvent}
         />

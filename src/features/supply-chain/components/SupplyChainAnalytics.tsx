@@ -1,10 +1,13 @@
+import { useMemo } from 'react';
 import { FileText, AlertTriangle, ArrowRightLeft } from 'lucide-react';
 import { Mineral } from '../../minerals/schema/mineralSchema';
 import SupplyChainSimulator, { SimulatedEvent } from './SupplyChainSimulator';
+import { getCountryComplianceStatus } from '../utils/countryCompliance';
 
 interface SupplyChainAnalyticsProps {
   selectedMineral: Mineral | null;
   isMobile: boolean;
+  showCompliance: boolean;
   simulatedEvent: SimulatedEvent;
   setSimulatedEvent: (event: SimulatedEvent) => void;
 }
@@ -12,9 +15,23 @@ interface SupplyChainAnalyticsProps {
 export default function SupplyChainAnalytics({
   selectedMineral,
   isMobile,
+  showCompliance,
   simulatedEvent,
   setSimulatedEvent
 }: SupplyChainAnalyticsProps) {
+
+  const complianceMetrics = useMemo(() => {
+    if (!selectedMineral) return null;
+    let feoc = 0;
+    let fta = 0;
+    selectedMineral.refining.forEach(r => {
+      const status = getCountryComplianceStatus(r.country);
+      if (status === 'FEOC') feoc += r.share;
+      if (status === 'FTA') fta += r.share;
+    });
+    return { feoc, fta };
+  }, [selectedMineral]);
+
   return (
     <div className={`w-full md:w-[360px] flex-shrink-0 border-l border-slate-800 bg-slate-950/80 z-20 flex flex-col md:h-full overflow-hidden transition-all duration-300 ${isMobile && selectedMineral ? 'h-[40vh]' : isMobile ? 'h-0 border-none' : 'h-auto'}`}>
       {selectedMineral ? (
@@ -64,6 +81,33 @@ export default function SupplyChainAnalytics({
                 </p>
               </div>
             </div>
+
+            {showCompliance && complianceMetrics && (
+              <div className="animate-in fade-in slide-in-from-top-4 duration-500">
+                <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                   IRA Compliance Exposure
+                </h3>
+                <div className="bg-slate-900 border border-slate-800 rounded-lg p-4">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-[10px] text-red-400 uppercase tracking-wider">FEOC Sourced</span>
+                    <span className="font-mono text-white text-sm font-bold">{complianceMetrics.feoc.toFixed(1)}%</span>
+                  </div>
+                  <div className="w-full bg-slate-800 rounded-full h-1.5 mb-3">
+                    {/* eslint-disable-next-line react/forbid-dom-props */}
+                    <div className="bg-red-500 h-1.5 rounded-full" style={{ width: `${complianceMetrics.feoc}%` }}></div>
+                  </div>
+                  
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-[10px] text-emerald-400 uppercase tracking-wider">FTA Compliant</span>
+                    <span className="font-mono text-white text-sm font-bold">{complianceMetrics.fta.toFixed(1)}%</span>
+                  </div>
+                  <div className="w-full bg-slate-800 rounded-full h-1.5">
+                    {/* eslint-disable-next-line react/forbid-dom-props */}
+                    <div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: `${complianceMetrics.fta}%` }}></div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div>
               <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">

@@ -7,6 +7,7 @@ interface SupplyChainMapAreaProps {
   selectedMineral: Mineral | null;
   showTradeFlows: boolean;
   showChokePoints: boolean;
+  showCompliance: boolean;
   simulatedEvent?: SimulatedEvent;
 }
 
@@ -14,6 +15,7 @@ export default function SupplyChainMapArea({
   selectedMineral,
   showTradeFlows,
   showChokePoints,
+  showCompliance,
   simulatedEvent
 }: SupplyChainMapAreaProps) {
   return (
@@ -22,6 +24,7 @@ export default function SupplyChainMapArea({
         mineral={selectedMineral} 
         showTradeFlows={showTradeFlows} 
         showChokePoints={showChokePoints} 
+        showCompliance={showCompliance}
         simulatedEvent={simulatedEvent}
       />
 
