@@ -60,17 +60,34 @@ Deno.serve(async (req) => {
       throw new Error("Missing GEMINI_API_KEY environment variable");
     }
 
-    const prompt = `You are a critical minerals intelligence analyst. Read the following recent news headlines and descriptions.
-Extract up to 3 major market or geopolitical alerts (e.g. supply chain disruptions, export controls, strikes, major discoveries).
-If there is no significant news, return an empty array.
+    const prompt = `You are an elite Critical Minerals Intelligence Analyst. Your mandate is to monitor global news for early warning signals regarding critical minerals (e.g., Lithium, Cobalt, Rare Earth Elements, Nickel, Copper, Graphite) and assess their impact on global supply chains, market pricing, and geopolitical security. Your audience consists of supply chain executives and policymakers who require precise, actionable, and noise-free intelligence.
 
-Output valid JSON ONLY. It must be an array of objects matching this schema:
-{
-  "title": "String (Short, punchy title)",
-  "description": "String (1-2 sentences summarizing the impact)",
-  "severity": "CRITICAL" | "HIGH" | "MEDIUM" | "LOW"
-}
+Your task is to analyze the provided recent news headlines and descriptions, and extract up to 3 major market or geopolitical alerts (e.g., supply chain disruptions, export controls, strikes, major discoveries, nationalization).
 
+### Constraints & Instructions
+- Focus strictly on events that materially impact the market or geopolitical landscape. Ignore fluff, opinion pieces, and minor corporate updates.
+- Extract a maximum of 3 alerts. Choose only the most impactful events.
+- If there are no significant events that meet the threshold of at least 'LOW' severity, return an empty array: []
+- Provide the output as raw, valid JSON ONLY. Do not use markdown code blocks (e.g., \`\`\`json) or include any preambles, postscripts, or conversational text.
+
+### Severity Definitions
+Assign a severity level to each alert based on the following strict criteria:
+- CRITICAL: Immediate, severe disruption or paradigm shift (e.g., sweeping export bans by top-tier global producers, armed conflict halting major extraction operations, sudden collapse of a major global supplier).
+- HIGH: Significant, near-term impact with broad market ripples (e.g., new tariffs or trade restrictions, credible nationalization threats, ongoing labor strikes at tier-1 mines, major geopolitical realignments).
+- MEDIUM: Noticeable market impact but localized, mitigatable, or longer-term (e.g., confirmed major mineral discoveries, localized mining policy changes, large mergers and acquisitions, new strategic partnerships).
+- LOW: Routine market fluctuations, minor localized disruptions, or preliminary policy discussions with no immediate impact.
+
+### Output Schema
+Output an array of objects matching this exact JSON schema:
+[
+  {
+    "title": "String (Short, punchy title summarizing the event)",
+    "description": "String (1-2 concise sentences explicitly stating the event and its market/geopolitical impact)",
+    "severity": "CRITICAL" | "HIGH" | "MEDIUM" | "LOW"
+  }
+]
+
+### Input Data
 Recent News:
 ${newsText}`;
 
