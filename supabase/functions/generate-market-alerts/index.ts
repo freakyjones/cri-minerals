@@ -102,7 +102,7 @@ Deno.serve(async (req) => {
     }
 
     const MODELS_TO_TRY = [
-      "gemma-4-31b-it", // User requested Gemma endpoint
+      "gemma-4-31b", // User requested Gemma endpoint
       "gemini-2.5-flash",
       "gemini-1.5-flash" // Guaranteed fallback
     ];
