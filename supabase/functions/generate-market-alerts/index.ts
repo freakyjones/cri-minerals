@@ -4,7 +4,7 @@ const RSS_FEEDS = [
   "https://www.mining.com/feed/"
 ];
 
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -60,6 +60,13 @@ Deno.serve(async (req) => {
       throw new Error("Missing GEMINI_API_KEY environment variable");
     }
 
+    const MODELS_TO_TRY = [
+      "gemini-2.5-flash",
+      "gemini-1.5-flash"
+    ];
+    
+    const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
+
     const prompt = `You are an elite Critical Minerals Intelligence Analyst. Your mandate is to monitor global news for early warning signals regarding critical minerals (e.g., Lithium, Cobalt, Rare Earth Elements, Nickel, Copper, Graphite) and assess their impact on global supply chains, market pricing, and geopolitical security. Your audience consists of supply chain executives and policymakers who require precise, actionable, and noise-free intelligence.
 
 Your task is to analyze the provided recent news headlines and descriptions, and extract up to 3 major market or geopolitical alerts (e.g., supply chain disruptions, export controls, strikes, major discoveries, nationalization).
@@ -91,23 +98,42 @@ Output an array of objects matching this exact JSON schema:
 Recent News:
 ${newsText}`;
 
-    const geminiRes = await fetch(`${GEMINI_API_URL}?key=${geminiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          response_mime_type: "application/json"
-        }
-      })
-    });
+    let geminiData = null;
+    let lastError = null;
 
-    if (!geminiRes.ok) {
-      const errorText = await geminiRes.text();
-      throw new Error(`Gemini API error: ${errorText}`);
+    for (const model of MODELS_TO_TRY) {
+      try {
+        console.log(`Attempting to generate alerts using model: ${model}`);
+        const geminiRes = await fetch(`${GEMINI_API_BASE}/${model}:generateContent?key=${geminiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              response_mime_type: "application/json"
+            }
+          })
+        });
+
+        if (!geminiRes.ok) {
+          const errorText = await geminiRes.text();
+          throw new Error(`${model} API error: ${errorText}`);
+        }
+
+        geminiData = await geminiRes.json();
+        console.log(`Successfully generated alerts with ${model}`);
+        break; // Success! Exit the retry loop.
+      } catch (e) {
+        console.warn(`Failed with model ${model}:`, e.message);
+        lastError = e;
+        // The loop continues to the next fallback model...
+      }
     }
 
-    const geminiData = await geminiRes.json();
+    if (!geminiData) {
+      throw lastError || new Error("All fallback models failed.");
+    }
+
     const resultText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
     
     let alerts = [];
