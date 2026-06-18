@@ -13,7 +13,7 @@ export default function ComplianceMainArea({ activeTag, activeCountry }: MainAre
   const currentTag = activeTag || 'FEOC';
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-bg-base relative pb-24 md:pb-8">
+    <div className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8 bg-bg-base relative pb-24 md:pb-8">
       <div className="max-w-5xl mx-auto space-y-6">
         <header className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">ESG & Compliance Intelligence</h1>
