@@ -4,7 +4,7 @@ const RSS_FEEDS = [
   "https://www.mining.com/feed/"
 ];
 
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
