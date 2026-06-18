@@ -11,6 +11,47 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+/**
+ * Extracts and parses a JSON array from an LLM response string.
+ * Handles markdown code blocks, prepended/appended conversational text,
+ * and gracefully fails by returning an empty array if parsing fails.
+ */
+function extractJsonArray(llmResponse: string): Array<Record<string, unknown>> {
+  if (!llmResponse || typeof llmResponse !== "string") {
+    return [];
+  }
+
+  const markdownRegex = /```(?:json)?\s*([\s\S]*?)\s*```/ig;
+  let match;
+  while ((match = markdownRegex.exec(llmResponse)) !== null) {
+    const content = match[1].trim();
+    if (content.startsWith("[") && content.endsWith("]")) {
+      try {
+        const parsed = JSON.parse(content);
+        if (Array.isArray(parsed)) return parsed;
+      } catch {
+        // ignore parsing errors and continue
+      }
+    }
+  }
+
+  const lastIndex = llmResponse.lastIndexOf("]");
+  if (lastIndex === -1) return [];
+
+  let startIndex = llmResponse.indexOf("[");
+  while (startIndex !== -1 && startIndex < lastIndex) {
+    try {
+      const jsonString = llmResponse.substring(startIndex, lastIndex + 1);
+      const parsed = JSON.parse(jsonString);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {
+      // ignore parsing errors and continue
+    }
+    startIndex = llmResponse.indexOf("[", startIndex + 1);
+  }
+  return [];
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -61,8 +102,9 @@ Deno.serve(async (req) => {
     }
 
     const MODELS_TO_TRY = [
+      "gemma-4-31b-it", // User requested Gemma endpoint
       "gemini-2.5-flash",
-      "gemini-1.5-flash"
+      "gemini-1.5-flash" // Guaranteed fallback
     ];
     
     const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
@@ -108,10 +150,9 @@ ${newsText}`;
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              response_mime_type: "application/json"
-            }
+            contents: [{ parts: [{ text: prompt }] }]
+            // Removed generationConfig to ensure compatibility with Gemma endpoints,
+            // relying on our robust parser instead.
           })
         });
 
@@ -136,10 +177,7 @@ ${newsText}`;
 
     const resultText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
     
-    let alerts = [];
-    if (resultText) {
-      alerts = JSON.parse(resultText);
-    }
+    const alerts = extractJsonArray(resultText);
 
     if (alerts.length === 0) {
       return new Response(
