@@ -9,11 +9,12 @@ CREATE EXTENSION IF NOT EXISTS pg_cron;
 
 SELECT cron.schedule(
   'generate-daily-market-alerts',
-  '0 8 * * *', -- Runs every day at 8:00 AM UTC
+  '30 19 * * *',
   $$
     SELECT net.http_post(
         url := 'https://kahzclgulxnpsnnlfxwd.supabase.co/functions/v1/generate-market-alerts',
-        headers := '{"Authorization": "Bearer YOUR_ANON_KEY"}'::jsonb
+        headers := '{"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImthaHpjbGd1bHhucHNubmxmeHdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMTQ0ODQsImV4cCI6MjA5NjY5MDQ4NH0.6rinUvsav5E9LUBr2cpViufFlgKMtehZlvCF4H1ReaA"}'::jsonb,
+        timeout_milliseconds := 30000
     );
   $$
 );
