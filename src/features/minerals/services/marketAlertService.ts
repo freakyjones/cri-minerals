@@ -68,5 +68,14 @@ export const marketAlertService = {
       .eq('id', id);
       
     if (error) throw error;
+  },
+
+  async triggerAlertsGeneration() {
+    const { data, error } = await supabase.functions.invoke('generate-market-alerts', {
+      method: 'POST',
+    });
+    
+    if (error) throw error;
+    return data;
   }
 };

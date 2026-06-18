@@ -51,3 +51,15 @@ export function useRejectAlert() {
     }
   });
 }
+
+export function useTriggerAlerts() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => marketAlertService.triggerAlertsGeneration(),
+    onSuccess: () => {
+      // Refresh the draft list after generating new ones
+      queryClient.invalidateQueries({ queryKey: ['draftAlerts'] });
+    }
+  });
+}
