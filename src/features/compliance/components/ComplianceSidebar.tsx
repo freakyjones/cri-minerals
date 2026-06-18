@@ -27,7 +27,7 @@ export default function ComplianceSidebar({ activeTag, activeCountry, setSearchP
   };
 
   return (
-    <div className={`w-full md:w-80 flex-shrink-0 bg-slate-900/50 border-r border-white/10 flex flex-col h-full overflow-y-auto ${isMobile ? 'h-auto max-h-[40vh] border-b md:border-b-0' : ''}`}>
+    <div className={`w-full md:w-80 flex-shrink-0 bg-slate-900/50 border-r border-white/10 flex flex-col h-full overflow-y-auto custom-scrollbar ${isMobile ? 'h-auto max-h-[40vh] border-b md:border-b-0' : ''}`}>
       <div className="p-4 border-b border-white/10 shrink-0">
         <h2 className="text-xl font-bold text-white mb-4">Risk Frameworks</h2>
         <div className="relative">

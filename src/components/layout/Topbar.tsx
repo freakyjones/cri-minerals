@@ -1,4 +1,4 @@
-import { Search, Bell, Download, Menu } from 'lucide-react';
+import { Search, Bell, Menu } from 'lucide-react';
 import { useSearchStore } from '../../stores/useSearchStore';
 
 interface TopbarProps {
@@ -41,13 +41,6 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
           aria-label="Notifications"
         >
           <Bell className="h-4 w-4" />
-        </button>
-        <button 
-          className="hidden sm:flex items-center gap-2 border border-white/10 text-slate-300 hover:bg-white/5 hover:text-white px-3 py-1.5 rounded-md text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-accent-blue outline-none disabled:opacity-50" 
-          disabled
-        >
-          <Download className="h-4 w-4" />
-          <span>Export Report</span>
         </button>
       </div>
     </header>
