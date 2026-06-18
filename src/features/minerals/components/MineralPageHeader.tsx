@@ -1,18 +1,59 @@
-import { motion } from 'framer-motion';
+import { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import type { Mineral } from '../schema/mineralSchema';
 import { getRiskColorSolid, getRiskIcon } from '../utils';
-import { useMinerals } from '../hooks/useMineral';
-import { useNavigate } from 'react-router-dom';
-import { ChevronDown } from 'lucide-react';
+import { Download, FileText, FileJson, File, FileSpreadsheet, Loader2 } from 'lucide-react';
+import { exportAsJson, exportAsMarkdown, exportAsPdf, exportAsCsv } from '../utils/exportUtils';
 
 interface MineralPageHeaderProps {
   mineral: Mineral;
 }
 
 export default function MineralPageHeader({ mineral }: MineralPageHeaderProps) {
-  const { minerals } = useMinerals();
-  const navigate = useNavigate();
+  const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Handle click outside and Escape key
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsExportOpen(false);
+      }
+    };
+    
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsExportOpen(false);
+      }
+    };
+
+    if (isExportOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isExportOpen]);
+
+  const handleExport = async (format: 'pdf' | 'md' | 'json' | 'csv') => {
+    setIsExportOpen(false);
+    setIsExporting(true);
+    try {
+      if (format === 'json') await exportAsJson(mineral);
+      else if (format === 'md') await exportAsMarkdown(mineral);
+      else if (format === 'pdf') await exportAsPdf(mineral);
+      else if (format === 'csv') await exportAsCsv(mineral);
+    } catch (e) {
+      console.error("Export failed", e);
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   return (
     <header className="mb-8 border-b border-white/10 pb-8">
@@ -31,26 +72,45 @@ export default function MineralPageHeader({ mineral }: MineralPageHeaderProps) {
           </Badge>
         </div>
 
-        {/* Quick-Switch Dropdown */}
-        <div className="relative group">
-          <button className="flex items-center gap-2 bg-slate-900 border border-white/10 rounded-md px-4 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-accent-blue transition-colors">
-            Switch Mineral <ChevronDown className="h-4 w-4" />
+        {/* Export Report Dropdown */}
+        <div className="relative inline-block z-50" ref={dropdownRef}>
+          <button 
+            onClick={() => !isExporting && setIsExportOpen(!isExportOpen)}
+            disabled={isExporting}
+            aria-haspopup="menu"
+            aria-expanded={isExportOpen}
+            aria-busy={isExporting}
+            className="hidden sm:flex items-center gap-2 bg-slate-900 border border-white/10 text-slate-300 hover:bg-slate-800 hover:text-white px-4 py-2 rounded-md text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-accent-blue outline-none disabled:opacity-70 disabled:cursor-not-allowed" 
+          >
+            {isExporting ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Download className="h-4 w-4" aria-hidden="true" />}
+            <span aria-live="polite">{isExporting ? 'Exporting...' : 'Export Report'}</span>
           </button>
           
-          <div className="absolute right-0 top-full mt-2 w-64 bg-slate-900 border border-white/10 rounded-md shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden group-focus-within:opacity-100 group-focus-within:visible">
-            <div className="max-h-96 overflow-y-auto py-1">
-              {minerals.map(m => (
-                <button
-                  key={m.id}
-                  onClick={() => navigate(`/mineral/${m.slug}`)}
-                  className={`w-full text-left px-4 py-2 text-sm flex items-center justify-between hover:bg-white/5 focus:outline-none focus:bg-white/5 ${m.id === mineral.id ? 'bg-accent-blue/10 text-accent-blue font-medium' : 'text-slate-300'}`}
-                >
-                  <span>{m.name}</span>
-                  <span className="text-xs text-slate-500">{m.symbol}</span>
+          <AnimatePresence>
+            {isExportOpen && (
+              <motion.div 
+                role="menu"
+                initial={{ opacity: 0, y: -5, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -5, scale: 0.95 }}
+                transition={{ duration: 0.15 }}
+                className="absolute right-0 top-full mt-2 w-48 bg-slate-900/95 backdrop-blur-md border border-white/10 rounded-md shadow-xl overflow-hidden"
+              >
+                <button role="menuitem" onClick={() => handleExport('pdf')} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-300 hover:bg-white/5 hover:text-white transition-colors focus:bg-white/5 focus:outline-none">
+                  <FileText className="h-4 w-4 text-rose-400" /> PDF Document
                 </button>
-              ))}
-            </div>
-          </div>
+                <button role="menuitem" onClick={() => handleExport('csv')} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-300 hover:bg-white/5 hover:text-white transition-colors focus:bg-white/5 focus:outline-none">
+                  <FileSpreadsheet className="h-4 w-4 text-green-400" /> CSV Data
+                </button>
+                <button role="menuitem" onClick={() => handleExport('md')} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-300 hover:bg-white/5 hover:text-white transition-colors focus:bg-white/5 focus:outline-none">
+                  <File className="h-4 w-4 text-sky-400" /> Markdown
+                </button>
+                <button role="menuitem" onClick={() => handleExport('json')} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-300 hover:bg-white/5 hover:text-white transition-colors focus:bg-white/5 focus:outline-none">
+                  <FileJson className="h-4 w-4 text-emerald-400" /> JSON Data
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
       

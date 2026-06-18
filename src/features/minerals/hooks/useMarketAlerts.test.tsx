@@ -9,6 +9,7 @@ import React from 'react';
 vi.mock('../services/marketAlertService', () => ({
   marketAlertService: {
     getPublishedAlerts: vi.fn(),
+    triggerAlertsGeneration: vi.fn(),
   }
 }));
 
@@ -74,5 +75,45 @@ describe('useMarketAlerts', () => {
     expect(result.current.error).toBeInstanceOf(Error);
     expect(result.current.error?.message).toBe('Database connection failed');
     expect(result.current.alerts).toEqual([]);
+  });
+});
+
+import { useTriggerAlerts } from './useMarketAlerts';
+
+describe('useTriggerAlerts', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    queryClient.clear();
+  });
+
+  it('calls triggerAlertsGeneration and invalidates draftAlerts query on success', async () => {
+    vi.mocked(marketAlertService.triggerAlertsGeneration).mockResolvedValue({ message: 'Success' });
+    const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries');
+
+    const { result } = renderHook(() => useTriggerAlerts(), { wrapper });
+
+    result.current.mutate();
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+
+    expect(marketAlertService.triggerAlertsGeneration).toHaveBeenCalledTimes(1);
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: ['draftAlerts'] });
+  });
+
+  it('handles errors properly', async () => {
+    const error = new Error('Failed to generate alerts');
+    vi.mocked(marketAlertService.triggerAlertsGeneration).mockRejectedValue(error);
+
+    const { result } = renderHook(() => useTriggerAlerts(), { wrapper });
+
+    result.current.mutate();
+
+    await waitFor(() => {
+      expect(result.current.isError).toBe(true);
+    });
+
+    expect(result.current.error).toBe(error);
   });
 });
