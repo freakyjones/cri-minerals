@@ -9,6 +9,9 @@ The Critical Minerals Intelligence Dashboard is a highly responsive, modern web 
 - **Interactive Risk Heatmap:** A visual summary of global supply chain risks that allows for one-click filtering.
 - **Geographic Visualizations:** Market dominance breakdowns showing production, reserves, and refining choke points by country.
 - **ESG & Geopolitical Tracking:** Direct surfacing of environmental risks, human rights issues, and historical supply chain events.
+- **Compliance Tracking:** FEOC (Foreign Entity of Concern) and FTA (Free Trade Agreement) tracking at the country and entity level.
+- **Export Functionality:** Analysts can export detailed mineral reports as branded PDFs, Markdown documents, and CSV spreadsheets.
+- **AI-Driven Market Alerts:** Integration with Gemma LLM via Supabase Edge Functions to monitor news and generate geopolitical risk alerts.
 - **Premium UI/UX:** 
   - Dark-mode optimized with tailored HSL color palettes and glassmorphism.
   - Fluid micro-animations powered by Framer Motion.
@@ -17,14 +20,18 @@ The Critical Minerals Intelligence Dashboard is a highly responsive, modern web 
 ## 3. Technology Stack
 - **Frontend Framework:** React 19 + Vite
 - **Language:** TypeScript
-- **Backend / Database:** Supabase (PostgreSQL)
+- **Backend / Database:** Supabase (PostgreSQL) + Edge Functions (Deno)
+- **AI/LLM:** Gemini API (Gemma-4-31b)
+- **Mapping:** React-Leaflet & Turf.js
 - **Styling:** Tailwind CSS (Utility-first styling with custom base layer and utility configurations)
 - **UI Components:** shadcn/ui
 - **Animation:** Framer Motion
 - **Data Parsing/Validation:** Zod (Strict schema mapping from snake_case DB columns to camelCase frontend props)
-- **Testing:** Vitest
+- **Testing:** Vitest & Playwright
 
 ## 4. Architecture Updates (Latest)
+- **AI-Driven Smart Simulator (Upcoming):** Hooking the AI-generated alerts directly into the Supply Chain Map using `turf.js` to calculate spatial "blast radius" intersections and instantly disrupt supply chains on the UI.
+- **Expert Export Upgrades:** Upgraded the export tools using `jspdf` and `jspdf-autotable` to include fully branded PDFs (incorporating "Uses" and "Reserves" tables) and CSV data dumps for analysts, with full ARIA accessibility and keyboard navigation.
 - **Authentication, Authorization & RBAC:** 
   - Integrated Supabase Auth utilizing Email/Password and OAuth (deprecated Magic Links).
   - Implemented comprehensive Role-Based Access Control (RBAC) supporting `admin` and `user` tiers via PostgreSQL enums (`user_role`).
@@ -38,10 +45,6 @@ The Critical Minerals Intelligence Dashboard is a highly responsive, modern web 
   - Refactored the massive `SupplyChainPage.tsx` into a streamlined orchestrator. 
   - Extracted UI logic into `SupplyChainSidebar`, `SupplyChainMapArea`, and `SupplyChainAnalytics` to enforce separation of concerns and enable robust future iterations.
 - **Supabase Migration:** The application has migrated from local static JSON (`minerals.json`) to a live Supabase PostgreSQL backend. Data is fetched using foreign table joins to preserve a normalized structure.
-- **UI Polish:** 
-  - Fixed an issue where the `RiskHeatmap` was removed from the DOM during data loading. It now uses a seamless loading skeleton.
-  - Global CSS scrollbars have been hidden (`-ms-overflow-style: none`, `::-webkit-scrollbar { display: none; }`) to provide a frictionless, native app aesthetic.
-- **Feature Deprecation:** Replaced the interactive 3D Supply Chain Globe with a highly performant 2D React Leaflet map using Canvas rendering and marker clustering. This streamlined the application and significantly reduced bundle size.
 
 ## 5. Security & Guardrails
 - **Dependency Pinning:** All dependencies in `package.json` are strictly pinned without carets (`^`) to mitigate supply chain attacks.

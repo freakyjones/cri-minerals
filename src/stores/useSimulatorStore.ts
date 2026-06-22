@@ -1,65 +1,76 @@
 import { create } from 'zustand';
+import { useMemo } from 'react';
 
-export type ScenarioType = 'NONE' | 'MALACCA_BLOCKADE' | 'DRC_FREEZE';
+export type DisruptionType = 'CHOKE_POINT_CLOSURE' | 'EXPORT_FREEZE' | 'PRICE_SHOCK' | 'DANGER_ZONE';
 
-interface SimulatorStateData {
-  activeScenario: ScenarioType;
-  globalModifiers: {
-    freightCostMultiplier: number;
-    baseTransitDelay: number;
-    mineralPriceSpike: Record<string, number>;
+export interface DisruptionPayload {
+  id: string;
+  title: string;
+  type: DisruptionType;
+  targetNodes?: string[];
+  center?: [number, number];
+  radiusKm?: number;
+  affectedMinerals?: string[];
+  multipliers: {
+    freightCost: number;
+    transitDelay: number;
+    priceSpike: number;
   };
 }
 
 interface SimulatorStore {
-  state: SimulatorStateData;
-  setActiveScenario: (scenario: ScenarioType) => void;
+  activeDisruptions: DisruptionPayload[];
+  addDisruption: (disruption: DisruptionPayload) => void;
+  removeDisruption: (id: string) => void;
 }
 
-const defaultState: SimulatorStateData = {
-  activeScenario: 'NONE',
-  globalModifiers: {
-    freightCostMultiplier: 1.0,
-    baseTransitDelay: 0,
-    mineralPriceSpike: {}
-  }
-};
-
 export const useSimulatorStore = create<SimulatorStore>((set) => ({
-  state: defaultState,
-  setActiveScenario: (scenario) => {
-    switch (scenario) {
-      case 'MALACCA_BLOCKADE':
-        set({
-          state: {
-            activeScenario: scenario,
-            globalModifiers: {
-              freightCostMultiplier: 4.5, // 350% spike
-              baseTransitDelay: 15, // 15 days
-              mineralPriceSpike: {}
-            }
-          }
-        });
-        break;
-      case 'DRC_FREEZE':
-        set({
-          state: {
-            activeScenario: scenario,
-            globalModifiers: {
-              freightCostMultiplier: 1.2,
-              baseTransitDelay: 0,
-              mineralPriceSpike: {
-                'Cobalt': 3.5, // 250% spike
-                'Lithium': 1.8 // Demand shifts to LFP
-              }
-            }
-          }
-        });
-        break;
-      case 'NONE':
-      default:
-        set({ state: defaultState });
-        break;
-    }
-  }
+  activeDisruptions: [],
+  
+  addDisruption: (disruption) => set((state) => {
+    // Avoid duplicates by ID
+    const exists = state.activeDisruptions.find(d => d.id === disruption.id);
+    if (exists) return state;
+    return { activeDisruptions: [disruption, ...state.activeDisruptions] };
+  }),
+  
+  removeDisruption: (id) => set((state) => ({
+    activeDisruptions: state.activeDisruptions.filter((d) => d.id !== id)
+  }))
 }));
+
+export const useEffectiveModifiers = (activeDisruptions: DisruptionPayload[], mineralName?: string) => {
+  
+  return useMemo(() => {
+    let totalFreight = 1.0;
+    let totalDelay = 0;
+    const priceSpike: Record<string, number> = {};
+
+    activeDisruptions.forEach(d => {
+      // If affectedMinerals is specified, only apply if the current mineral matches
+      if (mineralName && d.affectedMinerals && !d.affectedMinerals.includes(mineralName)) {
+        return;
+      }
+      
+      totalFreight *= d.multipliers.freightCost;
+      totalDelay += d.multipliers.transitDelay;
+      
+      if (d.multipliers.priceSpike > 1) {
+        if (d.affectedMinerals) {
+           d.affectedMinerals.forEach(m => {
+               priceSpike[m] = (priceSpike[m] || 1) * d.multipliers.priceSpike;
+           });
+        } else if (mineralName) {
+           // Global disruption applies to the currently viewed mineral
+           priceSpike[mineralName] = (priceSpike[mineralName] || 1) * d.multipliers.priceSpike;
+        }
+      }
+    });
+
+    return {
+      freightCostMultiplier: totalFreight,
+      baseTransitDelay: totalDelay,
+      mineralPriceSpike: priceSpike
+    };
+  }, [activeDisruptions, mineralName]);
+};

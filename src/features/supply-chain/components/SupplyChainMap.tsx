@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
 import CustomZoomControls from './map/CustomZoomControls';
@@ -8,7 +8,7 @@ import MapAutoFramer from './map/MapAutoFramer';
 import TradeRoutesLayer from './map/TradeRoutesLayer';
 import { Mineral } from '../../minerals/schema/mineralSchema';
 import chokePointsData from '../../../data/chokePoints.json';
-import { useSimulatorStore } from '../../../stores/useSimulatorStore';
+
 import { useSupplyChainGraph } from '../hooks/useSupplyChainGraph';
 import { SimulatedEvent } from './SupplyChainSimulator';
 
@@ -66,11 +66,8 @@ export default function SupplyChainMap({
   showCompliance = false,
   simulatedEvent = null 
 }: SupplyChainMapProps) {
-  const { state } = useSimulatorStore();
-  const { activeScenario } = state;
-
   // Use the decoupled Scenario Engine hook
-  const rawGraph = useSupplyChainGraph(mineral, showCompliance, simulatedEvent || null, activeScenario);
+  const rawGraph = useSupplyChainGraph(mineral, showCompliance, simulatedEvent || null, "");
 
   // Map pure data nodes to UI icons
   const nodes = useMemo(() => {
@@ -80,7 +77,7 @@ export default function SupplyChainMap({
     }));
   }, [rawGraph.nodes]);
 
-  const { routes, chokePointCoords } = rawGraph;
+  const { routes, chokePointCoords, dangerZones } = rawGraph;
 
   return (
     <div className="absolute inset-0 z-0 bg-slate-950">
@@ -119,6 +116,22 @@ export default function SupplyChainMap({
 
         {/* Trade Routes (Canvas Geodesic Arcs) */}
         <TradeRoutesLayer routes={routes} showTradeFlows={showTradeFlows} minZoomThreshold={2} />
+
+        {/* AI Danger Zones Layer */}
+        {dangerZones?.map(zone => (
+          <Circle
+            key={`danger-${zone.id}`}
+            center={zone.center}
+            radius={zone.radiusKm * 1000} // Leaflet requires meters
+            pathOptions={{ 
+              color: '#ef4444', 
+              fillColor: '#ef4444', 
+              fillOpacity: 0.2, 
+              weight: 2,
+              dashArray: '4 4'
+            }}
+          />
+        ))}
 
         {/* Facilities (Clustered) */}
         <MarkerClusterGroup 

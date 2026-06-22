@@ -1,6 +1,7 @@
 import { AlertTriangle, TrendingUp, ShieldAlert, AlertCircle } from 'lucide-react';
 import { useMarketAlerts } from '../hooks/useMarketAlerts';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 const getSeverityIcon = (severity: string) => {
   switch (severity) {
@@ -18,10 +19,13 @@ const getSeverityIcon = (severity: string) => {
 
 export default function MarketAlerts() {
   const { alerts, loading, error, refetch } = useMarketAlerts();
+  
+  // Only show top 5 in the sidebar "Inbox"
+  const inboxAlerts = alerts.slice(0, 5);
 
   return (
-    <div className="w-full lg:w-80 space-y-6 hidden lg:block h-full">
-      <div className="bg-bg-surface border border-white/10 rounded-xl p-6 shadow-glass h-full flex flex-col">
+    <div className="w-full lg:w-80 space-y-6 hidden lg:block">
+      <div className="bg-bg-surface border border-white/10 rounded-xl p-6 shadow-glass flex flex-col">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-bold text-white">Market Alerts</h3>
           {error && (
@@ -31,7 +35,7 @@ export default function MarketAlerts() {
           )}
         </div>
         
-        <div className="space-y-4 flex-1 overflow-y-auto custom-scrollbar pr-2">
+        <div className="space-y-4 pr-2">
           {loading ? (
             // Skeleton Loading State
             <>
@@ -57,7 +61,7 @@ export default function MarketAlerts() {
               <p className="text-sm text-slate-400">No active alerts at this time.</p>
             </div>
           ) : (
-            alerts.map((alert, idx) => (
+            inboxAlerts.map((alert, idx) => (
               <motion.div 
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -75,6 +79,12 @@ export default function MarketAlerts() {
               </motion.div>
             ))
           )}
+        </div>
+        
+        <div className="mt-4 pt-4 border-t border-white/10 text-center shrink-0">
+          <Link to="/alerts" className="text-sm font-medium text-brand-primary hover:text-brand-primary/80 transition-colors">
+            View All Alerts ({alerts.length})
+          </Link>
         </div>
       </div>
     </div>

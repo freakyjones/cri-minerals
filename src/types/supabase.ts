@@ -52,24 +52,30 @@ export type Database = {
       }
       market_alerts: {
         Row: {
+          blast_radius: Json | null
           created_at: string
           description: string
+          disruption_multiplier: number | null
           id: string
           severity: Database["public"]["Enums"]["severity_level"]
           status: Database["public"]["Enums"]["alert_status"]
           title: string
         }
         Insert: {
+          blast_radius?: Json | null
           created_at?: string
           description: string
+          disruption_multiplier?: number | null
           id?: string
           severity: Database["public"]["Enums"]["severity_level"]
           status?: Database["public"]["Enums"]["alert_status"]
           title: string
         }
         Update: {
+          blast_radius?: Json | null
           created_at?: string
           description?: string
+          disruption_multiplier?: number | null
           id?: string
           severity?: Database["public"]["Enums"]["severity_level"]
           status?: Database["public"]["Enums"]["alert_status"]

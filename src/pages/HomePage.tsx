@@ -66,18 +66,18 @@ export default function HomePage() {
         />
       </div>
 
-      <div className="flex-1 flex flex-col lg:flex-row gap-6">
-        <div className="flex-1 flex flex-col min-w-0">
-          <div className="mb-4 shrink-0">
-            <div className="overflow-x-auto pb-2 md:pb-0 hide-scrollbar w-full">
-              <CategoryFilter
-                categories={categories}
-                activeCategory={activeCategory}
-                onCategoryChange={setActiveCategory}
-              />
-            </div>
-          </div>
+      <div className="mb-6 shrink-0">
+        <div className="overflow-x-auto pb-2 md:pb-0 hide-scrollbar w-full">
+          <CategoryFilter
+            categories={categories}
+            activeCategory={activeCategory}
+            onCategoryChange={setActiveCategory}
+          />
+        </div>
+      </div>
 
+      <div className="flex-1 flex flex-col lg:flex-row gap-6 lg:items-start">
+        <div className="flex-1 flex flex-col min-w-0">
           <div className="pb-8">
             {loading ? (
               <div className="h-96 bg-bg-surface rounded-card animate-pulse shadow-glass"></div>
@@ -97,7 +97,7 @@ export default function HomePage() {
           </div>
         </div>
         
-        <div className="w-full lg:w-80 shrink-0 hidden lg:block pb-8">
+        <div className="w-full lg:w-80 shrink-0 hidden lg:block">
           <MarketAlerts />
         </div>
       </div>
