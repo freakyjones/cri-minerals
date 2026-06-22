@@ -11,6 +11,7 @@ import chokePointsData from '../../../data/chokePoints.json';
 
 import { useSupplyChainGraph } from '../hooks/useSupplyChainGraph';
 import { SimulatedEvent } from './SupplyChainSimulator';
+import ErrorBoundary from '../../../components/ErrorBoundary';
 
 const createCustomIcon = (color: string, isRefiner: boolean, share: number, complianceStatus: string = 'NEUTRAL') => {
   const baseSize = isRefiner ? 28 : 18;
@@ -81,100 +82,102 @@ export default function SupplyChainMap({
 
   return (
     <div className="absolute inset-0 z-0 bg-slate-950">
-      <MapContainer 
-        center={[20, 0]} 
-        zoom={2} 
-        minZoom={2}
-        maxZoom={8}
-        zoomControl={false}
-        scrollWheelZoom={true}
-        attributionControl={false}
-        className="w-full h-full bg-slate-950 z-0"
-      >
-        <CustomZoomControls minZoom={2} maxZoom={8} />
-        <MapAutoFramer nodes={nodes} chokePointCoords={chokePointCoords} />
-        <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-        />
-
-        {/* Choke Points Layer */}
-        {showChokePoints && chokePointsData.map(cp => (
-          <Marker key={cp.id} position={[cp.lat, cp.lng] as [number, number]} icon={chokePointIcon} zIndexOffset={100}>
-            <Popup className="custom-dark-popup">
-              <div className="p-2">
-                <h4 className="text-red-400 font-bold mb-1 uppercase tracking-wider text-xs flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                  Choke Point
-                </h4>
-                <p className="font-semibold text-slate-100 text-sm mb-1">{cp.name}</p>
-                <p className="text-xs text-slate-400">{cp.description}</p>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
-
-        {/* Trade Routes (Canvas Geodesic Arcs) */}
-        <TradeRoutesLayer routes={routes} showTradeFlows={showTradeFlows} minZoomThreshold={2} />
-
-        {/* AI Danger Zones Layer */}
-        {dangerZones?.map(zone => (
-          <Circle
-            key={`danger-${zone.id}`}
-            center={zone.center}
-            radius={zone.radiusKm * 1000} // Leaflet requires meters
-            pathOptions={{ 
-              color: '#ef4444', 
-              fillColor: '#ef4444', 
-              fillOpacity: 0.2, 
-              weight: 2,
-              dashArray: '4 4'
-            }}
-          />
-        ))}
-
-        {/* Facilities (Clustered) */}
-        <MarkerClusterGroup 
-          chunkedLoading 
-          maxClusterRadius={40}
-          showCoverageOnHover={false}
+      <ErrorBoundary fallback={<div className="absolute inset-0 z-0 bg-slate-950 flex flex-col items-center justify-center text-slate-500"><span className="text-3xl mb-2">🗺️</span><p>Supply chain map unavailable</p></div>}>
+        <MapContainer 
+          center={[20, 0]} 
+          zoom={2} 
+          minZoom={2}
+          maxZoom={8}
+          zoomControl={false}
+          scrollWheelZoom={true}
+          attributionControl={false}
+          className="w-full h-full bg-slate-950 z-0"
         >
-          {nodes.map(node => (
-            <Marker 
-              key={node.key} 
-              position={node.coords as [number, number]} 
-              icon={node.icon}
-              zIndexOffset={node.isRefiner ? 50 : 10}
-            >
+          <CustomZoomControls minZoom={2} maxZoom={8} />
+          <MapAutoFramer nodes={nodes} chokePointCoords={chokePointCoords} />
+          <TileLayer
+            url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          />
+
+          {/* Choke Points Layer */}
+          {showChokePoints && chokePointsData.map(cp => (
+            <Marker key={cp.id} position={[cp.lat, cp.lng] as [number, number]} icon={chokePointIcon} zIndexOffset={100}>
               <Popup className="custom-dark-popup">
                 <div className="p-2">
-                  <h4 className="font-bold text-slate-100 mb-1">{node.country}</h4>
-                  <p className="text-xs text-slate-400 mb-2">
-                    {node.isRefiner ? 'Primary Refining Hub' : 'Extraction Source'}
-                  </p>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xl font-mono text-white">{node.share.toFixed(1)}%</span>
-                    <span className="text-[10px] text-slate-400 uppercase">Global Share</span>
-                  </div>
-                  {node.complianceTags && node.complianceTags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-2 pt-2 border-t border-slate-700/50">
-                      {node.complianceTags.map((tag: string, idx: number) => (
-                        <Link 
-                          key={idx} 
-                          to={`/compliance?tag=${encodeURIComponent(tag)}&country=${encodeURIComponent(node.country)}`}
-                          className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider hover:opacity-80 transition-opacity cursor-pointer ${node.complianceStatus === 'FEOC' ? 'bg-red-500/20 text-red-300 border border-red-500/30' : node.complianceStatus === 'FTA' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-orange-500/20 text-orange-300 border border-orange-500/30'}`}
-                        >
-                          {tag}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
+                  <h4 className="text-red-400 font-bold mb-1 uppercase tracking-wider text-xs flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                    Choke Point
+                  </h4>
+                  <p className="font-semibold text-slate-100 text-sm mb-1">{cp.name}</p>
+                  <p className="text-xs text-slate-400">{cp.description}</p>
                 </div>
               </Popup>
             </Marker>
           ))}
-        </MarkerClusterGroup>
-      </MapContainer>
+
+          {/* Trade Routes (Canvas Geodesic Arcs) */}
+          <TradeRoutesLayer routes={routes} showTradeFlows={showTradeFlows} minZoomThreshold={2} />
+
+          {/* AI Danger Zones Layer */}
+          {dangerZones?.map(zone => (
+            <Circle
+              key={`danger-${zone.id}`}
+              center={zone.center}
+              radius={zone.radiusKm * 1000} // Leaflet requires meters
+              pathOptions={{ 
+                color: '#ef4444', 
+                fillColor: '#ef4444', 
+                fillOpacity: 0.2, 
+                weight: 2,
+                dashArray: '4 4'
+              }}
+            />
+          ))}
+
+          {/* Facilities (Clustered) */}
+          <MarkerClusterGroup 
+            chunkedLoading 
+            maxClusterRadius={40}
+            showCoverageOnHover={false}
+          >
+            {nodes.map(node => (
+              <Marker 
+                key={node.key} 
+                position={node.coords as [number, number]} 
+                icon={node.icon}
+                zIndexOffset={node.isRefiner ? 50 : 10}
+              >
+                <Popup className="custom-dark-popup">
+                  <div className="p-2">
+                    <h4 className="font-bold text-slate-100 mb-1">{node.country}</h4>
+                    <p className="text-xs text-slate-400 mb-2">
+                      {node.isRefiner ? 'Primary Refining Hub' : 'Extraction Source'}
+                    </p>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xl font-mono text-white">{node.share.toFixed(1)}%</span>
+                      <span className="text-[10px] text-slate-400 uppercase">Global Share</span>
+                    </div>
+                    {node.complianceTags && node.complianceTags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2 pt-2 border-t border-slate-700/50">
+                        {node.complianceTags.map((tag: string, idx: number) => (
+                          <Link 
+                            key={idx} 
+                            to={`/compliance?tag=${encodeURIComponent(tag)}&country=${encodeURIComponent(node.country)}`}
+                            className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider hover:opacity-80 transition-opacity cursor-pointer ${node.complianceStatus === 'FEOC' ? 'bg-red-500/20 text-red-300 border border-red-500/30' : node.complianceStatus === 'FTA' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-orange-500/20 text-orange-300 border border-orange-500/30'}`}
+                          >
+                            {tag}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
+          </MarkerClusterGroup>
+        </MapContainer>
+      </ErrorBoundary>
     </div>
   );
 }
