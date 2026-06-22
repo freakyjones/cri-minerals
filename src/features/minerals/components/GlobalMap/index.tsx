@@ -8,6 +8,7 @@ import MapControls from './MapControls';
 
 import MarkerLayer from './Layers/MarkerLayer';
 import ChoroplethLayer from './Layers/ChoroplethLayer';
+import ErrorBoundary from '../../../../components/ErrorBoundary';
 
 export type MapLayerType = 'reserves' | 'production' | 'refining' | 'esg' | 'chokePoints';
 
@@ -32,24 +33,26 @@ export default function GlobalMap({ mineral }: GlobalMapProps) {
       </CardHeader>
       <CardContent>
         <div className="h-[450px] w-full rounded-xl overflow-hidden border border-slate-700/50 relative z-0 ring-1 ring-white/10 shadow-inner">
-          <MapContainer 
-            center={[20, 0]} 
-            zoom={2} 
-            scrollWheelZoom={false}
-            dragging={true}
-            zoomControl={false}
-            attributionControl={false}
-            className="h-full w-full bg-slate-950"
-          >
-            <TileLayer
-              url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-            />
-            
-            {showChoropleth && (
-              <ChoroplethLayer mineral={mineral} activeLayer={activeLayer} />
-            )}
-            <MarkerLayer mineral={mineral} activeLayer={activeLayer} />
-          </MapContainer>
+          <ErrorBoundary fallback={<div className="h-full w-full bg-slate-950 flex flex-col items-center justify-center text-slate-500"><span className="text-2xl mb-2">🗺️</span><p>Map visualization unavailable</p></div>}>
+            <MapContainer 
+              center={[20, 0]} 
+              zoom={2} 
+              scrollWheelZoom={false}
+              dragging={true}
+              zoomControl={false}
+              attributionControl={false}
+              className="h-full w-full bg-slate-950"
+            >
+              <TileLayer
+                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+              />
+              
+              {showChoropleth && (
+                <ChoroplethLayer mineral={mineral} activeLayer={activeLayer} />
+              )}
+              <MarkerLayer mineral={mineral} activeLayer={activeLayer} />
+            </MapContainer>
+          </ErrorBoundary>
 
           {/* Floating Controls Overlay */}
           <div className="absolute top-4 right-4 z-[1000] pointer-events-none flex justify-end">

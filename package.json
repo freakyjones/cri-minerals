@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "prepare": "husky"
+    "prepare": "husky",
+    "types:generate": "supabase gen types typescript --local > src/types/supabase.ts"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
