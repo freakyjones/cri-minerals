@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useMarketAlerts } from './useMarketAlerts';
+import { useMarketAlerts, useTriggerAlerts, useSemanticSearch } from './useMarketAlerts';
 import { marketAlertService } from '../services/marketAlertService';
+import { supabase } from '../../../lib/supabase';
 import React from 'react';
 
 // Mock the service layer
@@ -10,6 +11,15 @@ vi.mock('../services/marketAlertService', () => ({
   marketAlertService: {
     getPublishedAlerts: vi.fn(),
     triggerAlertsGeneration: vi.fn(),
+    searchAlerts: vi.fn(),
+  }
+}));
+
+vi.mock('../../../lib/supabase', () => ({
+  supabase: {
+    functions: {
+      invoke: vi.fn(),
+    }
   }
 }));
 
@@ -78,8 +88,6 @@ describe('useMarketAlerts', () => {
   });
 });
 
-import { useTriggerAlerts } from './useMarketAlerts';
-
 describe('useTriggerAlerts', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -115,5 +123,31 @@ describe('useTriggerAlerts', () => {
     });
 
     expect(result.current.error).toBe(error);
+  });
+});
+
+describe('useSemanticSearch', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    queryClient.clear();
+  });
+
+  it('calls search-embedding and then searchAlerts', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.mocked(supabase.functions.invoke).mockResolvedValue({ data: { embedding: [0.1, 0.2] }, error: null } as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.mocked(marketAlertService.searchAlerts).mockResolvedValue([{ id: '1', title: 'Found Alert' } as any]);
+
+    const { result } = renderHook(() => useSemanticSearch(), { wrapper });
+
+    result.current.mutate('copper strike');
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+
+    expect(supabase.functions.invoke).toHaveBeenCalledWith('search-embedding', { body: { query: 'copper strike' } });
+    expect(marketAlertService.searchAlerts).toHaveBeenCalledWith([0.1, 0.2], 0.4, 20);
+    expect(result.current.data).toEqual([{ id: '1', title: 'Found Alert' }]);
   });
 });

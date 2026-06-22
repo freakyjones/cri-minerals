@@ -5,6 +5,8 @@ import chokePointsData from '../../../data/chokePoints.json';
 import { findMacroPath, smoothRawPath, getClosestMacroNode, MACRO_NODES } from '../utils/MacroGraph';
 import { useComplianceStore, ComplianceStatus } from '../../../stores/useComplianceStore';
 import { SimulatedEvent } from '../components/SupplyChainSimulator';
+import { useSimulatorStore } from '../../../stores/useSimulatorStore';
+import * as turf from '@turf/turf';
 
 export const useSupplyChainGraph = (
   mineral: Mineral | null,
@@ -15,16 +17,49 @@ export const useSupplyChainGraph = (
   const countries = useComplianceStore(state => state.countries);
   const getStatus = useComplianceStore(state => state.getStatus);
   const getTags = useComplianceStore(state => state.getTags);
+  const activeDisruptions = useSimulatorStore(state => state.activeDisruptions);
+
+  const parsedDisruptions = useMemo(() => {
+    const relevantDisruptions = activeDisruptions.filter(d => {
+      if (mineral && d.affectedMinerals && !d.affectedMinerals.includes(mineral.name)) return false;
+      return true;
+    });
+
+    const dangerZones = relevantDisruptions
+      .filter(d => d.type === 'DANGER_ZONE' && d.center && d.radiusKm)
+      .map(d => {
+        const centerPoint = turf.point([d.center![1], d.center![0]]);
+        const polygon = turf.circle(centerPoint, d.radiusKm as number, { units: 'kilometers' });
+        return {
+          id: d.id,
+          center: d.center as [number, number],
+          centerPoint,
+          radiusKm: d.radiusKm as number,
+          polygon,
+          bboxPoly: turf.bboxPolygon(turf.bbox(polygon))
+        };
+      });
+
+    const disabledNodes = relevantDisruptions
+      .filter(d => d.type === 'CHOKE_POINT_CLOSURE')
+      .flatMap(d => d.targetNodes || []);
+
+    const frozenOrigins = relevantDisruptions
+      .filter(d => d.type === 'EXPORT_FREEZE')
+      .flatMap(d => d.targetNodes || []);
+
+    return { dangerZones, disabledNodes, frozenOrigins };
+  }, [activeDisruptions, mineral]);
 
   return useMemo(() => {
     if (!mineral || !mineral.production.length || !mineral.refining.length) {
-      return { nodes: [], routes: [], chokePointCoords: null };
+      return { nodes: [], routes: [], chokePointCoords: null, dangerZones: [] };
     }
 
     const topRefiner = [...mineral.refining].sort((a, b) => b.share - a.share)[0];
     const destinationCoords = getCoordinates(topRefiner.country);
 
-    if (!destinationCoords) return { nodes: [], routes: [], chokePointCoords: null };
+    if (!destinationCoords) return { nodes: [], routes: [], chokePointCoords: null, dangerZones: [] };
 
     const nodesData: Array<{
       key: string;
@@ -45,6 +80,14 @@ export const useSupplyChainGraph = (
       isDisrupted?: boolean;
       isFrozen?: boolean;
     }> = [];
+
+    const { dangerZones, disabledNodes: initialDisabledNodes, frozenOrigins } = parsedDisruptions;
+    const disabledNodes = [...initialDisabledNodes];
+
+    // If active scenario string based legacy is used
+    if (activeScenario === 'MALACCA_BLOCKADE') {
+      if (!disabledNodes.includes('Malacca')) disabledNodes.push('Malacca');
+    }
 
     // Compliance color helper
     const getComplianceColor = (country: string, defaultColor: string) => {
@@ -85,9 +128,22 @@ export const useSupplyChainGraph = (
       if (!originCoords) return;
 
       const isEsgBanned = simulatedEvent?.type === 'ESG_BAN' && simulatedEvent.targetId === producer.country;
+      
+      // Node intersection with Danger Zones
+      let isNodeInDangerZone = false;
+      const nodePoint = turf.point([originCoords[1], originCoords[0]]);
+      for (const zone of dangerZones) {
+        const dist = turf.distance(zone.centerPoint, nodePoint, { units: 'kilometers' });
+        if (dist <= zone.radiusKm) {
+          isNodeInDangerZone = true;
+          break;
+        }
+      }
+
+      const isDisruptedNode = isEsgBanned || isNodeInDangerZone;
       const producerStatus = showCompliance ? getStatus(producer.country) : 'NEUTRAL';
       const producerColor = getComplianceColor(producer.country, mineral.color);
-      const finalColor = isEsgBanned ? '#ef4444' : producerColor;
+      const finalColor = isDisruptedNode ? '#ef4444' : producerColor;
 
       nodesData.push({
         key: `producer-${producer.country}`,
@@ -98,37 +154,33 @@ export const useSupplyChainGraph = (
         baseColor: finalColor,
         complianceStatus: producerStatus,
         complianceTags: showCompliance ? getTags(producer.country) : [],
-        isDisrupted: isEsgBanned
+        isDisrupted: isDisruptedNode
       });
 
       const startNodeId = getClosestMacroNode(originCoords[0], originCoords[1]);
       const endNodeId = getClosestMacroNode(destinationCoords[0], destinationCoords[1]);
       
-      let isRouteDisrupted = isEsgBanned;
-      let isFrozen = false;
+      const isFrozen = frozenOrigins.includes(producer.country);
+      let isRouteDisrupted = isDisruptedNode;
       let routeColor = finalColor;
-      const disabledNodes: string[] = [];
 
-      if (activeScenario === 'DRC_FREEZE' && (producer.country.includes('Congo') || producer.country === 'DRC')) {
-        isFrozen = true;
+      if (isFrozen) {
         routeColor = '#475569';
-      } else if (isEsgBanned) {
+      } else if (isRouteDisrupted) {
         routeColor = '#ef4444';
-      }
-
-      if (startNodeId && endNodeId && activeScenario === 'MALACCA_BLOCKADE') {
-        const normalPath = findMacroPath(startNodeId, endNodeId, []);
-        if (normalPath.includes('Malacca')) {
-          isRouteDisrupted = true;
-          routeColor = '#ef4444';
-          disabledNodes.push('Malacca');
-        }
       }
 
       let positions: [number, number][] = [originCoords, destinationCoords];
 
       if (startNodeId && endNodeId) {
         const pathNodes = findMacroPath(startNodeId, endNodeId, disabledNodes);
+        
+        // If route passes through disabled nodes or cannot find path, mark disrupted
+        if (pathNodes.length === 0 && !isFrozen) {
+            isRouteDisrupted = true;
+            routeColor = '#ef4444';
+        }
+
         if (pathNodes.length > 0) {
           const rawCoords: [number, number][] = [
             originCoords,
@@ -136,6 +188,20 @@ export const useSupplyChainGraph = (
             destinationCoords
           ];
           positions = smoothRawPath(rawCoords);
+        }
+      }
+
+      // Check Turf Intersection for Routes against Danger Zones
+      if (!isRouteDisrupted && positions.length > 1) {
+        const lineCoords = positions.map(p => [p[1], p[0]]); // Leaflet to Turf
+        const routeLine = turf.lineString(lineCoords);
+        
+        for (const zone of dangerZones) {
+          if (turf.booleanIntersects(routeLine, zone.bboxPoly) && turf.booleanIntersects(routeLine, zone.polygon)) {
+            isRouteDisrupted = true;
+            routeColor = '#ef4444';
+            break;
+          }
         }
       }
 
@@ -149,7 +215,7 @@ export const useSupplyChainGraph = (
       });
     });
 
-    return { nodes: nodesData, routes: routesData, chokePointCoords: blockedChokePointCoords };
+    return { nodes: nodesData, routes: routesData, chokePointCoords: blockedChokePointCoords, dangerZones };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mineral, simulatedEvent, activeScenario, showCompliance, countries, getStatus, getTags]);
+  }, [mineral, simulatedEvent, activeScenario, showCompliance, countries, getStatus, getTags, parsedDisruptions]);
 };

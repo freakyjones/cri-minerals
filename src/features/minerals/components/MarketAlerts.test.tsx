@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
 import MarketAlerts from './MarketAlerts';
 import * as hooks from '../hooks/useMarketAlerts';
 
@@ -16,7 +17,11 @@ describe('MarketAlerts Component', () => {
       refetch: vi.fn(),
     });
 
-    const { container } = render(<MarketAlerts />);
+    const { container } = render(
+      <BrowserRouter>
+        <MarketAlerts />
+      </BrowserRouter>
+    );
     // There are 3 skeleton items rendered
     expect(container.getElementsByClassName('animate-pulse').length).toBe(3);
   });
@@ -29,7 +34,11 @@ describe('MarketAlerts Component', () => {
       refetch: vi.fn(),
     });
 
-    render(<MarketAlerts />);
+    render(
+      <BrowserRouter>
+        <MarketAlerts />
+      </BrowserRouter>
+    );
     expect(screen.getByText('Failed to load alerts.')).toBeInTheDocument();
     expect(screen.getByText('Retry')).toBeInTheDocument();
   });
@@ -42,7 +51,11 @@ describe('MarketAlerts Component', () => {
       refetch: vi.fn(),
     });
 
-    render(<MarketAlerts />);
+    render(
+      <BrowserRouter>
+        <MarketAlerts />
+      </BrowserRouter>
+    );
     expect(screen.getByText('No active alerts at this time.')).toBeInTheDocument();
   });
 
@@ -71,7 +84,11 @@ describe('MarketAlerts Component', () => {
       refetch: vi.fn(),
     });
 
-    render(<MarketAlerts />);
+    render(
+      <BrowserRouter>
+        <MarketAlerts />
+      </BrowserRouter>
+    );
     expect(screen.getByText('Critical Supply Chain Issue')).toBeInTheDocument();
     expect(screen.getByText('A major disruption has occurred.')).toBeInTheDocument();
     expect(screen.getByText('Minor Delay')).toBeInTheDocument();

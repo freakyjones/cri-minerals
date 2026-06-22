@@ -63,3 +63,32 @@ export function useTriggerAlerts() {
     }
   });
 }
+
+import { supabase } from '../../../lib/supabase';
+
+export function useSemanticSearch() {
+  return useMutation({
+    mutationFn: async (searchTerm: string) => {
+      if (!searchTerm.trim()) return null;
+
+      const { data: embedData, error: embedError } = await supabase.functions.invoke('search-embedding', {
+        body: { query: searchTerm }
+      });
+
+      if (embedError) {
+        console.error("Supabase invoke error:", embedError);
+        throw new Error(embedError.message || "Failed to connect to edge function");
+      }
+      
+      if (embedData?.error) {
+        throw new Error(embedData.error);
+      }
+
+      if (!embedData?.embedding) {
+        throw new Error("No embedding returned from AI service");
+      }
+
+      return await marketAlertService.searchAlerts(embedData.embedding, 0.4, 20);
+    }
+  });
+}

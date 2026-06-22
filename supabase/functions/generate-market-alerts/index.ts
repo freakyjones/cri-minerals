@@ -118,6 +118,7 @@ Your task is to analyze the provided recent news headlines and descriptions, and
 - Extract a maximum of 3 alerts. Choose only the most impactful events.
 - If there are no significant events that meet the threshold of at least 'LOW' severity, return an empty array: []
 - Provide the output as raw, valid JSON ONLY. Do not use markdown code blocks (e.g., \`\`\`json) or include any preambles, postscripts, or conversational text.
+- NEW: If an event involves a localized physical disruption (e.g., mine strike, localized storm, port blockade), include the \`blastRadius\` and \`disruptionMultiplier\` fields. For regulatory, market-wide, or non-spatial events, omit these fields or set them to null.
 
 ### Severity Definitions
 Assign a severity level to each alert based on the following strict criteria:
@@ -132,7 +133,14 @@ Output an array of objects matching this exact JSON schema:
   {
     "title": "String (Short, punchy title summarizing the event)",
     "description": "String (1-2 concise sentences explicitly stating the event and its market/geopolitical impact)",
-    "severity": "CRITICAL" | "HIGH" | "MEDIUM" | "LOW"
+    "severity": "CRITICAL" | "HIGH" | "MEDIUM" | "LOW",
+    "blastRadius": {
+      "lat": "Number (Estimated latitude of the physical disruption, e.g. -23.65. Null if not a physical disruption.)",
+      "lng": "Number (Estimated longitude of the physical disruption, e.g. -70.40. Null if not a physical disruption.)",
+      "radius": "Number (Estimated impact radius in km, e.g. 50. Null if not a physical disruption.)"
+    },
+    "disruptionMultiplier": "Number (A severity multiplier for the smart simulator, typically between 1.1 and 5.0. Required if physical disruption.)",
+    "affectedMinerals": ["String", "String"] // Extract the specific critical minerals affected by this event (e.g. ["Copper", "Cobalt"]). Leave empty if it affects all minerals.
   }
 ]
 
@@ -212,11 +220,15 @@ ${newsText}`;
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const rowsToInsert = alerts.map((alert: { title: string; description: string; severity: string }) => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rowsToInsert = alerts.map((alert: any) => ({
       title: alert.title,
       description: alert.description,
       severity: alert.severity,
-      status: 'DRAFT'
+      status: 'DRAFT',
+      blast_radius: alert.blastRadius || null,
+      disruption_multiplier: alert.disruptionMultiplier || null,
+      affected_minerals: alert.affectedMinerals || null
     }));
 
     const { error: insertError } = await supabase
