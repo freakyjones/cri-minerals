@@ -220,6 +220,7 @@ ${newsText}`;
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rowsToInsert = alerts.map((alert: any) => ({
       title: alert.title,
       description: alert.description,

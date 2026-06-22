@@ -133,7 +133,9 @@ describe('useSemanticSearch', () => {
   });
 
   it('calls search-embedding and then searchAlerts', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(supabase.functions.invoke).mockResolvedValue({ data: { embedding: [0.1, 0.2] }, error: null } as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(marketAlertService.searchAlerts).mockResolvedValue([{ id: '1', title: 'Found Alert' } as any]);
 
     const { result } = renderHook(() => useSemanticSearch(), { wrapper });

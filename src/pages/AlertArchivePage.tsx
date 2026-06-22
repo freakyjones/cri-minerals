@@ -127,6 +127,7 @@ export default function AlertArchivePage() {
               )}
             </div>
           ) : (
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             displayedAlerts.map((alert: any) => (
               <motion.div
                 key={alert.id}

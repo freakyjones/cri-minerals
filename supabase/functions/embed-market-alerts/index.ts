@@ -76,6 +76,7 @@ serve(async (req) => {
             successCount++;
           }
         }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         console.error(`Failed to embed alert ${alert.id}:`, err);
         lastError = err.message;
@@ -92,6 +93,7 @@ serve(async (req) => {
       }
     );
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('Error generating embeddings:', error);
     return new Response(JSON.stringify({ error: error.message }), {

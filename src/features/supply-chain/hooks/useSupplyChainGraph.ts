@@ -160,7 +160,7 @@ export const useSupplyChainGraph = (
       const startNodeId = getClosestMacroNode(originCoords[0], originCoords[1]);
       const endNodeId = getClosestMacroNode(destinationCoords[0], destinationCoords[1]);
       
-      let isFrozen = frozenOrigins.includes(producer.country);
+      const isFrozen = frozenOrigins.includes(producer.country);
       let isRouteDisrupted = isDisruptedNode;
       let routeColor = finalColor;
 

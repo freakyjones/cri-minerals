@@ -199,9 +199,9 @@ export default function SupplyChainSimulator({
 
                     const Icon = isAi ? AlertTriangle : (isMalacca ? Ship : BatteryWarning);
                     
-                    let bgClass = 'bg-accent-blue/10 border-accent-blue/30 shadow-[0_0_10px_rgba(56,189,248,0.1)]';
-                    let textClass = 'text-accent-blue';
-                    let iconBg = 'bg-accent-blue/20';
+                    let bgClass: string;
+                    let textClass: string;
+                    let iconBg: string;
 
                     if (isAi) {
                       bgClass = 'bg-purple-500/10 border-purple-500/30 shadow-[0_0_10px_rgba(168,85,247,0.1)]';

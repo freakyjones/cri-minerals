@@ -57,14 +57,14 @@ describe('useSimulatorStore', () => {
     useSimulatorStore.getState().addDisruption(mockTargetedSpike);
     
     // Viewing Cobalt should apply the spike
-    let { result: cobaltResult } = renderHook(() => {
+    const { result: cobaltResult } = renderHook(() => {
       const disruptions = useSimulatorStore(state => state.activeDisruptions);
       return useEffectiveModifiers(disruptions, 'Cobalt');
     });
     expect(cobaltResult.current.mineralPriceSpike['Cobalt']).toBe(2.0);
 
     // Viewing Copper should ignore the Cobalt spike
-    let { result: copperResult } = renderHook(() => {
+    const { result: copperResult } = renderHook(() => {
       const disruptions = useSimulatorStore(state => state.activeDisruptions);
       return useEffectiveModifiers(disruptions, 'Copper');
     });

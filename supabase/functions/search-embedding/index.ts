@@ -49,6 +49,7 @@ serve(async (req) => {
     return new Response(JSON.stringify({ embedding }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('Error generating embedding:', error);
     return new Response(JSON.stringify({ error: error.message }), {

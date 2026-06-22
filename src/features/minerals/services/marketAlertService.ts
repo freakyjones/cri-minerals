@@ -80,6 +80,7 @@ export const marketAlertService = {
   },
 
   async searchAlerts(queryEmbedding: number[], matchThreshold = 0.5, matchCount = 5): Promise<MarketAlert[]> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase as any).rpc('match_alerts', {
       query_embedding: queryEmbedding,
       match_threshold: matchThreshold,
@@ -90,7 +91,9 @@ export const marketAlertService = {
     
     if (!data) return [];
     
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (data as any[])
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .map((a: any) => parseMarketAlert(a))
       .filter((a): a is MarketAlert => a !== null);
   }
