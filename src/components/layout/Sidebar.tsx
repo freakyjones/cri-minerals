@@ -17,10 +17,10 @@ export default function Sidebar({ isMobileMenuOpen, onClose }: SidebarProps) {
   
   return (
     <>
-      {/* Mobile Overlay */}
+      {/* Mobile Overlay (elevated to z-45 to overlay sticky Topbar z-40) */}
       {isMobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 md:hidden" 
+          className="fixed inset-0 bg-black/50 z-45 md:hidden" 
           onClick={onClose}
           aria-hidden="true"
         />
