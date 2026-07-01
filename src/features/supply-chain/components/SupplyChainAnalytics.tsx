@@ -50,22 +50,6 @@ export default function SupplyChainAnalytics({
             
             <div>
               <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                <FileText className="w-4 h-4" /> Market Data (LME)
-              </h3>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-slate-900 border border-slate-800 rounded-lg p-3">
-                  <p className="text-[10px] text-slate-400 uppercase mb-1">Current Price</p>
-                  <p className="font-mono text-white text-lg">--- <span className="text-xs text-slate-400">/t</span></p>
-                </div>
-                <div className="bg-slate-900 border border-slate-800 rounded-lg p-3">
-                  <p className="text-[10px] text-slate-400 uppercase mb-1">24h Change</p>
-                  <p className="font-mono text-lg text-slate-400">---%</p>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4" /> Risk Analysis
               </h3>
               <div className="bg-slate-900 border border-slate-800 rounded-lg p-4">

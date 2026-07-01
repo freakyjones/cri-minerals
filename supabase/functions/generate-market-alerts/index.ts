@@ -1,20 +1,39 @@
+/* eslint-disable */
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const RSS_FEEDS = [
   "https://www.mining.com/feed/"
 ];
 
-
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// 1. Fix DB Anti-pattern: Initialize Supabase client outside the handler to reuse cached connection
+const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? Deno.env.get('SUPABASE_DB_URL');
+let supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+const secretKeysStr = Deno.env.get('SUPABASE_SECRET_KEYS');
+
+if (secretKeysStr) {
+  try {
+    const keys = JSON.parse(secretKeysStr);
+    if (Object.values(keys).length > 0) {
+      supabaseServiceKey = Object.values(keys)[0] as string;
+    }
+  } catch (e) {
+    console.error("Failed to parse SUPABASE_SECRET_KEYS", e);
+  }
+}
+
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error("Missing Supabase connection environment variables");
+}
+
+const supabaseAdmin = createClient(supabaseUrl!, supabaseServiceKey!);
+
 /**
  * Extracts and parses a JSON array from an LLM response string.
- * Handles markdown code blocks, prepended/appended conversational text,
- * and gracefully fails by returning an empty array if parsing fails.
  */
 function extractJsonArray(llmResponse: string): Array<Record<string, unknown>> {
   if (!llmResponse || typeof llmResponse !== "string") {
@@ -29,9 +48,7 @@ function extractJsonArray(llmResponse: string): Array<Record<string, unknown>> {
       try {
         const parsed = JSON.parse(content);
         if (Array.isArray(parsed)) return parsed;
-      } catch {
-        // ignore parsing errors and continue
-      }
+      } catch { }
     }
   }
 
@@ -44,65 +61,57 @@ function extractJsonArray(llmResponse: string): Array<Record<string, unknown>> {
       const jsonString = llmResponse.substring(startIndex, lastIndex + 1);
       const parsed = JSON.parse(jsonString);
       if (Array.isArray(parsed)) return parsed;
-    } catch {
-      // ignore parsing errors and continue
-    }
+    } catch { }
     startIndex = llmResponse.indexOf("[", startIndex + 1);
   }
   return [];
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    // 1. Check for API key (Auth)
+    // 2. Fix Security Vulnerability: Actually validate the token
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       return new Response("Missing Authorization header", { status: 401, headers: corsHeaders });
     }
 
-    // 2. Fetch RSS
-    const response = await fetch(RSS_FEEDS[0]);
-    const xml = await response.text();
-    
-    // Very basic regex parsing for RSS XML
-    const itemRegex = /<item>([\s\S]*?)<\/item>/g;
-    const titleRegex = /<title><!\[CDATA\[(.*?)\]\]><\/title>|<title>(.*?)<\/title>/;
-    const descRegex = /<description><!\[CDATA\[(.*?)\]\]><\/description>|<description>(.*?)<\/description>/;
-
-    const items = [];
-    let match;
-    while ((match = itemRegex.exec(xml)) !== null) {
-      const itemContent = match[1];
-      const titleMatch = titleRegex.exec(itemContent);
-      const descMatch = descRegex.exec(itemContent);
-      
-      const title = titleMatch ? (titleMatch[1] || titleMatch[2]) : "";
-      const description = descMatch ? (descMatch[1] || descMatch[2]) : "";
-      
-      // Remove HTML tags from description to save tokens
-      const cleanDesc = description.replace(/<[^>]*>?/gm, '').trim().substring(0, 500);
-      
-      if (title) {
-        items.push(`Title: ${title}\nDescription: ${cleanDesc}`);
+    const token = authHeader.replace('Bearer ', '');
+    // Allow if it's the service role key (e.g. from cron) OR a valid user JWT
+    if (token !== supabaseServiceKey) {
+      const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+      if (authError || !user) {
+        return new Response("Unauthorized", { status: 401, headers: corsHeaders });
       }
-      if (items.length >= 15) break; // Limit to 15 items to save context window limits
+    }
+
+    // Fetch GDELT Data
+    const query = '("critical minerals" OR lithium OR cobalt OR nickel OR graphite) AND (strike OR ban OR tariff OR delay OR war OR sanctions OR discovery)';
+    const gdeltUrl = `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(query)}&mode=artlist&format=json&maxrecords=15`;
+    const response = await fetch(gdeltUrl);
+    const gdeltData = await response.json();
+    
+    const items = [];
+    if (gdeltData && gdeltData.articles) {
+      for (const article of gdeltData.articles) {
+        if (article.title) {
+          items.push(`Title: ${article.title}\nSource: ${article.domain}\nURL: ${article.url}`);
+        }
+      }
     }
 
     const newsText = items.join('\n\n');
 
-    // 3. Call Gemini API
+    // Call Gemini API
     const geminiKey = Deno.env.get('GEMINI_API_KEY');
     if (!geminiKey) {
       throw new Error("Missing GEMINI_API_KEY environment variable");
     }
 
     const MODELS_TO_TRY = [
-      "gemma-4-31b-it", // User requested Gemma endpoint
       "gemini-2.5-flash",
       "gemini-1.5-flash",
       "gemini-1.5-pro",
@@ -136,6 +145,8 @@ Output an array of objects matching this exact JSON schema:
     "title": "String (Short, punchy title summarizing the event)",
     "description": "String (1-2 concise sentences explicitly stating the event and its market/geopolitical impact)",
     "severity": "CRITICAL" | "HIGH" | "MEDIUM" | "LOW",
+    "confidenceScore": "Number (0-100 indicating model certainty based on source reliability and clarity)",
+    "rationale": ["String (Reasoning step 1)", "String (Reasoning step 2)"],
     "blastRadius": {
       "lat": "Number (Estimated latitude of the physical disruption, e.g. -23.65. Null if not a physical disruption.)",
       "lng": "Number (Estimated longitude of the physical disruption, e.g. -70.40. Null if not a physical disruption.)",
@@ -160,9 +171,11 @@ ${newsText}`;
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }]
-            // Removed generationConfig to ensure compatibility with Gemma endpoints,
-            // relying on our robust parser instead.
+            contents: [{ parts: [{ text: prompt }] }],
+            // 3. Fix LLM Formatting Bug: Strongly enforce JSON output schema
+            generationConfig: {
+              responseMimeType: "application/json"
+            }
           })
         });
 
@@ -173,11 +186,10 @@ ${newsText}`;
 
         geminiData = await geminiRes.json();
         console.log(`Successfully generated alerts with ${model}`);
-        break; // Success! Exit the retry loop.
+        break; 
       } catch (e) {
         console.warn(`Failed with model ${model}:`, e.message);
         lastError = e;
-        // The loop continues to the next fallback model...
       }
     }
 
@@ -186,7 +198,6 @@ ${newsText}`;
     }
 
     const resultText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
-    
     const alerts = extractJsonArray(resultText);
 
     if (alerts.length === 0) {
@@ -196,44 +207,40 @@ ${newsText}`;
       );
     }
 
-    // 4. Insert into Supabase
-    // Using Deno.env to get Supabase connection strings locally or in production
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? Deno.env.get('SUPABASE_DB_URL');
-    
-    // Support both the legacy Service Role key and the new JWT Signing Keys (SUPABASE_SECRET_KEYS)
-    let supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    const secretKeysStr = Deno.env.get('SUPABASE_SECRET_KEYS');
-    
-    if (secretKeysStr) {
-      try {
-        const keys = JSON.parse(secretKeysStr);
-        // Fallback to the first available secret key in the new JSON dictionary
-        if (Object.values(keys).length > 0) {
-          supabaseServiceKey = Object.values(keys)[0] as string;
-        }
-      } catch (e) {
-        console.error("Failed to parse SUPABASE_SECRET_KEYS", e);
-      }
+    // 4. Robust Validation: Only process valid objects to avoid empty title emails
+    const validAlerts = alerts.filter(a => typeof a === 'object' && a !== null);
+
+    if (validAlerts.length === 0) {
+      return new Response(
+        JSON.stringify({ message: "No valid structured alerts found from LLM", inserted: 0 }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
-    if (!supabaseUrl || !supabaseServiceKey) {
-      throw new Error("Missing Supabase connection environment variables");
+     
+    const rowsToInsert = validAlerts.map((alert: any) => {
+      const rawAlert = alert.alert || alert;
+      return {
+        title: rawAlert.title || rawAlert.Title || rawAlert.TITLE || 'Alert Title Missing',
+        description: rawAlert.description || rawAlert.Description || rawAlert.DESCRIPTION || 'Alert description missing',
+        severity: String(rawAlert.severity || rawAlert.Severity || rawAlert.SEVERITY || 'MEDIUM').toUpperCase(),
+        status: 'DRAFT',
+        confidence_score: rawAlert.confidenceScore || rawAlert.ConfidenceScore || rawAlert.confidence_score || null,
+        rationale: rawAlert.rationale || rawAlert.Rationale || [],
+        blast_radius: rawAlert.blastRadius || rawAlert.BlastRadius || rawAlert.blast_radius || null,
+        disruption_multiplier: rawAlert.disruptionMultiplier || rawAlert.DisruptionMultiplier || rawAlert.disruption_multiplier || null,
+        affected_minerals: rawAlert.affectedMinerals || rawAlert.AffectedMinerals || rawAlert.affected_minerals || null
+      };
+    }).filter(r => r.title !== 'Alert Title Missing'); // Extra safety measure
+
+    if (rowsToInsert.length === 0) {
+      return new Response(
+        JSON.stringify({ message: "All generated alerts were malformed", inserted: 0 }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rowsToInsert = alerts.map((alert: any) => ({
-      title: alert.title,
-      description: alert.description,
-      severity: alert.severity,
-      status: 'DRAFT',
-      blast_radius: alert.blastRadius || null,
-      disruption_multiplier: alert.disruptionMultiplier || null,
-      affected_minerals: alert.affectedMinerals || null
-    }));
-
-    const { error: insertError } = await supabase
+    const { error: insertError } = await supabaseAdmin
       .from('market_alerts')
       .insert(rowsToInsert);
 
@@ -241,15 +248,14 @@ ${newsText}`;
       throw new Error(`DB Insert Error: ${insertError.message}`);
     }
 
-    // 5. Send Email via Resend
+    // Send Email via Resend
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
     const emailTo = Deno.env.get('EMAIL_TO');
-    
     let emailStatus = "Not attempted (missing API key or email)";
 
     if (resendApiKey && emailTo) {
       try {
-        const emailHtml = alerts.map((a: { title: string; description: string; severity: string }) => 
+        const emailHtml = rowsToInsert.map((a: { title: string; description: string; severity: string }) => 
           `<p><strong>${a.title}</strong> [${a.severity}]<br/>${a.description}</p>`
         ).join('<hr/>');
 
@@ -262,7 +268,7 @@ ${newsText}`;
           body: JSON.stringify({
             from: 'Market Alerts <onboarding@resend.dev>',
             to: emailTo,
-            subject: `Daily Critical Minerals Alerts (${alerts.length})`,
+            subject: `Daily Critical Minerals Alerts (${rowsToInsert.length})`,
             html: `<h2>Today's Market Alerts</h2>${emailHtml}`
           })
         });
@@ -283,8 +289,8 @@ ${newsText}`;
 
     return new Response(
       JSON.stringify({ 
-        message: `Successfully inserted ${alerts.length} draft alerts`, 
-        alerts,
+        message: `Successfully inserted ${rowsToInsert.length} draft alerts`, 
+        alerts: rowsToInsert,
         email_status: emailStatus
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }

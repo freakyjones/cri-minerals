@@ -11,7 +11,7 @@ export default function SummaryStats({ mineral }: SummaryStatsProps) {
   const esgCount = mineral.esgRisks?.length ?? 0;
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+    <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-10">
       {/* Supply Risk */}
       <a href="#supply-risk" className="bg-bg-surface border border-white/10 rounded-xl p-4 shadow-glass hover:bg-white/5 transition-colors focus-visible:ring-2 focus-visible:ring-accent-blue focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base outline-none block group">
         <div className="flex items-center gap-2 mb-2">
@@ -45,6 +45,17 @@ export default function SummaryStats({ mineral }: SummaryStatsProps) {
         </div>
         <span className={`px-2 py-1 rounded-md text-sm font-bold font-mono tabular-nums tracking-tight inline-block ${getRecyclingRateColor(mineral.recyclingRate)}`}>
           {mineral.recyclingRate}%
+        </span>
+      </div>
+
+      {/* Market Price */}
+      <div className="bg-bg-surface border border-white/10 rounded-xl p-4 shadow-glass">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-slate-400 font-bold">$</span>
+          <span className="text-xs text-slate-400 uppercase tracking-wider font-medium">Spot Price (MT)</span>
+        </div>
+        <span className="text-lg font-bold text-white mt-1 block font-mono tabular-nums tracking-tight">
+          {mineral.currentPriceUsd ? `$${mineral.currentPriceUsd.toLocaleString()}` : 'N/A'}
         </span>
       </div>
 

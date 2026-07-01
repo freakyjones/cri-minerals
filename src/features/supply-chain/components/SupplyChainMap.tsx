@@ -12,6 +12,7 @@ import chokePointsData from '../../../data/chokePoints.json';
 import { useSupplyChainGraph } from '../hooks/useSupplyChainGraph';
 import { SimulatedEvent } from './SupplyChainSimulator';
 import ErrorBoundary from '../../../components/ErrorBoundary';
+import { useSimulatorStore } from '../../../stores/useSimulatorStore';
 
 const createCustomIcon = (color: string, isRefiner: boolean, share: number, complianceStatus: string = 'NEUTRAL') => {
   const baseSize = isRefiner ? 28 : 18;
@@ -69,6 +70,7 @@ export default function SupplyChainMap({
 }: SupplyChainMapProps) {
   // Use the decoupled Scenario Engine hook
   const rawGraph = useSupplyChainGraph(mineral, showCompliance, simulatedEvent || null, "");
+  const activeDisruptions = useSimulatorStore(state => state.activeDisruptions);
 
   // Map pure data nodes to UI icons
   const nodes = useMemo(() => {
@@ -120,20 +122,40 @@ export default function SupplyChainMap({
           <TradeRoutesLayer routes={routes} showTradeFlows={showTradeFlows} minZoomThreshold={2} />
 
           {/* AI Danger Zones Layer */}
-          {dangerZones?.map(zone => (
-            <Circle
-              key={`danger-${zone.id}`}
-              center={zone.center}
-              radius={zone.radiusKm * 1000} // Leaflet requires meters
-              pathOptions={{ 
-                color: '#ef4444', 
-                fillColor: '#ef4444', 
-                fillOpacity: 0.2, 
-                weight: 2,
-                dashArray: '4 4'
-              }}
-            />
-          ))}
+          {dangerZones?.map(zone => {
+            const disruption = activeDisruptions.find(d => d.id === zone.id);
+            return (
+              <Circle
+                key={`danger-${zone.id}`}
+                center={zone.center}
+                radius={zone.radiusKm * 1000} // Leaflet requires meters
+                pathOptions={{ 
+                  color: '#9333ea', 
+                  fillColor: '#9333ea', 
+                  fillOpacity: 0.15, 
+                  weight: 2,
+                  dashArray: '4 4'
+                }}
+              >
+                <Popup className="custom-dark-popup">
+                  <div className="p-2 max-w-[240px]">
+                    <h4 className="text-purple-400 font-bold mb-1 uppercase tracking-wider text-[10px] flex items-center gap-1.5 animate-pulse">
+                      <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                      Active AI Danger Zone
+                    </h4>
+                    {disruption && (
+                      <>
+                        <p className="font-semibold text-slate-100 text-sm mb-1">{disruption.title}</p>
+                        <p className="text-xs text-slate-400 leading-relaxed">
+                          This zone blocks all transport routes and mining operations within a {zone.radiusKm}km radius.
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </Popup>
+              </Circle>
+            );
+          })}
 
           {/* Facilities (Clustered) */}
           <MarkerClusterGroup 
@@ -158,6 +180,19 @@ export default function SupplyChainMap({
                       <span className="text-xl font-mono text-white">{node.share.toFixed(1)}%</span>
                       <span className="text-[10px] text-slate-400 uppercase">Global Share</span>
                     </div>
+
+                    {node.isDisrupted && (
+                      <div className="mt-2 pt-2 border-t border-red-500/20 text-red-400">
+                        <p className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                          <span className="w-1 h-1 rounded-full bg-red-500 animate-pulse"></span>
+                          Disrupted by Scenario
+                        </p>
+                        <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                          {node.disruptionReason || 'Export restrictions or localized hazard.'}
+                        </p>
+                      </div>
+                    )}
+
                     {node.complianceTags && node.complianceTags.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-2 pt-2 border-t border-slate-700/50">
                         {node.complianceTags.map((tag: string, idx: number) => (

@@ -71,6 +71,7 @@ export const useSupplyChainGraph = (
       complianceStatus: ComplianceStatus;
       complianceTags: string[];
       isDisrupted?: boolean;
+      disruptionReason?: string;
     }> = [];
     const routesData: Array<{
       key: string;
@@ -132,18 +133,31 @@ export const useSupplyChainGraph = (
       // Node intersection with Danger Zones
       let isNodeInDangerZone = false;
       const nodePoint = turf.point([originCoords[1], originCoords[0]]);
+      const disruptingAlertNames: string[] = [];
+
       for (const zone of dangerZones) {
         const dist = turf.distance(zone.centerPoint, nodePoint, { units: 'kilometers' });
         if (dist <= zone.radiusKm) {
           isNodeInDangerZone = true;
-          break;
+          const disp = activeDisruptions.find(d => d.id === zone.id);
+          if (disp) disruptingAlertNames.push(disp.title);
         }
+      }
+
+      const isFrozen = frozenOrigins.includes(producer.country);
+      if (isFrozen) {
+        const disp = activeDisruptions.find(d => d.type === 'EXPORT_FREEZE' && d.targetNodes?.includes(producer.country));
+        if (disp) disruptingAlertNames.push(disp.title);
+      }
+
+      if (isEsgBanned) {
+        disruptingAlertNames.push("ESG Compliance Restriction");
       }
 
       const isDisruptedNode = isEsgBanned || isNodeInDangerZone;
       const producerStatus = showCompliance ? getStatus(producer.country) : 'NEUTRAL';
       const producerColor = getComplianceColor(producer.country, mineral.color);
-      const finalColor = isDisruptedNode ? '#ef4444' : producerColor;
+      const finalColor = isDisruptedNode ? '#ef4444' : (isFrozen ? '#475569' : producerColor);
 
       nodesData.push({
         key: `producer-${producer.country}`,
@@ -154,13 +168,13 @@ export const useSupplyChainGraph = (
         baseColor: finalColor,
         complianceStatus: producerStatus,
         complianceTags: showCompliance ? getTags(producer.country) : [],
-        isDisrupted: isDisruptedNode
+        isDisrupted: isDisruptedNode || isFrozen,
+        disruptionReason: disruptingAlertNames.length > 0 ? disruptingAlertNames.join(', ') : undefined
       });
 
       const startNodeId = getClosestMacroNode(originCoords[0], originCoords[1]);
       const endNodeId = getClosestMacroNode(destinationCoords[0], destinationCoords[1]);
       
-      const isFrozen = frozenOrigins.includes(producer.country);
       let isRouteDisrupted = isDisruptedNode;
       let routeColor = finalColor;
 

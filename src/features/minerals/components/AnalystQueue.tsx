@@ -58,7 +58,35 @@ export default function AnalystQueue() {
                   <span className="text-xs text-white/40">{new Date(alert.created_at).toLocaleString()}</span>
                 </div>
                 <h3 className="text-lg font-medium text-white/90 mb-2 leading-tight">{alert.title}</h3>
-                <p className="text-white/60 text-sm leading-relaxed">{alert.description}</p>
+                <p className="text-white/60 text-sm leading-relaxed mb-4">{alert.description}</p>
+                
+                {/* AI Explainability (XAI) Section */}
+                {(alert.confidence_score !== undefined && alert.confidence_score !== null || (alert.rationale && alert.rationale.length > 0)) && (
+                  <div className="mt-4 p-4 rounded-lg bg-slate-900/50 border border-slate-700/50">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider">AI Analysis</span>
+                      {alert.confidence_score !== undefined && alert.confidence_score !== null && (
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                          alert.confidence_score >= 80 ? 'bg-green-500/20 text-green-400' :
+                          alert.confidence_score >= 50 ? 'bg-yellow-500/20 text-yellow-400' :
+                          'bg-red-500/20 text-red-400'
+                        }`}>
+                          {alert.confidence_score}% CONFIDENCE
+                        </span>
+                      )}
+                    </div>
+                    {alert.rationale && alert.rationale.length > 0 && (
+                      <ul className="space-y-2">
+                        {alert.rationale.map((reason, idx) => (
+                          <li key={idx} className="flex gap-2 text-sm text-slate-400">
+                            <span className="text-slate-600 mt-0.5">•</span>
+                            <span>{reason}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
               </div>
               
               <div className="flex flex-col gap-3 min-w-[120px]">

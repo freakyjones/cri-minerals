@@ -52,31 +52,43 @@ export type Database = {
       }
       market_alerts: {
         Row: {
+          affected_minerals: string[] | null
           blast_radius: Json | null
+          confidence_score: number | null
           created_at: string
           description: string
           disruption_multiplier: number | null
+          embedding: string | null
           id: string
+          rationale: string[] | null
           severity: Database["public"]["Enums"]["severity_level"]
           status: Database["public"]["Enums"]["alert_status"]
           title: string
         }
         Insert: {
+          affected_minerals?: string[] | null
           blast_radius?: Json | null
+          confidence_score?: number | null
           created_at?: string
           description: string
           disruption_multiplier?: number | null
+          embedding?: string | null
           id?: string
+          rationale?: string[] | null
           severity: Database["public"]["Enums"]["severity_level"]
           status?: Database["public"]["Enums"]["alert_status"]
           title: string
         }
         Update: {
+          affected_minerals?: string[] | null
           blast_radius?: Json | null
+          confidence_score?: number | null
           created_at?: string
           description?: string
           disruption_multiplier?: number | null
+          embedding?: string | null
           id?: string
+          rationale?: string[] | null
           severity?: Database["public"]["Enums"]["severity_level"]
           status?: Database["public"]["Enums"]["alert_status"]
           title?: string
@@ -338,10 +350,14 @@ export type Database = {
       }
       minerals: {
         Row: {
+          annual_production_mt: number | null
           atomic_number: number
           category: string
           color: string
+          current_price_usd: number | null
+          global_reserves_mt: number | null
           id: string
+          last_usgs_sync: string | null
           name: string
           recycling_rate: number
           recycling_sources: string[]
@@ -353,10 +369,14 @@ export type Database = {
           tagline: string
         }
         Insert: {
+          annual_production_mt?: number | null
           atomic_number: number
           category: string
           color: string
+          current_price_usd?: number | null
+          global_reserves_mt?: number | null
           id?: string
+          last_usgs_sync?: string | null
           name: string
           recycling_rate: number
           recycling_sources: string[]
@@ -368,10 +388,14 @@ export type Database = {
           tagline: string
         }
         Update: {
+          annual_production_mt?: number | null
           atomic_number?: number
           category?: string
           color?: string
+          current_price_usd?: number | null
+          global_reserves_mt?: number | null
           id?: string
+          last_usgs_sync?: string | null
           name?: string
           recycling_rate?: number
           recycling_sources?: string[]
@@ -413,7 +437,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      match_alerts: {
+        Args: {
+          match_count: number
+          match_threshold: number
+          query_embedding: string
+        }
+        Returns: {
+          affected_minerals: string[]
+          created_at: string
+          description: string
+          id: string
+          severity: string
+          similarity: number
+          status: string
+          title: string
+        }[]
+      }
+      sync_usgs_mineral_data: { Args: { payload: Json }; Returns: undefined }
     }
     Enums: {
       alert_status: "DRAFT" | "PUBLISHED"

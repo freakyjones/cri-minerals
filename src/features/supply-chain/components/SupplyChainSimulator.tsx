@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Activity, Ship, BatteryWarning, AlertTriangle, X, Plus, Zap } from 'lucide-react';
 import { Mineral } from '../../minerals/schema/mineralSchema';
 import { useSimulatorStore, DisruptionPayload, useEffectiveModifiers } from '../../../stores/useSimulatorStore';
@@ -40,14 +40,64 @@ export default function SupplyChainSimulator({
   const globalModifiers = useEffectiveModifiers(activeDisruptions, selectedMineral?.name);
   const { alerts } = useMarketAlerts();
 
+  // Filter active disruptions to only show those affecting the selected mineral
+  const relevantActiveDisruptions = useMemo(() => {
+    return activeDisruptions.filter(d => {
+      if (selectedMineral && d.affectedMinerals && !d.affectedMinerals.includes(selectedMineral.name)) {
+        return false;
+      }
+      return true;
+    });
+  }, [activeDisruptions, selectedMineral]);
+
+  // Allow published alerts for the selected mineral to be simulated
   const availableAiAlerts = alerts.filter(alert => {
     if (alert.status !== 'PUBLISHED') return false;
-    if (!alert.blast_radius) return false;
     if (!alert.affected_minerals || alert.affected_minerals.length === 0) return false;
     if (selectedMineral && !alert.affected_minerals.includes(selectedMineral.name)) return false;
     if (activeDisruptions.find(d => d.id === alert.id)) return false;
     return true;
   });
+
+  // Track auto-activated alerts to prevent infinite loops if user manually removes them
+  const [autoActivatedAlerts, setAutoActivatedAlerts] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!selectedMineral) return;
+
+    const alertsToActivate = alerts.filter(alert => {
+      if (alert.status !== 'PUBLISHED') return false;
+      if (!alert.affected_minerals || alert.affected_minerals.length === 0) return false;
+      if (!alert.affected_minerals.includes(selectedMineral.name)) return false;
+      if (activeDisruptions.find(d => d.id === alert.id)) return false;
+      if (autoActivatedAlerts.includes(alert.id)) return false;
+      return true;
+    });
+
+    if (alertsToActivate.length > 0) {
+      alertsToActivate.forEach(alert => {
+        addDisruption({
+          id: alert.id,
+          title: `[Live News] ${alert.title}`,
+          type: alert.blast_radius ? 'DANGER_ZONE' : 'PRICE_SHOCK',
+          center: alert.blast_radius ? [alert.blast_radius.lat, alert.blast_radius.lng] : undefined,
+          radiusKm: alert.blast_radius ? alert.blast_radius.radius : undefined,
+          multipliers: {
+            freightCost: alert.disruption_multiplier || 1.5,
+            transitDelay: alert.blast_radius ? 5 : 0,
+            priceSpike: alert.disruption_multiplier || 1.2
+          },
+          affectedMinerals: alert.affected_minerals || undefined
+        });
+      });
+
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setAutoActivatedAlerts(prev => [
+        ...prev,
+        ...alertsToActivate.map(a => a.id)
+      ]);
+    }
+  }, [alerts, selectedMineral, activeDisruptions, addDisruption, autoActivatedAlerts]);
 
   const togglePreset = (preset: DisruptionPayload) => {
     if (activeDisruptions.find(d => d.id === preset.id)) {
@@ -94,13 +144,13 @@ export default function SupplyChainSimulator({
                         onClick={() => {
                           addDisruption({
                             id: alert.id,
-                            title: alert.title,
-                            type: 'DANGER_ZONE',
-                            center: [alert.blast_radius!.lat, alert.blast_radius!.lng],
-                            radiusKm: alert.blast_radius!.radius,
+                            title: `[Live News] ${alert.title}`,
+                            type: alert.blast_radius ? 'DANGER_ZONE' : 'PRICE_SHOCK',
+                            center: alert.blast_radius ? [alert.blast_radius.lat, alert.blast_radius.lng] : undefined,
+                            radiusKm: alert.blast_radius ? alert.blast_radius.radius : undefined,
                             multipliers: {
                               freightCost: alert.disruption_multiplier || 1.5,
-                              transitDelay: 5,
+                              transitDelay: alert.blast_radius ? 5 : 0,
                               priceSpike: alert.disruption_multiplier || 1.2
                             },
                             affectedMinerals: alert.affected_minerals || undefined
@@ -140,16 +190,17 @@ export default function SupplyChainSimulator({
               className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-colors flex items-center justify-center gap-1.5 ${activeTab === 'active' ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`}
             >
               Active Scenarios
-              {activeDisruptions.length > 0 && (
+              {relevantActiveDisruptions.length > 0 && (
                 <span className="bg-accent-blue/20 text-accent-blue py-0.5 px-1.5 rounded-full text-[10px] leading-none">
-                  {activeDisruptions.length}
+                  {relevantActiveDisruptions.length}
                 </span>
               )}
             </button>
           </div>
 
           {activeTab === 'presets' && (
-            <div className="grid grid-cols-1 gap-3">
+            <div className="grid grid-cols-1 gap-3 max-h-72 overflow-y-auto pr-1">
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Preset Scenarios</div>
               {PRESET_DISRUPTIONS.map(preset => {
                 const isActive = !!activeDisruptions.find(d => d.id === preset.id);
                 const isMalacca = preset.id === 'MALACCA_BLOCKADE';
@@ -181,18 +232,62 @@ export default function SupplyChainSimulator({
                   </button>
                 )
               })}
+
+              {availableAiAlerts.length > 0 && (
+                <>
+                  <div className="text-[10px] font-bold text-purple-400 uppercase tracking-widest mt-2 px-1 flex items-center gap-1.5 animate-pulse">
+                    <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
+                    Live News Alerts (AI)
+                  </div>
+                  {availableAiAlerts.map(alert => (
+                    <button
+                      key={alert.id}
+                      onClick={() => {
+                        addDisruption({
+                          id: alert.id,
+                          title: `[Live News] ${alert.title}`,
+                          type: alert.blast_radius ? 'DANGER_ZONE' : 'PRICE_SHOCK',
+                          center: alert.blast_radius ? [alert.blast_radius.lat, alert.blast_radius.lng] : undefined,
+                          radiusKm: alert.blast_radius ? alert.blast_radius.radius : undefined,
+                          multipliers: {
+                            freightCost: alert.disruption_multiplier || 1.5,
+                            transitDelay: alert.blast_radius ? 5 : 0,
+                            priceSpike: alert.disruption_multiplier || 1.2
+                          },
+                          affectedMinerals: alert.affected_minerals || undefined
+                        });
+                      }}
+                      className="p-3 rounded-xl border border-purple-500/20 bg-purple-500/5 hover:border-purple-500/40 hover:bg-purple-500/10 text-left transition-all duration-300 flex flex-col gap-2 group"
+                    >
+                      <div className="flex items-start justify-between gap-3 min-w-0 w-full">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <div className="p-2 rounded-lg shrink-0 bg-purple-500/20 text-purple-400 group-hover:scale-105 transition-transform">
+                            <AlertTriangle size={16} />
+                          </div>
+                          <div className="flex flex-col min-w-0 flex-1">
+                            <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-0.5">Click to Simulate</span>
+                            <span className="text-sm font-medium text-slate-300 group-hover:text-white line-clamp-2 leading-relaxed">
+                              {alert.title}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </>
+              )}
             </div>
           )}
 
           {activeTab === 'active' && (
             <div className="flex flex-col gap-3">
-              {activeDisruptions.length === 0 ? (
+              {relevantActiveDisruptions.length === 0 ? (
                 <div className="py-6 text-center text-xs text-slate-500 bg-slate-800/30 rounded-lg border border-slate-700/50 border-dashed">
                   No active scenarios.
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-3">
-                  {activeDisruptions.map(disruption => {
+                  {relevantActiveDisruptions.map((disruption: DisruptionPayload) => {
                     const isPreset = PRESET_DISRUPTIONS.find(p => p.id === disruption.id);
                     const isMalacca = disruption.id === 'MALACCA_BLOCKADE';
                     const isAi = !isPreset;
@@ -250,7 +345,7 @@ export default function SupplyChainSimulator({
           )}
 
           {/* Dynamic Impact Metrics */}
-          {activeDisruptions.length > 0 && (
+          {relevantActiveDisruptions.length > 0 && (
             <div className="mt-2 p-4 bg-slate-950/80 rounded-xl border border-slate-800 shadow-inner animate-in fade-in slide-in-from-bottom-2">
               <div className="flex items-center gap-2 mb-3">
                 <Zap className="w-4 h-4 text-accent-blue" />
