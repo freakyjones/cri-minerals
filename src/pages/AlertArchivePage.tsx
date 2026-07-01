@@ -53,13 +53,13 @@ export default function AlertArchivePage() {
       />
 
       <motion.div
-        className="max-w-4xl mx-auto py-8 px-4 h-full overflow-y-auto custom-scrollbar"
+        className="max-w-4xl mx-auto py-8 px-4 h-full flex flex-col overflow-hidden"
         variants={pageVariants}
         initial="initial"
         animate="animate"
         exit="exit"
       >
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center gap-4 mb-6 shrink-0">
           <Link to="/" className="p-2 hover:bg-slate-800 rounded-full transition-colors">
             <ArrowLeft className="w-6 h-6 text-slate-400 hover:text-white" />
           </Link>
@@ -69,7 +69,7 @@ export default function AlertArchivePage() {
           </div>
         </div>
 
-        <div className="relative mb-8">
+        <div className="relative mb-6 shrink-0">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Search className="h-5 w-5 text-slate-500" />
           </div>
@@ -91,7 +91,7 @@ export default function AlertArchivePage() {
         </div>
 
         {error && (
-          <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3 mb-8">
+          <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3 mb-6 shrink-0">
             <AlertCircle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
             <div className="flex-1">
               <h3 className="text-sm font-medium text-red-400">Error</h3>
@@ -100,7 +100,7 @@ export default function AlertArchivePage() {
           </div>
         )}
 
-        <div className="space-y-4">
+        <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-4 min-h-0 pb-6">
           {loading ? (
             Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="animate-pulse p-6 bg-slate-800/50 rounded-xl border border-slate-700/50">

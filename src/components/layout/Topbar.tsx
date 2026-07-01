@@ -1,5 +1,7 @@
 import { Search, Bell, Menu } from 'lucide-react';
 import { useSearchStore } from '../../stores/useSearchStore';
+import { useTopbarNotifications } from './topbar/useTopbarNotifications';
+import NotificationDropdown from './topbar/NotificationDropdown';
 
 interface TopbarProps {
   onMenuClick?: () => void;
@@ -7,6 +9,21 @@ interface TopbarProps {
 
 export default function Topbar({ onMenuClick }: TopbarProps) {
   const { openSearch } = useSearchStore();
+  const {
+    isOpen,
+    setIsOpen,
+    dropdownRef,
+    triggerRef,
+    alerts,
+    minerals,
+    alertsLoading,
+    alertsError,
+    readAlertIds,
+    unreadCount,
+    handleMarkAllRead,
+    handleAlertClick,
+    refetch
+  } = useTopbarNotifications();
 
   return (
     <header className="h-16 border-b border-white/10 bg-bg-base/95 backdrop-blur sticky top-0 z-40 flex items-center justify-between px-4 sm:px-6">
@@ -34,14 +51,39 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
         </button>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 relative">
         <button 
-          className="p-2 text-slate-400 hover:text-white rounded-md hover:bg-white/5 transition-colors focus-visible:ring-2 focus-visible:ring-accent-blue outline-none disabled:opacity-50" 
-          disabled
-          aria-label="Notifications"
+          ref={triggerRef}
+          onClick={() => setIsOpen(!isOpen)}
+          className={`p-2 text-slate-400 hover:text-white rounded-md hover:bg-white/5 transition-all focus-visible:ring-2 focus-visible:ring-accent-blue outline-none relative ${isOpen ? 'bg-white/5 text-white' : ''}`}
+          aria-label={`Notifications, ${unreadCount} unread`}
+          aria-haspopup="true"
+          aria-expanded={isOpen}
         >
           <Bell className="h-4 w-4" />
+          {unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white ring-2 ring-bg-base">
+              {unreadCount}
+            </span>
+          )}
         </button>
+
+        {/* Dropdown Container */}
+        {isOpen && (
+          <NotificationDropdown
+            dropdownRef={dropdownRef}
+            alerts={alerts}
+            readAlertIds={readAlertIds}
+            alertsLoading={alertsLoading}
+            alertsError={alertsError}
+            minerals={minerals}
+            unreadCount={unreadCount}
+            handleMarkAllRead={handleMarkAllRead}
+            handleAlertClick={handleAlertClick}
+            setIsOpen={setIsOpen}
+            refetch={refetch}
+          />
+        )}
       </div>
     </header>
   );
