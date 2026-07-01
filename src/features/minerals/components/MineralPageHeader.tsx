@@ -73,7 +73,7 @@ export default function MineralPageHeader({ mineral }: MineralPageHeaderProps) {
         </div>
 
         {/* Export Report Dropdown */}
-        <div className="relative inline-block z-50" ref={dropdownRef}>
+        <div className="relative inline-block z-30" ref={dropdownRef}>
           <button 
             onClick={() => !isExporting && setIsExportOpen(!isExportOpen)}
             disabled={isExporting}
