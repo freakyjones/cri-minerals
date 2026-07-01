@@ -68,26 +68,29 @@ export default function NotificationDropdown({
               Retry
             </button>
           </div>
-        ) : alerts.length === 0 ? (
+        ) : alerts.filter(a => !readAlertIds.includes(a.id)).length === 0 ? (
           <div className="p-8 flex flex-col items-center justify-center text-center gap-2">
             <CheckCircle2 className="w-8 h-8 text-slate-600" />
             <h4 className="text-sm font-semibold text-slate-300">All caught up!</h4>
             <p className="text-xs text-slate-500">No active alerts at this time.</p>
           </div>
         ) : (
-          alerts.map((alert) => {
-            const isRead = readAlertIds.includes(alert.id);
-            return (
-              <NotificationItem
-                key={alert.id}
-                alert={alert}
-                isRead={isRead}
-                minerals={minerals}
-                onAlertClick={handleAlertClick}
-                onLinkClick={() => setIsOpen(false)}
-              />
-            );
-          })
+          alerts
+            .filter(a => !readAlertIds.includes(a.id))
+            .slice(0, 5)
+            .map((alert) => {
+              const isRead = readAlertIds.includes(alert.id);
+              return (
+                <NotificationItem
+                  key={alert.id}
+                  alert={alert}
+                  isRead={isRead}
+                  minerals={minerals}
+                  onAlertClick={handleAlertClick}
+                  onLinkClick={() => setIsOpen(false)}
+                />
+              );
+            })
         )}
       </div>
 
