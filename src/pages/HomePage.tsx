@@ -4,7 +4,6 @@ import RiskHeatmap from '../features/minerals/components/RiskHeatmap';
 import CategoryFilter from '../features/minerals/components/CategoryFilter';
 import MineralTable from '../features/minerals/components/MineralTable';
 import MineralListMobile from '../features/minerals/components/MineralListMobile';
-import MarketAlerts from '../features/minerals/components/MarketAlerts';
 import { useAccessibleVariants } from '../lib/useAccessibleVariants';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { ErrorState } from '../components/ui/ErrorState';
@@ -95,10 +94,6 @@ export default function HomePage() {
               </motion.div>
             )}
           </div>
-        </div>
-        
-        <div className="w-full lg:w-80 shrink-0 hidden lg:block">
-          <MarketAlerts />
         </div>
       </div>
     </motion.div>
