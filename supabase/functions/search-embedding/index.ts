@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const corsHeaders = {
@@ -49,12 +50,12 @@ serve(async (req) => {
     return new Response(JSON.stringify({ embedding }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   } catch (error: any) {
     console.error('Error generating embedding:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
+      status: 500,
     });
   }
 });

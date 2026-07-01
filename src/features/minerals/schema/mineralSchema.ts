@@ -58,6 +58,7 @@ export const mineralSchema = z.object({
   substitutability: z.enum(['LOW', 'MEDIUM', 'HIGH']),
   substituteMineral: z.string().optional(),
   recyclingRate: z.number().min(0).max(100),
+  currentPriceUsd: z.number().optional(),
   recyclingSources: z.array(z.string()).min(1),
   esgRisks: z.array(z.object({
     country: z.string(),

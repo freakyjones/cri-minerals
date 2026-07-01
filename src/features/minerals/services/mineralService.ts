@@ -8,6 +8,7 @@ interface RawMineralDBRecord {
   risk_score?: string;
   substitute_mineral?: string | null;
   recycling_rate?: number | string;
+  current_price_usd?: number | string;
   recycling_sources?: string[];
   mineral_use_cases?: Array<{ label: string; share: number | string }>;
   mineral_reserves?: Array<{ country: string; share: number | string; amount_mt?: number | string | null }>;
@@ -27,6 +28,7 @@ const mapMineralFromDB = (dbMineral: RawMineralDBRecord): unknown => {
     riskScore: dbMineral.risk_score,
     substituteMineral: dbMineral.substitute_mineral ?? undefined,
     recyclingRate: Number(dbMineral.recycling_rate),
+    currentPriceUsd: dbMineral.current_price_usd ? Number(dbMineral.current_price_usd) : undefined,
     recyclingSources: dbMineral.recycling_sources,
     useCases: (dbMineral.mineral_use_cases || []).map((u) => ({ ...u, share: Number(u.share) })),
     reserves: (dbMineral.mineral_reserves || []).map((r) => ({
@@ -72,6 +74,7 @@ const MINERAL_LIST_SELECT_QUERY = `
   tagline,
   substitutability,
   recycling_rate,
+  current_price_usd,
   recycling_sources,
   mineral_reserves(country, share, amount_mt),
   mineral_production(country, share, amount_mt),

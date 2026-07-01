@@ -7,6 +7,8 @@ export const marketAlertSchema = z.object({
   severity: z.enum(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']),
   status: z.enum(['DRAFT', 'PUBLISHED']),
   created_at: z.string().datetime({ offset: true }).or(z.string()),
+  confidence_score: z.number().nullable().optional(),
+  rationale: z.array(z.string()).nullable().optional(),
   blast_radius: z.object({
     lat: z.number(),
     lng: z.number(),

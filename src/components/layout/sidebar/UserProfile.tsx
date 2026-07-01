@@ -8,8 +8,9 @@ export default function UserProfile() {
   const navigate = useNavigate();
   
   // Get initials from email or full_name
+  const isGuest = user?.is_anonymous ?? false;
   const emailPrefix = user?.email?.split('@')[0] || '';
-  const initials = emailPrefix.substring(0, 2).toUpperCase() || 'U';
+  const initials = isGuest ? 'GU' : (emailPrefix.substring(0, 2).toUpperCase() || 'U');
 
   return (
     <div className="p-4 border-t border-white/10 shrink-0 w-64">
@@ -20,7 +21,9 @@ export default function UserProfile() {
         <div className="flex-1 min-w-0 transition-opacity duration-300 md:opacity-0 md:group-hover:opacity-100 flex items-center justify-between gap-2 whitespace-nowrap">
           <div className="truncate">
             <p className="text-sm font-medium text-white truncate">{user?.email || 'Guest User'}</p>
-            <p className="text-[10px] text-slate-500 truncate uppercase tracking-wider">{user ? 'Enterprise Plan' : 'Public Access'}</p>
+            <p className="text-[10px] text-slate-500 truncate uppercase tracking-wider">
+              {!user ? 'Public Access' : (isGuest ? 'Guest Access' : 'Enterprise Plan')}
+            </p>
           </div>
           {user ? (
             <button 
