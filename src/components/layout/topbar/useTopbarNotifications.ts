@@ -13,29 +13,46 @@ export function useTopbarNotifications() {
   const { minerals } = useMinerals();
 
   // Local Storage for Read tracking
-  const [readAlertIds, setReadAlertIds] = useState<string[]>(() => {
+  const [readAlertIds, setReadAlertIds] = useState<string[]>([]);
+  const [isFirstTime, setIsFirstTime] = useState(false);
+
+  // Initialize read statuses from localStorage on load
+  useEffect(() => {
     try {
       const saved = localStorage.getItem('read_alert_ids');
-      return saved ? JSON.parse(saved) : [];
+      if (saved === null) {
+        setIsFirstTime(true);
+      } else {
+        setReadAlertIds(JSON.parse(saved));
+      }
     } catch {
-      return [];
+      // Fallback
     }
-  });
+  }, []);
 
-  // Prune read status for stale alerts to prevent infinite local storage growth
+  // Manage read status pruning or first-visit initialization when alerts load
   useEffect(() => {
     if (alerts.length > 0) {
-      const activeAlertIds = new Set(alerts.map(a => a.id));
-      setReadAlertIds(prev => {
-        const pruned = prev.filter(id => activeAlertIds.has(id));
-        if (pruned.length !== prev.length) {
-          localStorage.setItem('read_alert_ids', JSON.stringify(pruned));
-          return pruned;
-        }
-        return prev;
-      });
+      if (isFirstTime) {
+        // First time visiting the site in this browser: mark all current alerts read by default
+        const allIds = alerts.map(a => a.id);
+        setReadAlertIds(allIds);
+        localStorage.setItem('read_alert_ids', JSON.stringify(allIds));
+        setIsFirstTime(false);
+      } else {
+        // Standard pruning for stale/removed alerts to prevent infinite localStorage growth
+        const activeAlertIds = new Set(alerts.map(a => a.id));
+        setReadAlertIds(prev => {
+          const pruned = prev.filter(id => activeAlertIds.has(id));
+          if (pruned.length !== prev.length) {
+            localStorage.setItem('read_alert_ids', JSON.stringify(pruned));
+            return pruned;
+          }
+          return prev;
+        });
+      }
     }
-  }, [alerts]);
+  }, [alerts, isFirstTime]);
 
   const unreadAlerts = alerts.filter(alert => !readAlertIds.includes(alert.id));
   const unreadCount = unreadAlerts.length;
