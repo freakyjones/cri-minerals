@@ -1,36 +1,85 @@
 # Critical Minerals Intelligence Dashboard
 
-A strategic intelligence platform designed for policymakers, supply chain managers, and analysts to monitor the global critical minerals landscape. This dashboard provides data on global reserves, production, refining dominance, and supply chain choke points for the top critical minerals.
+![React 19](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)
+![Vite](https://img.shields.io/badge/Vite-6.0.1-646CFF?style=for-the-badge&logo=vite)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4.19-38B2AC?style=for-the-badge&logo=tailwind-css)
+![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?style=for-the-badge&logo=typescript)
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen?style=for-the-badge)
 
-## Features
+**Empowering strategic decision-making through actionable intelligence on the global critical minerals supply chain.**
 
-- **Top 10 Minerals Tracking:** Deep dives into Lithium, Cobalt, Rare Earth Elements, and more.
-- **Supply Chain Risk Scoring:** Visual badges mapping single points of failure.
-- **Geographic Visualizations:** Data charts highlighting country-by-country reserves vs. production.
-- **Data Guardrails:** Strict runtime validation using Zod to prevent data corruption.
-- **Role-Based Access Control:** Dual-tier user access (Admin vs Standard) natively integrated into Supabase Auth and synced via Postgres database triggers.
-- **Premium UI:** Built with Tailwind CSS, Framer Motion, and shadcn/ui for a highly responsive, modern dark-mode experience.
+*(Add a high-quality dashboard screenshot or GIF here)*
 
-## Tech Stack
+---
 
-- **Framework:** React 19 + Vite
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS
-- **Components:** shadcn/ui
-- **Animations:** Framer Motion
-- **Data Validation:** Zod
-- **Testing:** Vitest + React Testing Library
+## 🎯 Who Is This For?
 
-## Getting Started
+- **Policymakers (National Security & Trade Strategy):** Identify strategic dependencies, formulate resource independence initiatives, and monitor geopolitical chokepoints.
+- **Industry Analysts (Market Intelligence & Risk Mitigation):** Access pinpoint data accuracy, trend forecasting, and assess upstream supply chain shocks before they hit the market.
+
+**Quick Use Case:** 
+> *Scenario: A sudden export ban is announced in a major producing nation. Use the dashboard to immediately visualize downstream impacts on Cobalt availability and identify alternative sourcing regions.*
+
+---
+
+## ✨ Core Features
+
+*   🌍 **Global Reserves & Production Pulse:** Track the highest-stakes minerals (Lithium, Cobalt, Rare Earth Elements). Data tracks both current reserves and active production rates to prevent conflating ground capacity with output.
+*   ⚠️ **Predictive Supply Chain Risk Scoring:** The core analytical engine. Synthesizes geopolitical stability, market concentration, and environmental factors into an actionable vulnerability index/score for rapid triage.
+*   📊 **Interactive Threat Mapping:** The visual command center. Maps out global dependencies, trade routes, and production hubs, allowing users to visually spot supply chain bottlenecks.
+
+---
+
+## 🛠 Tech Stack
+
+*   **Core:** React 19, Vite, TypeScript
+*   **Styling:** Tailwind CSS (Dark Mode Native), shadcn/ui
+*   **State Management:** Zustand (Modular, feature-specific slices)
+*   **Data & Backend:** Supabase (Auth & Database)
+*   **Data Validation:** Zod (Runtime validation & TS inference)
+*   **Animations:** Framer Motion
+*   **Testing:** Vitest (Unit/Integration), Playwright (E2E)
+
+---
+
+## 🏗 Architecture & Engineering Rules
+
+> [!WARNING]
+> **Strict Adherence Required:** This project utilizes an `.agents/rules/project_rules.md` file. All developers and AI Agents MUST abide by these guardrails. 
+
+This project enforces strict boundaries to maintain scalability.
+
+```text
+src/
+├── components/   # Generic, reusable, stateless UI (e.g., shadcn)
+├── features/     # Domain-specific modules (e.g., minerals, auth)
+├── hooks/        # Shared custom hooks
+├── lib/          # Utilities and shared configurations
+├── pages/        # Thin routing wrappers
+├── stores/       # Global Zustand state management
+└── types/        # TypeScript interfaces and generated Supabase types
+```
+
+### 🚨 Strict Engineering Guardrails
+
+1. **Feature-Based Isolation:** Domain features are bounded contexts. A feature (e.g., `src/features/minerals`) CANNOT import from another feature. Shared logic must be in `src/components` or `src/lib`. No God Objects.
+2. **No Inline Styles:** The `style={{}}` prop is strictly forbidden unless styles are dynamically derived from data (e.g., hex codes from DB). All styling MUST use Tailwind CSS.
+3. **Data Boundary Validation:** All external data payloads MUST be parsed and validated through Zod schemas before entering the application state.
+4. **Thin Pages:** Files inside `src/pages/` contain zero business logic and zero data fetching; they are exclusively for composing feature components for routing.
+
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+
+*   Node.js >= 18.x
+*   npm
 
 ### Installation
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/freakyjones/cri-minerals.git
+   git clone <repository-url>
    cd cri-minerals
    ```
 
@@ -39,23 +88,29 @@ A strategic intelligence platform designed for policymakers, supply chain manage
    npm install
    ```
 
-3. Run the development server:
+3. Environment Setup:
+   Copy `.env.example` to `.env` and fill in your Supabase credentials.
+   ```bash
+   cp .env.example .env
+   ```
+
+4. Run the development server:
    ```bash
    npm run dev
    ```
-   The dashboard will be available at `http://localhost:5173`.
 
-## Testing & Building
+### Available Scripts
 
-To run the Vitest test suite:
-```bash
-npm run test
-```
+| Command | Description |
+| :--- | :--- |
+| `npm run dev` | Starts the Vite dev server with Hot Module Replacement. |
+| `npm run build` | Compiles TypeScript and builds for production. |
+| `npm run test` | Runs unit and integration tests using Vitest. |
+| `npm run lint` | Lints code using ESLint. |
+| `npm run preview` | Previews the production build locally. |
 
-To build for production (runs TypeScript type-checks first):
-```bash
-npm run build
-```
+---
 
-## AI Agent Guardrails
-This project includes an `.agents/rules/project_rules.md` file. Any AI coding assistant opening this repository will automatically read these rules to ensure all future code follows strict styling, architecture, and typing standards.
+## 🧪 Testing Strategy
+- **Unit & Integration:** Written in Vitest. Core business logic, Zod schemas, and Zustand stores require test coverage.
+- **End-to-End (E2E):** Written in Playwright. Tests must interact with the DOM using resilient `data-testid` attributes rather than brittle CSS classes.
