@@ -92,9 +92,6 @@ export default function MineralPage() {
               <div id="esg-alerts" className="scroll-mt-24">
                 <EsgAlertCard mineral={mineral} />
               </div>
-              {mineral.timeline && mineral.timeline.length > 0 && (
-                <MineralTimeline timeline={mineral.timeline} color={mineral.color} mineralId={mineral.id} currentPrice={mineral.currentPriceUsd} />
-              )}
               
               <div className="text-xs text-slate-500 bg-bg-surface border border-white/5 p-4 rounded-card">
                 <p className="mb-2 font-bold text-slate-400">Data Sources:</p>
@@ -112,6 +109,12 @@ export default function MineralPage() {
               <BatteryChemistrySandbox mineral={mineral} />
             </div>
           </div>
+
+          {mineral.timeline && mineral.timeline.length > 0 && (
+            <div className="mt-8">
+              <MineralTimeline timeline={mineral.timeline} color={mineral.color} mineralId={mineral.id} currentPrice={mineral.currentPriceUsd} />
+            </div>
+          )}
         </motion.div>
       </div>
     </>
