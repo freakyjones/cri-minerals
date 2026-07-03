@@ -12,7 +12,7 @@ export const marketAlertService = {
   async getPublishedAlerts(abortSignal?: AbortSignal): Promise<MarketAlert[]> {
     let query = supabase
       .from('market_alerts')
-      .select('*')
+      .select('*, user_alert_reads!left(user_id)')
       .eq('status', 'PUBLISHED')
       .order('created_at', { ascending: false })
       .limit(50);
@@ -34,7 +34,7 @@ export const marketAlertService = {
   async getDraftAlerts(abortSignal?: AbortSignal): Promise<MarketAlert[]> {
     let query = supabase
       .from('market_alerts')
-      .select('*')
+      .select('*, user_alert_reads!left(user_id)')
       .eq('status', 'DRAFT')
       .order('created_at', { ascending: false });
 
@@ -68,6 +68,39 @@ export const marketAlertService = {
       .eq('id', id);
       
     if (error) throw error;
+  },
+
+  async getAlertById(id: string): Promise<MarketAlert> {
+    const { data, error } = await supabase
+      .from('market_alerts')
+      .select('*, user_alert_reads!left(user_id)')
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+    if (!data) throw new Error("Alert not found");
+
+    const parsed = parseMarketAlert(data);
+    if (!parsed) throw new Error("Validation failed for market alert");
+    return parsed;
+  },
+
+  async markAlertAsRead(alertId: string, userId: string) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any)
+      .from('user_alert_reads')
+      .upsert({ user_id: userId, alert_id: alertId }, { onConflict: 'user_id,alert_id' });
+    
+    if (error) throw error;
+  },
+
+  async getUnreadAlertsCount(): Promise<number> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any)
+      .rpc('get_unread_alerts_count');
+      
+    if (error) throw error;
+    return (data as number) || 0;
   },
 
   async triggerAlertsGeneration() {

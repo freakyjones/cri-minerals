@@ -6,6 +6,7 @@ import UserProfile from './sidebar/UserProfile';
 import { navItems, preloadRoute } from './sidebar/navigation.config';
  
 import { useAuthStore } from '../../stores/useAuthStore';
+import { useUnreadAlertsCount } from '../../features/minerals/hooks/useMarketAlerts';
 
 interface SidebarProps {
   isMobileMenuOpen?: boolean;
@@ -14,6 +15,7 @@ interface SidebarProps {
 
 export default function Sidebar({ isMobileMenuOpen, onClose }: SidebarProps) {
   const { role } = useAuthStore();
+  const { data: unreadAlertsCount } = useUnreadAlertsCount();
   
   return (
     <>
@@ -64,11 +66,21 @@ export default function Sidebar({ isMobileMenuOpen, onClose }: SidebarProps) {
                 );
               }
 
+              let badge = undefined;
+              if (item.path === '/alerts' && unreadAlertsCount && unreadAlertsCount > 0) {
+                badge = (
+                  <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-brand-primary px-1.5 text-[10px] font-bold text-bg-base shrink-0">
+                    {unreadAlertsCount}
+                  </span>
+                );
+              }
+
               return (
                 <NavItem 
                   key={item.name} 
                   item={item} 
                   onClose={onClose} 
+                  badge={badge}
                 />
               );
             })}

@@ -61,23 +61,38 @@ export default function MarketAlerts() {
               <p className="text-sm text-slate-400">No active alerts at this time.</p>
             </div>
           ) : (
-            inboxAlerts.map((alert, idx) => (
-              <motion.div 
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                key={alert.id} 
-                className="bg-white/5 border border-white/10 rounded-lg p-4 transition-colors hover:bg-white/10"
-              >
-                <div className="flex items-start gap-3">
-                  {getSeverityIcon(alert.severity)}
-                  <div>
-                    <p className="text-sm font-bold text-white mb-1">{alert.title}</p>
-                    <p className="text-xs text-slate-400">{alert.description}</p>
-                  </div>
-                </div>
-              </motion.div>
-            ))
+            inboxAlerts.map((alert, idx) => {
+              const isRead = alert.user_alert_reads && alert.user_alert_reads.length > 0;
+              return (
+                <Link to={`/alerts/${alert.id}`} key={alert.id} className="block">
+                  <motion.div 
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.1 }}
+                    className={`border rounded-lg p-4 transition-colors relative ${
+                      isRead 
+                        ? 'bg-white/5 border-white/10 hover:bg-white/10 opacity-70' 
+                        : 'bg-bg-surface border-brand-primary/30 hover:border-brand-primary/60 shadow-[0_0_15px_rgba(0,240,255,0.05)]'
+                    }`}
+                  >
+                    {!isRead && (
+                      <div className="absolute top-3 right-3 w-2 h-2 rounded-full bg-brand-primary animate-pulse" />
+                    )}
+                    <div className="flex items-start gap-3">
+                      {getSeverityIcon(alert.severity)}
+                      <div className="pr-4">
+                        <p className={`text-sm mb-1 ${isRead ? 'font-medium text-slate-300' : 'font-bold text-white'}`}>
+                          {alert.title}
+                        </p>
+                        <p className={`text-xs ${isRead ? 'text-slate-500' : 'text-slate-400'}`}>
+                          {alert.description}
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                </Link>
+              );
+            })
           )}
         </div>
         

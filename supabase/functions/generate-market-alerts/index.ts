@@ -106,9 +106,9 @@ Deno.serve(async (req) => {
     const newsText = items.join('\n\n');
 
     // Call Gemini API
-    const geminiKey = Deno.env.get('GEMINI_API_KEY');
+    const geminiKey = Deno.env.get('GEMINI_API_KEY') || Deno.env.get('CRI_MINERALS_GEMINI_API_KEY');
     if (!geminiKey) {
-      throw new Error("Missing GEMINI_API_KEY environment variable");
+      throw new Error("Missing GEMINI_API_KEY or CRI_MINERALS_GEMINI_API_KEY environment variable");
     }
 
     const MODELS_TO_TRY = [
@@ -174,7 +174,32 @@ ${newsText}`;
             contents: [{ parts: [{ text: prompt }] }],
             // 3. Fix LLM Formatting Bug: Strongly enforce JSON output schema
             generationConfig: {
-              responseMimeType: "application/json"
+              responseMimeType: "application/json",
+              responseSchema: {
+                type: "ARRAY",
+                items: {
+                  type: "OBJECT",
+                  properties: {
+                    title: { type: "STRING" },
+                    description: { type: "STRING" },
+                    severity: { type: "STRING" },
+                    confidenceScore: { type: "NUMBER" },
+                    rationale: { type: "ARRAY", items: { type: "STRING" } },
+                    blastRadius: {
+                      type: "OBJECT",
+                      nullable: true,
+                      properties: {
+                        lat: { type: "NUMBER" },
+                        lng: { type: "NUMBER" },
+                        radius: { type: "NUMBER" }
+                      }
+                    },
+                    disruptionMultiplier: { type: "NUMBER", nullable: true },
+                    affectedMinerals: { type: "ARRAY", items: { type: "STRING" }, nullable: true }
+                  },
+                  required: ["title", "description", "severity"]
+                }
+              }
             }
           })
         });
@@ -218,20 +243,17 @@ ${newsText}`;
     }
 
      
-    const rowsToInsert = validAlerts.map((alert: any) => {
-      const rawAlert = alert.alert || alert;
-      return {
-        title: rawAlert.title || rawAlert.Title || rawAlert.TITLE || 'Alert Title Missing',
-        description: rawAlert.description || rawAlert.Description || rawAlert.DESCRIPTION || 'Alert description missing',
-        severity: String(rawAlert.severity || rawAlert.Severity || rawAlert.SEVERITY || 'MEDIUM').toUpperCase(),
-        status: 'DRAFT',
-        confidence_score: rawAlert.confidenceScore || rawAlert.ConfidenceScore || rawAlert.confidence_score || null,
-        rationale: rawAlert.rationale || rawAlert.Rationale || [],
-        blast_radius: rawAlert.blastRadius || rawAlert.BlastRadius || rawAlert.blast_radius || null,
-        disruption_multiplier: rawAlert.disruptionMultiplier || rawAlert.DisruptionMultiplier || rawAlert.disruption_multiplier || null,
-        affected_minerals: rawAlert.affectedMinerals || rawAlert.AffectedMinerals || rawAlert.affected_minerals || null
-      };
-    }).filter(r => r.title !== 'Alert Title Missing'); // Extra safety measure
+    const rowsToInsert = validAlerts.map((alert: any) => ({
+      title: alert.title,
+      description: alert.description,
+      severity: alert.severity,
+      status: 'DRAFT',
+      confidence_score: alert.confidenceScore || null,
+      rationale: alert.rationale || [],
+      blast_radius: alert.blastRadius || null,
+      disruption_multiplier: alert.disruptionMultiplier || null,
+      affected_minerals: alert.affectedMinerals || null
+    }));
 
     if (rowsToInsert.length === 0) {
       return new Response(

@@ -46,9 +46,9 @@ serve(async (req) => {
       });
     }
 
-    const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
+    const geminiApiKey = Deno.env.get('GEMINI_API_KEY') || Deno.env.get('CRI_MINERALS_GEMINI_API_KEY');
     if (!geminiApiKey) {
-      throw new Error("GEMINI_API_KEY is missing");
+      throw new Error("GEMINI_API_KEY or CRI_MINERALS_GEMINI_API_KEY is missing");
     }
 
     let successCount = 0;

@@ -1,4 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { 
   useMineral, 
@@ -9,9 +10,13 @@ import {
   MineralTimeline,
   GeopoliticsSection
 } from '../features/minerals';
+import BatteryChemistrySandbox from '../features/minerals/components/BatteryChemistrySandbox';
 import { useAccessibleVariants } from '../lib/useAccessibleVariants';
 import { ErrorState } from '../components/ui/ErrorState';
 import { SEO } from '../components/SEO';
+
+const GlobalMap = lazy(() => import('../features/minerals/components/GlobalMap'));
+const ChokePoints = lazy(() => import('../features/minerals/components/ChokePoints'));
 
 const pageVariantsFull = {
   initial: { opacity: 0, y: 20 },
@@ -91,9 +96,6 @@ export default function MineralPage() {
               <div id="esg-alerts" className="scroll-mt-24">
                 <EsgAlertCard mineral={mineral} />
               </div>
-              {mineral.timeline && mineral.timeline.length > 0 && (
-                <MineralTimeline timeline={mineral.timeline} color={mineral.color} />
-              )}
               
               <div className="text-xs text-slate-500 bg-bg-surface border border-white/5 p-4 rounded-card">
                 <p className="mb-2 font-bold text-slate-400">Data Sources:</p>
@@ -106,7 +108,29 @@ export default function MineralPage() {
             </div>
             
             {/* Right Column - Geopolitics & Supply Chain */}
-            <GeopoliticsSection mineral={mineral} />
+            <div className="lg:col-span-2 flex flex-col space-y-8">
+              <GeopoliticsSection mineral={mineral} />
+              <BatteryChemistrySandbox mineral={mineral} />
+            </div>
+          </div>
+
+          {/* Full Width Components */}
+          <div className="mt-8 space-y-8">
+            <div className="w-full">
+              <Suspense fallback={<div className="h-[400px] w-full bg-slate-900/50 rounded-xl border border-slate-800 flex items-center justify-center text-slate-500 animate-pulse">Loading map...</div>}>
+                <GlobalMap mineral={mineral} />
+              </Suspense>
+            </div>
+
+            <div id="supply-risk" className="scroll-mt-24">
+              <Suspense fallback={<div className="h-64 w-full bg-slate-900/50 rounded-xl border border-slate-800 flex items-center justify-center text-slate-500 animate-pulse">Loading risks...</div>}>
+                <ChokePoints mineral={mineral} />
+              </Suspense>
+            </div>
+
+            {mineral.timeline && mineral.timeline.length > 0 && (
+              <MineralTimeline timeline={mineral.timeline} color={mineral.color} mineralId={mineral.id} currentPrice={mineral.currentPriceUsd} />
+            )}
           </div>
         </motion.div>
       </div>

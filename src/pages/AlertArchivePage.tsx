@@ -129,12 +129,12 @@ export default function AlertArchivePage() {
           ) : (
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             displayedAlerts.map((alert: any) => (
-              <motion.div
-                key={alert.id}
-                variants={itemVariants}
-                className="p-6 bg-slate-800/80 hover:bg-slate-800 rounded-xl border border-slate-700/50 transition-all flex gap-4"
-              >
-                <div className="mt-1">
+              <Link to={`/alerts/${alert.id}`} key={alert.id} className="block">
+                <motion.div
+                  variants={itemVariants}
+                  className="p-6 bg-slate-800/80 hover:bg-slate-800 rounded-xl border border-slate-700/50 transition-all flex gap-4"
+                >
+                  <div className="mt-1">
                   {alert.severity === 'CRITICAL' ? (
                     <AlertTriangle className="w-5 h-5 text-red-500" />
                   ) : alert.severity === 'HIGH' ? (
@@ -167,7 +167,8 @@ export default function AlertArchivePage() {
                   <h3 className="text-lg font-medium text-white mb-2">{alert.title}</h3>
                   <p className="text-slate-300 text-sm leading-relaxed">{alert.description}</p>
                 </div>
-              </motion.div>
+                </motion.div>
+              </Link>
             ))
           )}
         </div>

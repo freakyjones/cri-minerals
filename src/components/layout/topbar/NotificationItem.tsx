@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-imports */
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AlertCircle, AlertTriangle, ShieldAlert, TrendingUp } from 'lucide-react';
 import type { MarketAlert } from '../../../features/minerals/schema/marketAlertSchema';
 import type { Mineral } from '../../../features/minerals/schema/mineralSchema';
@@ -65,10 +65,17 @@ export default function NotificationItem({
   onLinkClick
 }: NotificationItemProps) {
   const style = severityStyles[alert.severity as keyof typeof severityStyles] || severityStyles.LOW;
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    onAlertClick(alert.id);
+    onLinkClick(); // close the dropdown
+    navigate(`/alerts/${alert.id}`);
+  };
 
   return (
     <div 
-      onClick={() => onAlertClick(alert.id)}
+      onClick={handleClick}
       className={`p-4 transition-colors flex flex-col gap-1 cursor-pointer text-left ${
         isRead ? 'opacity-65 hover:opacity-100 bg-transparent' : 'bg-white/[0.02] hover:bg-white/[0.04]'
       }`}
@@ -102,7 +109,10 @@ export default function NotificationItem({
                 <Link
                   key={mineral.id}
                   to={`/mineral/${mineral.slug}`}
-                  onClick={onLinkClick}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onLinkClick();
+                  }}
                   className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] font-bold text-slate-300 hover:text-white hover:bg-slate-700 hover:border-slate-600 transition-colors border-l-[2.5px]"
                   style={{ borderLeftColor: mineral.color }}
                 >

@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Circle, GeoJSON } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
 import CustomZoomControls from './map/CustomZoomControls';
@@ -13,6 +13,7 @@ import { useSupplyChainGraph } from '../hooks/useSupplyChainGraph';
 import { SimulatedEvent } from './SupplyChainSimulator';
 import ErrorBoundary from '../../../components/ErrorBoundary';
 import { useSimulatorStore } from '../../../stores/useSimulatorStore';
+import { MapMode } from './SupplyChainMapArea';
 
 const createCustomIcon = (color: string, isRefiner: boolean, share: number, complianceStatus: string = 'NEUTRAL') => {
   const baseSize = isRefiner ? 28 : 18;
@@ -59,6 +60,7 @@ interface SupplyChainMapProps {
   showChokePoints?: boolean;
   showCompliance?: boolean;
   simulatedEvent?: SimulatedEvent;
+  mapMode?: MapMode;
 }
 
 export default function SupplyChainMap({ 
@@ -66,11 +68,20 @@ export default function SupplyChainMap({
   showTradeFlows = true, 
   showChokePoints = true, 
   showCompliance = false,
-  simulatedEvent = null 
+  simulatedEvent = null,
+  mapMode = 'NETWORK'
 }: SupplyChainMapProps) {
   // Use the decoupled Scenario Engine hook
   const rawGraph = useSupplyChainGraph(mineral, showCompliance, simulatedEvent || null, "");
   const activeDisruptions = useSimulatorStore(state => state.activeDisruptions);
+  const [geoData, setGeoData] = useState<any>(null);
+
+  useEffect(() => {
+    fetch('/data/world-countries-lite.json')
+      .then(res => res.json())
+      .then(data => setGeoData(data))
+      .catch(err => console.error("Failed to load geojson", err));
+  }, []);
 
   // Map pure data nodes to UI icons
   const nodes = useMemo(() => {
@@ -81,6 +92,51 @@ export default function SupplyChainMap({
   }, [rawGraph.nodes]);
 
   const { routes, chokePointCoords, dangerZones } = rawGraph;
+
+  // Choropleth Styling
+  const getStyle = (feature: any) => {
+    const defaultStyle = {
+      fillColor: '#1e293b',
+      weight: 1,
+      opacity: 1,
+      color: '#0f172a',
+      fillOpacity: 0.4
+    };
+
+    if (!mineral || mapMode === 'NETWORK') return defaultStyle;
+
+    const countryName = feature.properties.name;
+    
+    // Check if country matches extraction or refining
+    const extractionMatch = mineral.production.find((e: any) => e.country === countryName || (e.country === 'DRC' && countryName === 'Democratic Republic of the Congo'));
+    const refiningMatch = mineral.refining.find((r: any) => r.country === countryName);
+
+    if (mapMode === 'EXTRACTION' && extractionMatch) {
+      const share = extractionMatch.share;
+      const intensity = share > 50 ? '#f59e0b' : share > 20 ? '#fbbf24' : share > 5 ? '#fcd34d' : '#fef3c7';
+      return {
+        ...defaultStyle,
+        fillColor: intensity,
+        fillOpacity: 0.6 + (share / 100) * 0.4,
+        color: '#f59e0b',
+        weight: 1.5
+      };
+    }
+
+    if (mapMode === 'REFINING' && refiningMatch) {
+      const share = refiningMatch.share;
+      const intensity = share > 50 ? '#ef4444' : share > 20 ? '#f87171' : share > 5 ? '#fca5a5' : '#fee2e2';
+      return {
+        ...defaultStyle,
+        fillColor: intensity,
+        fillOpacity: 0.6 + (share / 100) * 0.4,
+        color: '#ef4444',
+        weight: 1.5
+      };
+    }
+
+    return defaultStyle;
+  };
 
   return (
     <div className="absolute inset-0 z-0 bg-slate-950">
@@ -101,6 +157,15 @@ export default function SupplyChainMap({
             url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
           />
+
+          {/* Choropleth Layer */}
+          {geoData && mapMode !== 'NETWORK' && (
+            <GeoJSON 
+              key={`${mapMode}-${mineral?.id}`} // force re-render when mode or mineral changes
+              data={geoData} 
+              style={getStyle} 
+            />
+          )}
 
           {/* Choke Points Layer */}
           {showChokePoints && chokePointsData.map(cp => (
