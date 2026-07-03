@@ -1,4 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { 
   useMineral, 
@@ -13,6 +14,9 @@ import BatteryChemistrySandbox from '../features/minerals/components/BatteryChem
 import { useAccessibleVariants } from '../lib/useAccessibleVariants';
 import { ErrorState } from '../components/ui/ErrorState';
 import { SEO } from '../components/SEO';
+
+const GlobalMap = lazy(() => import('../features/minerals/components/GlobalMap'));
+const ChokePoints = lazy(() => import('../features/minerals/components/ChokePoints'));
 
 const pageVariantsFull = {
   initial: { opacity: 0, y: 20 },
@@ -110,11 +114,24 @@ export default function MineralPage() {
             </div>
           </div>
 
-          {mineral.timeline && mineral.timeline.length > 0 && (
-            <div className="mt-8">
-              <MineralTimeline timeline={mineral.timeline} color={mineral.color} mineralId={mineral.id} currentPrice={mineral.currentPriceUsd} />
+          {/* Full Width Components */}
+          <div className="mt-8 space-y-8">
+            <div className="w-full">
+              <Suspense fallback={<div className="h-[400px] w-full bg-slate-900/50 rounded-xl border border-slate-800 flex items-center justify-center text-slate-500 animate-pulse">Loading map...</div>}>
+                <GlobalMap mineral={mineral} />
+              </Suspense>
             </div>
-          )}
+
+            <div id="supply-risk" className="scroll-mt-24">
+              <Suspense fallback={<div className="h-64 w-full bg-slate-900/50 rounded-xl border border-slate-800 flex items-center justify-center text-slate-500 animate-pulse">Loading risks...</div>}>
+                <ChokePoints mineral={mineral} />
+              </Suspense>
+            </div>
+
+            {mineral.timeline && mineral.timeline.length > 0 && (
+              <MineralTimeline timeline={mineral.timeline} color={mineral.color} mineralId={mineral.id} currentPrice={mineral.currentPriceUsd} />
+            )}
+          </div>
         </motion.div>
       </div>
     </>
