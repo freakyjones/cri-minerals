@@ -17,6 +17,7 @@ const SupplyChainPage = lazy(() => import('./pages/SupplyChainPage'));
 const CompliancePage = lazy(() => import('./pages/CompliancePage'));
 const AuthPage = lazy(() => import('./features/auth/pages/AuthPage'));
 const AlertArchivePage = lazy(() => import('./pages/AlertArchivePage'));
+const AlertDetailPage = lazy(() => import('./features/minerals/pages/AlertDetailPage'));
 
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import GuestRoute from './components/layout/GuestRoute';
@@ -88,6 +89,7 @@ function AppRoutes() {
                   <Route path="/supply-chain" element={<SupplyChainPage />} />
                   <Route path="/compliance" element={<CompliancePage />} />
                   <Route path="/alerts" element={<AlertArchivePage />} />
+                  <Route path="/alerts/:id" element={<AlertDetailPage />} />
                 </Routes>
               </Suspense>
             </AnimatePresence>

@@ -4,9 +4,10 @@ import { NavItemConfig, preloadRoute } from './navigation.config';
 interface NavItemProps {
   item: NavItemConfig;
   onClose?: () => void;
+  badge?: React.ReactNode;
 }
 
-export default function NavItem({ item, onClose }: NavItemProps) {
+export default function NavItem({ item, onClose, badge }: NavItemProps) {
   const location = useLocation();
   const isActive = location.pathname === item.path;
   const Icon = item.icon;
@@ -34,6 +35,7 @@ export default function NavItem({ item, onClose }: NavItemProps) {
       {Icon && <Icon className={`h-5 w-5 shrink-0 ${isActive ? 'text-accent-blue' : 'text-slate-500'}`} />}
       <span className="flex-1 whitespace-nowrap transition-opacity duration-300 md:opacity-0 md:group-hover:opacity-100">{item.name}</span>
       {item.disabled && <span className="ml-auto text-[10px] uppercase bg-white/5 text-slate-500 px-1.5 py-0.5 rounded shrink-0 transition-opacity duration-300 md:opacity-0 md:group-hover:opacity-100">Soon</span>}
+      {badge && <span className="ml-auto transition-opacity duration-300 md:opacity-0 md:group-hover:opacity-100">{badge}</span>}
     </Link>
   );
 }

@@ -15,7 +15,8 @@ export const marketAlertSchema = z.object({
     radius: z.number()
   }).nullable().optional(),
   disruption_multiplier: z.number().nullable().optional(),
-  affected_minerals: z.array(z.string()).nullable().optional()
+  affected_minerals: z.array(z.string()).nullable().optional(),
+  user_alert_reads: z.array(z.object({ user_id: z.string() })).optional()
 });
 
 export type MarketAlert = z.infer<typeof marketAlertSchema>;

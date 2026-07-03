@@ -9,6 +9,7 @@ import {
   MineralTimeline,
   GeopoliticsSection
 } from '../features/minerals';
+import BatteryChemistrySandbox from '../features/minerals/components/BatteryChemistrySandbox';
 import { useAccessibleVariants } from '../lib/useAccessibleVariants';
 import { ErrorState } from '../components/ui/ErrorState';
 import { SEO } from '../components/SEO';
@@ -92,7 +93,7 @@ export default function MineralPage() {
                 <EsgAlertCard mineral={mineral} />
               </div>
               {mineral.timeline && mineral.timeline.length > 0 && (
-                <MineralTimeline timeline={mineral.timeline} color={mineral.color} />
+                <MineralTimeline timeline={mineral.timeline} color={mineral.color} mineralId={mineral.id} currentPrice={mineral.currentPriceUsd} />
               )}
               
               <div className="text-xs text-slate-500 bg-bg-surface border border-white/5 p-4 rounded-card">
@@ -106,7 +107,10 @@ export default function MineralPage() {
             </div>
             
             {/* Right Column - Geopolitics & Supply Chain */}
-            <GeopoliticsSection mineral={mineral} />
+            <div className="lg:col-span-2 flex flex-col space-y-8">
+              <GeopoliticsSection mineral={mineral} />
+              <BatteryChemistrySandbox mineral={mineral} />
+            </div>
           </div>
         </motion.div>
       </div>

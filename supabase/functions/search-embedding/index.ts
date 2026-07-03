@@ -18,9 +18,9 @@ serve(async (req) => {
       throw new Error("Missing query");
     }
 
-    const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
+    const geminiApiKey = Deno.env.get('GEMINI_API_KEY') || Deno.env.get('CRI_MINERALS_GEMINI_API_KEY');
     if (!geminiApiKey) {
-      throw new Error("GEMINI_API_KEY is missing");
+      throw new Error("GEMINI_API_KEY or CRI_MINERALS_GEMINI_API_KEY is missing");
     }
 
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key=${geminiApiKey}`, {

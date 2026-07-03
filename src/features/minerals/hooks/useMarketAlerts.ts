@@ -92,3 +92,35 @@ export function useSemanticSearch() {
     }
   });
 }
+
+export function useMarketAlert(id: string) {
+  return useQuery({
+    queryKey: ['marketAlert', id],
+    queryFn: () => marketAlertService.getAlertById(id),
+    enabled: !!id,
+  });
+}
+
+export function useMarkAlertAsRead() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ alertId, userId }: { alertId: string; userId: string }) => 
+      marketAlertService.markAlertAsRead(alertId, userId),
+    onSuccess: () => {
+      // Refresh the lists and the unread count when an alert is marked as read
+      queryClient.invalidateQueries({ queryKey: ['marketAlerts'] });
+      queryClient.invalidateQueries({ queryKey: ['unreadAlertsCount'] });
+      // We could also do optimistic updates here
+    }
+  });
+}
+
+export function useUnreadAlertsCount() {
+  return useQuery({
+    queryKey: ['unreadAlertsCount'],
+    queryFn: () => marketAlertService.getUnreadAlertsCount(),
+    // Keep it relatively fresh
+    staleTime: 60000,
+  });
+}
