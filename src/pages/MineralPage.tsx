@@ -129,7 +129,7 @@ export default function MineralPage() {
             </div>
 
             {mineral.timeline && mineral.timeline.length > 0 && (
-              <MineralTimeline timeline={mineral.timeline} color={mineral.color} mineralId={mineral.id} currentPrice={mineral.currentPriceUsd} />
+              <MineralTimeline timeline={mineral.timeline} color={mineral.color} currentPrice={mineral.currentPriceUsd} />
             )}
           </div>
         </motion.div>

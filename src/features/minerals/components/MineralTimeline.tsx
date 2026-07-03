@@ -8,7 +8,6 @@ import type { TimelineEvent } from '../schema/mineralSchema';
 interface MineralTimelineProps {
   timeline: TimelineEvent[];
   color: string;
-  mineralId: string;
   currentPrice: number | undefined;
 }
 
@@ -27,7 +26,7 @@ const itemVariants: Variants = {
   show: { opacity: 1, x: 0, transition: { duration: 0.4, ease: 'easeOut' } }
 };
 
-export default function MineralTimeline({ timeline, color, mineralId, currentPrice }: MineralTimelineProps) {
+export default function MineralTimeline({ timeline, color, currentPrice }: MineralTimelineProps) {
   const [activeYear, setActiveYear] = useState<number | null>(null);
 
   const sorted = useMemo(() => {
@@ -46,12 +45,14 @@ export default function MineralTimeline({ timeline, color, mineralId, currentPri
     let basePrice = currentPrice ? currentPrice / 2 : 100;
 
     for (let year = startYear; year <= endYear; year++) {
-      // Create some volatility
-      const volatility = 1 + (Math.sin(year * 1.5) * 0.3) + (Math.random() * 0.2 - 0.1);
+      // Create some volatility without Math.random (pure)
+      const pseudoRandom1 = (year * 7 % 10) / 10;
+      const volatility = 1 + (Math.sin(year * 1.5) * 0.3) + (pseudoRandom1 * 0.2 - 0.1);
       
       // If there's an event this year, spike the price to simulate a "market shock"
       const hasEvent = sorted.some(e => e.year === year);
-      const shockFactor = hasEvent ? 1.5 + Math.random() : 1;
+      const pseudoRandom2 = (year * 3 % 10) / 10;
+      const shockFactor = hasEvent ? 1.5 + pseudoRandom2 : 1;
       
       basePrice = basePrice * volatility * shockFactor;
       
@@ -71,7 +72,7 @@ export default function MineralTimeline({ timeline, color, mineralId, currentPri
     }
 
     return data;
-  }, [sorted, currentPrice, mineralId]);
+  }, [sorted, currentPrice]);
 
   if (!timeline || timeline.length === 0) return null;
 
@@ -150,6 +151,7 @@ export default function MineralTimeline({ timeline, color, mineralId, currentPri
                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '8px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)' }}
                    itemStyle={{ color: '#f8fafc', fontWeight: 'bold' }}
                    labelStyle={{ color: '#94a3b8' }}
+                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                    formatter={(value: any) => [`$${Number(value).toLocaleString()}`, 'Price']}
                  />
                  <Line 

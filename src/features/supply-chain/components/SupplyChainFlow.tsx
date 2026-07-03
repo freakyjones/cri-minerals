@@ -6,6 +6,7 @@ interface SupplyChainFlowProps {
   mineral: Mineral | null;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CustomNode = ({ x, y, width, height, index, payload, containerWidth }: any) => {
   const isOut = x + width + 6 > containerWidth;
   return (
@@ -118,7 +119,10 @@ export default function SupplyChainFlow({ mineral }: SupplyChainFlowProps) {
         <div className="flex gap-4 text-xs font-bold uppercase tracking-wider text-slate-500">
            <span className="flex items-center gap-1"><div className="w-3 h-3 bg-amber-500 rounded-full"></div> Extraction</span>
            <span className="flex items-center gap-1"><div className="w-3 h-3 bg-red-500 rounded-full"></div> Refining</span>
-           <span className="flex items-center gap-1"><div className="w-3 h-3 rounded-full" style={{backgroundColor: mineral.color}}></div> Application</span>
+           <span className="flex items-center gap-1">
+             {/* eslint-disable-next-line react/forbid-dom-props */}
+             <div className="w-3 h-3 rounded-full" style={{backgroundColor: mineral.color}}></div> Application
+           </span>
         </div>
       </div>
 
@@ -135,6 +139,7 @@ export default function SupplyChainFlow({ mineral }: SupplyChainFlowProps) {
             <Tooltip 
               contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '8px' }}
               itemStyle={{ color: '#f8fafc', fontWeight: 'bold' }}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               formatter={(value: any) => [`${Number(value).toFixed(1)}%`, 'Volume']}
             />
           </Sankey>
