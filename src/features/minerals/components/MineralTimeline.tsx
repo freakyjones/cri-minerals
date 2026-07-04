@@ -5,6 +5,8 @@ import { Card } from '@/components/ui/card';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import type { TimelineEvent } from '../schema/mineralSchema';
 
+import { generateMockPriceData } from './MineralTimeline.utils';
+
 interface MineralTimelineProps {
   timeline: TimelineEvent[];
   color: string;
@@ -36,42 +38,7 @@ export default function MineralTimeline({ timeline, color, currentPrice }: Miner
 
   // Generate mock historical price data based on currentPrice and timeline range
   const priceData = useMemo(() => {
-    if (sorted.length === 0) return [];
-    
-    const startYear = sorted[0].year - 2;
-    const endYear = new Date().getFullYear();
-    const data = [];
-    
-    let basePrice = currentPrice ? currentPrice / 2 : 100;
-
-    for (let year = startYear; year <= endYear; year++) {
-      // Create some volatility without Math.random (pure)
-      const pseudoRandom1 = (year * 7 % 10) / 10;
-      const volatility = 1 + (Math.sin(year * 1.5) * 0.3) + (pseudoRandom1 * 0.2 - 0.1);
-      
-      // If there's an event this year, spike the price to simulate a "market shock"
-      const hasEvent = sorted.some(e => e.year === year);
-      const pseudoRandom2 = (year * 3 % 10) / 10;
-      const shockFactor = hasEvent ? 1.5 + pseudoRandom2 : 1;
-      
-      basePrice = basePrice * volatility * shockFactor;
-      
-      // Keep within bounds somewhat
-      if (basePrice < (currentPrice || 100) * 0.2) basePrice *= 2;
-      if (basePrice > (currentPrice || 100) * 3) basePrice *= 0.5;
-
-      data.push({
-        year,
-        price: Math.round(basePrice)
-      });
-    }
-
-    // Ensure the last year is close to current price if provided
-    if (currentPrice) {
-      data[data.length - 1].price = currentPrice;
-    }
-
-    return data;
+    return generateMockPriceData(sorted, currentPrice);
   }, [sorted, currentPrice]);
 
   if (!timeline || timeline.length === 0) return null;
@@ -142,7 +109,10 @@ export default function MineralTimeline({ timeline, color, currentPrice }: Miner
         {/* Right: Price Chart */}
         <div className="hidden xl:block relative h-full">
           <div className="sticky top-24 h-[400px] border border-white/5 rounded-xl bg-black/20 p-4">
-             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 text-center">Historical Price Index (USD/mt)</h3>
+             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center justify-center gap-2">
+               Historical Price Index (USD/mt)
+               <span className="bg-blue-500/20 text-blue-300 text-[10px] px-2 py-0.5 rounded border border-blue-500/30">SIMULATED</span>
+             </h3>
              <ResponsiveContainer width="100%" height="100%">
                <LineChart data={priceData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                  <XAxis dataKey="year" stroke="#475569" fontSize={11} tickLine={false} axisLine={false} />

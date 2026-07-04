@@ -6,16 +6,15 @@ interface BatteryChemistrySandboxProps {
   mineral: Mineral;
 }
 
+import { normalizeShares } from './BatteryChemistrySandbox.utils';
+
 export default function BatteryChemistrySandbox({ mineral }: BatteryChemistrySandboxProps) {
   const [nmcShare, setNmcShare] = useState(50);
   const [lfpShare, setLfpShare] = useState(30);
   const [solidStateShare, setSolidStateShare] = useState(20);
 
   // Normalize shares to 100%
-  const total = nmcShare + lfpShare + solidStateShare;
-  const nmcNorm = total === 0 ? 33.33 : (nmcShare / total) * 100;
-  const lfpNorm = total === 0 ? 33.33 : (lfpShare / total) * 100;
-  const solidStateNorm = total === 0 ? 33.33 : (solidStateShare / total) * 100;
+  const { nmcNorm, lfpNorm, solidStateNorm } = normalizeShares(nmcShare, lfpShare, solidStateShare);
 
   // Calculate demand projections (mock logic)
   const projectionData = useMemo(() => {
