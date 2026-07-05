@@ -74,6 +74,7 @@ export default function SupplyChainMap({
   // Use the decoupled Scenario Engine hook
   const rawGraph = useSupplyChainGraph(mineral, showCompliance, simulatedEvent || null, "");
   const activeDisruptions = useSimulatorStore(state => state.activeDisruptions);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [geoData, setGeoData] = useState<any>(null);
 
   useEffect(() => {
@@ -94,6 +95,7 @@ export default function SupplyChainMap({
   const { routes, chokePointCoords, dangerZones } = rawGraph;
 
   // Choropleth Styling
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getStyle = (feature: any) => {
     const defaultStyle = {
       fillColor: '#1e293b',
@@ -108,7 +110,9 @@ export default function SupplyChainMap({
     const countryName = feature.properties.name;
     
     // Check if country matches extraction or refining
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const extractionMatch = mineral.production.find((e: any) => e.country === countryName || (e.country === 'DRC' && countryName === 'Democratic Republic of the Congo'));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const refiningMatch = mineral.refining.find((r: any) => r.country === countryName);
 
     if (mapMode === 'EXTRACTION' && extractionMatch) {

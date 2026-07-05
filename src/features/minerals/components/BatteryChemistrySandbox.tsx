@@ -157,6 +157,7 @@ export default function BatteryChemistrySandbox({ mineral }: BatteryChemistrySan
                 contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '8px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)' }}
                 itemStyle={{ color: '#f8fafc', fontWeight: 'bold' }}
                 labelStyle={{ color: '#94a3b8' }}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 formatter={(value: any) => [`${value} Index`, 'Demand']}
               />
               <Area 

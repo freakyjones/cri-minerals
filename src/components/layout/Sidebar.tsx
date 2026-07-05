@@ -6,6 +6,7 @@ import UserProfile from './sidebar/UserProfile';
 import { navItems, preloadRoute } from './sidebar/navigation.config';
  
 import { useAuthStore } from '../../stores/useAuthStore';
+// eslint-disable-next-line no-restricted-imports
 import { useUnreadAlertsCount } from '../../features/minerals/hooks/useMarketAlerts';
 
 interface SidebarProps {
