@@ -2,8 +2,8 @@ import AnalystQueue from '../features/minerals/components/AnalystQueue';
 import { SEO } from '../components/SEO';
 import { useTriggerAlerts } from '../features/minerals/hooks/useMarketAlerts';
 import { useAlertQueue } from '../features/minerals/hooks/useAlertQueue';
-import { RefreshCw, CheckCircle2, AlertCircle, Clock, Info } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { RefreshCw, Info } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
 export default function AnalystDashboard() {
@@ -14,14 +14,14 @@ export default function AnalystDashboard() {
   const queueStatus = useAlertQueue(activeRunId);
 
   // New states for UI fixes
-  const [lastProcessedRunId, setLastProcessedRunId] = useState<string | null>(null);
+  const lastProcessedRunIdRef = useRef<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [prevDraftCount, setPrevDraftCount] = useState<number | null>(null);
 
-  const getDraftCount = () => {
-    const data = queryClient.getQueryData(['draftAlerts']) as any[];
+  const getDraftCount = useCallback(() => {
+    const data = queryClient.getQueryData(['draftAlerts']) as unknown[];
     return data ? data.length : 0;
-  };
+  }, [queryClient]);
 
   const handleTrigger = async () => {
     setErrorMsg(null);
@@ -29,7 +29,7 @@ export default function AnalystDashboard() {
     setPrevDraftCount(getDraftCount());
     try {
       const res = await triggerAlerts.mutateAsync();
-      if (res && res.run_id) {
+      if (res?.run_id) {
         setActiveRunId(res.run_id);
       }
     } catch (err: unknown) {
@@ -41,10 +41,10 @@ export default function AnalystDashboard() {
     if (
       queueStatus?.status === 'COMPLETED' && 
       activeRunId && 
-      activeRunId !== lastProcessedRunId &&
+      activeRunId !== lastProcessedRunIdRef.current &&
       prevDraftCount !== null
     ) {
-      setLastProcessedRunId(activeRunId);
+      lastProcessedRunIdRef.current = activeRunId;
       // Refresh the draft list automatically when background job finishes
       queryClient.invalidateQueries({ queryKey: ['draftAlerts'] }).then(() => {
         const newCount = getDraftCount();
@@ -56,10 +56,10 @@ export default function AnalystDashboard() {
         setPrevDraftCount(null); // Reset to prevent re-triggering
 
         // Auto-hide toast
-        setTimeout(() => setToastMessage(null), 6000);
-      });
+        setTimeout(() => { setToastMessage(null); }, 6000);
+      }).catch(console.error);
     }
-  }, [queueStatus?.status, activeRunId, lastProcessedRunId, queryClient, prevDraftCount]);
+  }, [queueStatus?.status, activeRunId, queryClient, prevDraftCount, getDraftCount]);
 
   const isGenerating = triggerAlerts.isPending || queueStatus?.status === 'PENDING' || queueStatus?.status === 'IN_PROGRESS';
 
@@ -67,9 +67,9 @@ export default function AnalystDashboard() {
   let buttonText = 'Fetch Latest News';
   if (triggerAlerts.isPending) {
     buttonText = 'Starting Job...';
-  } else if (queueStatus?.status === 'PENDING' && activeRunId !== lastProcessedRunId) {
+  } else if (queueStatus?.status === 'PENDING') {
     buttonText = 'Waiting in Queue...';
-  } else if (queueStatus?.status === 'IN_PROGRESS' && activeRunId !== lastProcessedRunId) {
+  } else if (queueStatus?.status === 'IN_PROGRESS') {
     buttonText = 'Generating AI Alerts...';
   }
 

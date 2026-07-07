@@ -59,7 +59,7 @@ const parseMineral = (row: RawMineralDBRecord): Mineral | null => {
   
   if (parsed.success) return parsed.data;
   
-  logger.warn(`Validation failed for mineral ${row.slug || row.id}:`, { error: parsed.error });
+  logger.warn(`Validation failed for mineral ${row.slug ?? row.id}:`, { error: parsed.error });
   return null;
 };
 

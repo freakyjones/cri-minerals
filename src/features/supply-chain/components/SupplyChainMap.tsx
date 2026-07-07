@@ -109,7 +109,7 @@ export default function SupplyChainMap({
     fetch('/data/world-countries-lite.json')
       .then(res => res.json())
       .then(data => setGeoData(data))
-      .catch(err => logger.error("Failed to load geojson", err, { source: '/ne_110m_admin_0_countries.geojson' }));
+      .catch(err => { logger.error("Failed to load geojson", err, { source: '/ne_110m_admin_0_countries.geojson' }); });
   }, []);
 
   // Map pure data nodes to UI icons

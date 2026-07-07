@@ -22,8 +22,8 @@ export function generateMockPriceData(sortedEvents: TimelineEvent[], currentPric
     basePrice = basePrice * volatility * shockFactor;
     
     // Keep within bounds somewhat
-    if (basePrice < (currentPrice || 100) * 0.2) basePrice *= 2;
-    if (basePrice > (currentPrice || 100) * 3) basePrice *= 0.5;
+    if (basePrice < (currentPrice ?? 100) * 0.2) basePrice *= 2;
+    if (basePrice > (currentPrice ?? 100) * 3) basePrice *= 0.5;
 
     data.push({
       year,

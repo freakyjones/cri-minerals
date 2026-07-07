@@ -17,7 +17,10 @@ if (secretKeysStr) {
   }
 }
 
-export const supabaseAdmin = createClient(supabaseUrl!, supabaseServiceKey!);
+if (!supabaseUrl) throw new Error("Missing SUPABASE_URL");
+if (!supabaseServiceKey) throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY");
+
+export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function checkAndLockRun(runId: string): Promise<boolean> {
   const { data: currentRun, error: checkError } = await supabaseAdmin
@@ -36,7 +39,7 @@ export async function checkAndLockRun(runId: string): Promise<boolean> {
 }
 
 export async function updateRunStatus(runId: string, status: string, errorMessage?: string): Promise<void> {
-  const payload: any = { status, completed_at: new Date().toISOString() };
+  const payload: Record<string, unknown> = { status, completed_at: new Date().toISOString() };
   if (errorMessage) {
     payload.error_message = errorMessage;
   }
@@ -47,7 +50,7 @@ export async function updateRunStatus(runId: string, status: string, errorMessag
     .eq('run_id', runId);
 }
 
-export async function insertAlerts(alerts: any[]): Promise<void> {
+export async function insertAlerts(alerts: unknown[]): Promise<void> {
   const rowsToInsert = alerts.map(alert => {
     // Normalization logic for confidence score
     let parsedConfidence = alert.confidenceScore;

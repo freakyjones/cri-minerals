@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 
@@ -12,7 +11,8 @@ export interface AlertQueueStatus {
 export function useAlertQueue(runId: string | null) {
   const fetchStatus = async () => {
     if (!runId) return null;
-    const { data, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any)
       .from('generate_market_alerts_status')
       .select('*')
       .eq('run_id', runId)
@@ -38,5 +38,5 @@ export function useAlertQueue(runId: string | null) {
     staleTime: 0,
   });
 
-  return status || null;
+  return status ?? null;
 }

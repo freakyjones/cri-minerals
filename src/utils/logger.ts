@@ -33,8 +33,8 @@ const pinoLogger = pino({
 const SENSITIVE_KEYS = ['email', 'password', 'token', 'session', 'jwt', 'secret', 'phone', 'authorization', 'api_key', 'card', 'ssn'];
 
 // Recursive deep sanitization for Sentry context
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const deepSanitize = (obj: any): any => {
+ 
+export const deepSanitize = (obj: unknown): unknown => {
   if (obj === null || typeof obj !== 'object') {
     return obj;
   }
@@ -43,8 +43,9 @@ export const deepSanitize = (obj: any): any => {
     return obj.map(item => deepSanitize(item));
   }
 
-  const sanitized: Record<string, any> = {};
+  const sanitized: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(obj)) {
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
     if (SENSITIVE_KEYS.some(sk => key.toLowerCase().includes(sk))) {
       sanitized[key] = '[REDACTED]';
     } else {
@@ -55,19 +56,16 @@ export const deepSanitize = (obj: any): any => {
 };
 
 export const logger = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  info: (msg: string, data?: Record<string, any>) => {
+  info: (msg: string, data?: Record<string, unknown>) => {
     // Pino handles redaction for console
     pinoLogger.info(data, msg);
   },
   
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  warn: (msg: string, data?: Record<string, any>) => {
+  warn: (msg: string, data?: Record<string, unknown>) => {
     pinoLogger.warn(data, msg);
   },
   
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  error: (msg: string, error: Error | unknown, context?: Record<string, any>) => {
+  error: (msg: string, error: Error | unknown, context?: Record<string, unknown>) => {
     pinoLogger.error({ err: error, ...context }, msg);
     
     // Automatically capture structured errors in Sentry with sanitized extra
@@ -76,22 +74,23 @@ export const logger = {
     // Attempt to sanitize error object if it's an Axios/Fetch error with response data
     let sanitizedError = error;
     if (error && typeof error === 'object') {
-       const errObj = error as any;
-       if (errObj.response && errObj.response.data) {
-           sanitizedError = new Error(errObj.message);
-           (sanitizedError as any).response = { data: deepSanitize(errObj.response.data) };
-           (sanitizedError as any).stack = errObj.stack;
+       const errObj = error as Record<string, unknown>;
+       if (errObj.response && typeof errObj.response === 'object' && errObj.response !== null) {
+           const response = errObj.response as Record<string, unknown>;
+           if (response.data) {
+               sanitizedError = new Error(typeof errObj.message === 'string' ? errObj.message : 'Unknown error');
+               Object.assign(sanitizedError as object, { response: { data: deepSanitize(response.data) } });
+           }
        }
     }
 
     Sentry.captureException(sanitizedError, { 
-      extra: sanitizedContext,
+      extra: sanitizedContext as Record<string, unknown>,
       tags: { custom_message: msg }
     });
   },
   
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  action: (actionName: string, metadata?: Record<string, any>) => {
+  action: (actionName: string, metadata?: Record<string, unknown>) => {
     pinoLogger.info({ action: actionName, ...metadata }, `User Action: ${actionName}`);
   }
 };

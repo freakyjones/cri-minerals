@@ -8,8 +8,8 @@ Sentry.init({
 const SENSITIVE_KEYS = ['email', 'password', 'token', 'session', 'jwt', 'secret', 'phone', 'authorization', 'api_key', 'card', 'ssn'];
 
 // Recursive deep sanitization for logs and Sentry context
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const deepSanitize = (obj: any, seen = new WeakSet(), depth = 0): any => {
+ 
+export const deepSanitize = (obj: unknown, seen = new WeakSet(), depth = 0): unknown => {
   if (obj === null || typeof obj !== 'object' || depth > 4) {
     return obj;
   }
@@ -23,8 +23,9 @@ export const deepSanitize = (obj: any, seen = new WeakSet(), depth = 0): any => 
     return obj.map(item => deepSanitize(item, seen, depth + 1));
   }
 
-  const sanitized: Record<string, any> = {};
+  const sanitized: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(obj)) {
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
     if (SENSITIVE_KEYS.some(sk => key.toLowerCase().includes(sk))) {
       sanitized[key] = '[REDACTED]';
     } else {
@@ -36,7 +37,7 @@ export const deepSanitize = (obj: any, seen = new WeakSet(), depth = 0): any => 
 
 
 
-type LogMetadata = Record<string, any>;
+type LogMetadata = Record<string, unknown>;
 
 class DenoLogger {
   private baseContext: LogMetadata;
