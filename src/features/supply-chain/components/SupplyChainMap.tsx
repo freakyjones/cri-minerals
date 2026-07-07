@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 import { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, Circle, GeoJSON } from 'react-leaflet';
@@ -14,6 +15,33 @@ import { SimulatedEvent } from './SupplyChainSimulator';
 import ErrorBoundary from '../../../components/ErrorBoundary';
 import { useSimulatorStore } from '../../../stores/useSimulatorStore';
 import { MapMode } from './SupplyChainMapArea';
+
+const getIso3FromCountryName = (countryName: string): string => {
+  const map = new Map<string, string>([
+    ['Chile', 'CHL'],
+    ['Australia', 'AUS'],
+    ['Argentina', 'ARG'],
+    ['China', 'CHN'],
+    ['DRC', 'COD'],
+    ['Democratic Republic of the Congo', 'COD'],
+    ['Indonesia', 'IDN'],
+    ['Russia', 'RUS'],
+    ['Finland', 'FIN'],
+    ['Canada', 'CAN'],
+    ['Philippines', 'PHL'],
+    ['Japan', 'JPN'],
+    ['Peru', 'PER'],
+    ['Turkey', 'TUR'],
+    ['Brazil', 'BRA'],
+    ['Mozambique', 'MOZ'],
+    ['Madagascar', 'MDG'],
+    ['South Africa', 'ZAF'],
+    ['Gabon', 'GAB'],
+    ['United States', 'USA'],
+    ['USA', 'USA']
+  ]);
+  return map.get(countryName) ?? countryName;
+};
 
 const createCustomIcon = (color: string, isRefiner: boolean, share: number, complianceStatus: string = 'NEUTRAL') => {
   const baseSize = isRefiner ? 28 : 18;
@@ -81,7 +109,7 @@ export default function SupplyChainMap({
     fetch('/data/world-countries-lite.json')
       .then(res => res.json())
       .then(data => setGeoData(data))
-      .catch(err => console.error("Failed to load geojson", err));
+      .catch((err: unknown) => { logger.error("Failed to load geojson", err, { source: '/ne_110m_admin_0_countries.geojson' }); });
   }, []);
 
   // Map pure data nodes to UI icons
@@ -107,13 +135,13 @@ export default function SupplyChainMap({
 
     if (!mineral || mapMode === 'NETWORK') return defaultStyle;
 
-    const countryName = feature.properties.name;
+    const featureIso3 = feature.id; // e.g. "ARG"
     
-    // Check if country matches extraction or refining
+    // Check if country matches extraction or refining using ISO-3 codes
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const extractionMatch = mineral.production.find((e: any) => e.country === countryName || (e.country === 'DRC' && countryName === 'Democratic Republic of the Congo'));
+    const extractionMatch = mineral.production.find((e: any) => getIso3FromCountryName(e.country) === featureIso3);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const refiningMatch = mineral.refining.find((r: any) => r.country === countryName);
+    const refiningMatch = mineral.refining.find((r: any) => getIso3FromCountryName(r.country) === featureIso3);
 
     if (mapMode === 'EXTRACTION' && extractionMatch) {
       const share = extractionMatch.share;

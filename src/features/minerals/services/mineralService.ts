@@ -1,4 +1,5 @@
 import { supabase } from '../../../lib/supabase';
+import { logger } from '../../../utils/logger';
 import { mineralSchema, type Mineral } from '../schema/mineralSchema';
 
 interface RawMineralDBRecord {
@@ -58,7 +59,7 @@ const parseMineral = (row: RawMineralDBRecord): Mineral | null => {
   
   if (parsed.success) return parsed.data;
   
-  console.warn(`Validation failed for mineral ${row.slug || row.id}:`, parsed.error);
+  logger.warn(`Validation failed for mineral ${row.slug ?? row.id}:`, { error: parsed.error });
   return null;
 };
 

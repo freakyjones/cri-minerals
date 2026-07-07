@@ -1,3 +1,5 @@
+import { logger } from '../utils/logger';
+
 export const COUNTRY_COORDINATES: Record<string, [number, number]> = {
   // South America
   'Chile': [-35.6751, -71.5430],
@@ -64,7 +66,7 @@ export const getCoordinates = (countryName: string): [number, number] => {
   const coords = COUNTRY_COORDINATES[countryName];
   if (!coords && import.meta.env.DEV) {
     // Dev-only warning — stripped from production builds by Vite.
-    console.warn(`[coordinates] Missing mapping for country: "${countryName}". Marker will render at [0,0].`);
+    logger.warn(`Missing mapping for country: "${countryName}". Marker will render at [0,0].`, { countryName });
   }
   return coords || [0, 0];
 };

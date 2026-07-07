@@ -1,4 +1,5 @@
 import { Component, type ReactNode } from 'react';
+import { logger } from '../utils/logger';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -25,9 +26,8 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
     return { hasError: true, error };
   }
 
-  componentDidCatch(): void {
-    // In production, this would send to an error reporting service (e.g., Sentry).
-    // console.error is intentionally omitted per Rule 9.1.
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
+    logger.error('React Error Boundary Caught Exception', error, { errorInfo });
   }
 
   render() {
