@@ -20,7 +20,7 @@ export default function AnalystDashboard() {
   const [prevDraftCount, setPrevDraftCount] = useState<number | null>(null);
 
   const getDraftCount = useCallback(() => {
-    const data = queryClient.getQueryData(['draftAlerts']) as unknown[];
+    const data = queryClient.getQueryData(['draftAlerts']) as unknown[] | undefined;
     return data ? data.length : 0;
   }, [queryClient]);
 

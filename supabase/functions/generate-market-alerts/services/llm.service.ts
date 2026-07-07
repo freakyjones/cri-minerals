@@ -1,12 +1,32 @@
 import { MODELS_TO_TRY, GEMINI_API_BASE } from '../config/index.ts';
 import { extractJsonArray } from '../utils/parsers.ts';
 
-async function callGeminiApi(model: string, geminiKey: string, prompt: string) {
+interface GeminiPart {
+  text?: string;
+}
+
+interface GeminiContent {
+  parts?: GeminiPart[];
+}
+
+interface GeminiCandidate {
+  content?: GeminiContent;
+}
+
+interface GeminiResponse {
+  candidates?: GeminiCandidate[];
+}
+
+async function callGeminiApi(model: string, geminiKey: string, prompt: string): Promise<GeminiResponse> {
   if (!MODELS_TO_TRY.includes(model)) {
     throw new Error(`Model ${model} is not allowed.`);
   }
   const url = `${GEMINI_API_BASE}/${model}:generateContent?key=${geminiKey}`;
-  if (!url.startsWith('https://generativelanguage.googleapis.com/')) {
+  const parsed = new URL(url);
+  if (parsed.protocol !== 'https:') {
+    throw new Error('Invalid URL protocol');
+  }
+  if (parsed.hostname !== 'generativelanguage.googleapis.com') {
     throw new Error('Invalid Gemini API destination');
   }
 
@@ -48,7 +68,7 @@ async function callGeminiApi(model: string, geminiKey: string, prompt: string) {
     throw new Error(`${model} API error: ${errorText}`);
   }
 
-  return await geminiRes.json();
+  return await geminiRes.json() as GeminiResponse;
 }
 
 export async function generateAlertsFromNews(newsText: string): Promise<Record<string, unknown>[]> {
@@ -74,8 +94,8 @@ Output an array of objects matching this exact JSON schema:
 Recent News:
 ${newsText}`;
 
-  let geminiData = null;
-  let lastError = null;
+  let geminiData: GeminiResponse | undefined;
+  let lastError: unknown;
 
   for (const model of MODELS_TO_TRY) {
     try {
@@ -86,8 +106,8 @@ ${newsText}`;
     }
   }
 
-  if (!geminiData) {
-    if (lastError) {
+  if (geminiData === undefined) {
+    if (lastError instanceof Error) {
       throw lastError;
     }
     throw new Error("All fallback models failed.");

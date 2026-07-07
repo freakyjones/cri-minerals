@@ -27,9 +27,9 @@ export const deepSanitize = (obj: unknown, seen = new WeakSet(), depth = 0): unk
   for (const [key, value] of Object.entries(obj)) {
     if (key !== '__proto__' && key !== 'constructor' && key !== 'prototype') {
       if (SENSITIVE_KEYS.some(sk => key.toLowerCase().includes(sk))) {
-        sanitized[key] = '[REDACTED]';
+        Reflect.set(sanitized, key, '[REDACTED]');
       } else {
-        sanitized[key] = deepSanitize(value, seen, depth + 1);
+        Reflect.set(sanitized, key, deepSanitize(value, seen, depth + 1));
       }
     }
   }

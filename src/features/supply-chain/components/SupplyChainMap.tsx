@@ -17,39 +17,30 @@ import { useSimulatorStore } from '../../../stores/useSimulatorStore';
 import { MapMode } from './SupplyChainMapArea';
 
 const getIso3FromCountryName = (countryName: string): string => {
-  const map: Record<string, string> = {
-    'Chile': 'CHL',
-    'Australia': 'AUS',
-    'Argentina': 'ARG',
-    'China': 'CHN',
-    'DRC': 'COD',
-    'Democratic Republic of the Congo': 'COD',
-    'Indonesia': 'IDN',
-    'Russia': 'RUS',
-    'Finland': 'FIN',
-    'Canada': 'CAN',
-    'Philippines': 'PHL',
-    'Japan': 'JPN',
-    'Peru': 'PER',
-    'Turkey': 'TUR',
-    'Brazil': 'BRA',
-    'Mozambique': 'MOZ',
-    'Madagascar': 'MDG',
-    'South Africa': 'ZAF',
-    'Gabon': 'GAB',
-    'United States': 'USA',
-    'USA': 'USA'
-  };
-  if (
-    typeof countryName === 'string' &&
-    countryName !== '__proto__' &&
-    countryName !== 'constructor' &&
-    countryName !== 'prototype' &&
-    Object.prototype.hasOwnProperty.call(map, countryName)
-  ) {
-    return map[countryName];
-  }
-  return countryName;
+  const map = new Map<string, string>([
+    ['Chile', 'CHL'],
+    ['Australia', 'AUS'],
+    ['Argentina', 'ARG'],
+    ['China', 'CHN'],
+    ['DRC', 'COD'],
+    ['Democratic Republic of the Congo', 'COD'],
+    ['Indonesia', 'IDN'],
+    ['Russia', 'RUS'],
+    ['Finland', 'FIN'],
+    ['Canada', 'CAN'],
+    ['Philippines', 'PHL'],
+    ['Japan', 'JPN'],
+    ['Peru', 'PER'],
+    ['Turkey', 'TUR'],
+    ['Brazil', 'BRA'],
+    ['Mozambique', 'MOZ'],
+    ['Madagascar', 'MDG'],
+    ['South Africa', 'ZAF'],
+    ['Gabon', 'GAB'],
+    ['United States', 'USA'],
+    ['USA', 'USA']
+  ]);
+  return map.get(countryName) || countryName;
 };
 
 const createCustomIcon = (color: string, isRefiner: boolean, share: number, complianceStatus: string = 'NEUTRAL') => {

@@ -47,9 +47,9 @@ export const deepSanitize = (obj: unknown): unknown => {
   for (const [key, value] of Object.entries(obj)) {
     if (key !== '__proto__' && key !== 'constructor' && key !== 'prototype') {
       if (SENSITIVE_KEYS.some(sk => key.toLowerCase().includes(sk))) {
-        sanitized[key] = '[REDACTED]';
+        Reflect.set(sanitized, key, '[REDACTED]');
       } else {
-        sanitized[key] = deepSanitize(value);
+        Reflect.set(sanitized, key, deepSanitize(value));
       }
     }
   }

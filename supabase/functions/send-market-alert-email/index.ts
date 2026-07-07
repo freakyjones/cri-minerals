@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import escapeHtml from "npm:escape-html";
 import { logger } from "../shared/logger.ts";
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
@@ -8,15 +9,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
 function buildEmailHeader(title: string): string {
   return `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
@@ -25,26 +17,31 @@ function buildEmailHeader(title: string): string {
 
 function buildEmailMetadata(severity: string, minerals: string[]): string {
   const sevColor = severity === 'CRITICAL' ? '#dc2626' : '#d97706';
-  const escapedMinerals = minerals.map(escapeHtml).join(', ') || 'N/A';
+  const mineralsText = minerals.join(', ') || 'N/A';
   return `
       <div style="background-color: #f3f4f6; padding: 12px; border-radius: 8px; margin-bottom: 20px;">
         <p style="margin: 0;"><strong>Severity:</strong> <span style="color: ${sevColor}">${escapeHtml(severity)}</span></p>
-        <p style="margin: 4px 0 0 0;"><strong>Minerals:</strong> ${escapedMinerals}</p>
+        <p style="margin: 4px 0 0 0;"><strong>Minerals:</strong> ` + escapeHtml(mineralsText) + `</p>
       </div>`;
 }
 
 function buildEmailBody(description: string, rationale: string[]): string {
-  const rationaleList = rationale.length > 0
-    ? rationale.map((r) => `<li>${escapeHtml(r)}</li>`).join('')
-    : '<li>No specific rationale provided.</li>';
-    
+  let listItemsHtml = '';
+  if (rationale.length > 0) {
+    for (let i = 0; i < rationale.length; i++) {
+      listItemsHtml += '<li>' + escapeHtml(rationale[i]) + '</li>';
+    }
+  } else {
+    listItemsHtml = '<li>No specific rationale provided.</li>';
+  }
+
   return `
       <p style="font-size: 16px; line-height: 1.5;">${escapeHtml(description)}</p>
       
       <div style="margin-top: 24px; border-top: 1px solid #e5e7eb; padding-top: 16px;">
         <h4 style="margin: 0 0 8px 0;">Rationale & Insights:</h4>
         <ul style="margin: 0; padding-left: 20px; color: #4b5563;">
-          ${rationaleList}
+  ` + listItemsHtml + `
         </ul>
       </div>`;
 }
