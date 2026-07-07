@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import escapeHtml from "npm:escape-html";
 import { logger } from "../shared/logger.ts";
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
@@ -8,6 +7,15 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
 function buildEmailHeader(title: string): string {
   return `
@@ -64,6 +72,35 @@ function buildEmailHtml(record: Record<string, unknown>): string {
     buildEmailFooter();
 }
 
+async function sendResendEmail(
+  resendApiKey: string,
+  severityStr: string,
+  titleStr: string,
+  emailHtml: string,
+  alertId: string,
+  traceId: string
+): Promise<void> {
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${resendApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: 'alerts@criminerals.com',
+      to: ['analysts@criminerals.com'],
+      subject: `[${severityStr}] ${titleStr}`,
+      html: emailHtml,
+    }),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    logger.error(`Resend API Error: ${errorText}`, new Error(errorText), { traceId, alertId });
+    throw new Error(`Resend API Error: ${errorText}`);
+  }
+}
+
 async function handleEmailRequest(req: Request): Promise<Response> {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -71,7 +108,7 @@ async function handleEmailRequest(req: Request): Promise<Response> {
 
   try {
     const payload = await req.json();
-    const traceId = req.headers.get('trace_id') || 'unknown';
+    const traceId = req.headers.get('trace_id') ?? 'unknown';
     
     // The webhook payload for UPDATE
     const record = payload.record as Record<string, unknown> | null | undefined;
@@ -97,25 +134,7 @@ async function handleEmailRequest(req: Request): Promise<Response> {
     const severityStr = typeof record.severity === 'string' ? record.severity : 'MEDIUM';
     const titleStr = typeof record.title === 'string' ? record.title : '';
 
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: 'alerts@criminerals.com', // Best effort default
-        to: ['analysts@criminerals.com'], // Best effort default
-        subject: `[${severityStr}] ${titleStr}`,
-        html: emailHtml,
-      }),
-    });
-
-    if (!res.ok) {
-      const errorText = await res.text();
-      logger.error(`Resend API Error: ${errorText}`, new Error(errorText), { traceId, alertId: record.id });
-      throw new Error(`Resend API Error: ${errorText}`);
-    }
+    await sendResendEmail(RESEND_API_KEY, severityStr, titleStr, emailHtml, String(record.id), traceId);
 
     logger.info("Email sent successfully", { traceId, alertId: record.id });
 

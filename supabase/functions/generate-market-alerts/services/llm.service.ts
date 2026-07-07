@@ -25,7 +25,7 @@ async function callGeminiApi(model: string, geminiKey: string, prompt: string): 
   const allowedDomains = ['generativelanguage.googleapis.com'];
   const parsedUrl = new URL(url);
   if (!allowedDomains.includes(parsedUrl.hostname)) {
-    throw new Error("Disallowed target URL");
+    throw new Error(`Unauthorized fetch target: ${parsedUrl.hostname}`);
   }
   if (parsedUrl.protocol !== 'https:') {
     throw new Error('Invalid URL protocol');
@@ -34,8 +34,9 @@ async function callGeminiApi(model: string, geminiKey: string, prompt: string): 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => { controller.abort(); }, 20000);
 
-  const safeModel = MODELS_TO_TRY.find(m => m === model) || model;
-  const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${safeModel}:generateContent?key=${geminiKey}`, {
+  const safeModel = MODELS_TO_TRY.find(m => m === model) ?? model;
+  const finalModelName = MODELS_TO_TRY.includes(safeModel) ? safeModel : 'gemini-pro';
+  const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${finalModelName}:generateContent?key=${geminiKey}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     signal: controller.signal,
