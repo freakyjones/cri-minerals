@@ -6,6 +6,8 @@ import { getRiskColorSolid, getRiskIcon } from '../utils';
 import { Download, FileText, FileJson, File, FileSpreadsheet, Loader2 } from 'lucide-react';
 import { exportAsJson, exportAsMarkdown, exportAsPdf, exportAsCsv } from '../utils/exportUtils';
 
+import { logger } from '../../../utils/logger';
+
 interface MineralPageHeaderProps {
   mineral: Mineral;
 }
@@ -48,8 +50,10 @@ export default function MineralPageHeader({ mineral }: MineralPageHeaderProps) {
       else if (format === 'md') await exportAsMarkdown(mineral);
       else if (format === 'pdf') await exportAsPdf(mineral);
       else if (format === 'csv') await exportAsCsv(mineral);
+      
+      logger.action('export_mineral_data', { format, mineralId: mineral.id });
     } catch (e) {
-      console.error("Export failed", e);
+      logger.error("Export failed", e, { format, mineralId: mineral.id });
     } finally {
       setIsExporting(false);
     }

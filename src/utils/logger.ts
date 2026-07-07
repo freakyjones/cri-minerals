@@ -1,0 +1,97 @@
+import pino from 'pino';
+import * as Sentry from '@sentry/react';
+
+// Initialize Sentry
+Sentry.init({
+  dsn: "https://9186ef26b30e3dd572dd8c243c000eba@o4511690011639808.ingest.de.sentry.io/4511690020028496",
+  integrations: [
+    Sentry.browserTracingIntegration(),
+    Sentry.replayIntegration(),
+  ],
+  // Performance Monitoring
+  tracesSampleRate: 1.0, 
+  // Session Replay
+  replaysSessionSampleRate: 0.1, 
+  replaysOnErrorSampleRate: 1.0, 
+});
+
+// Configure Pino with native redaction for its own outputs
+const pinoLogger = pino({
+  browser: { asObject: true },
+  level: import.meta.env.MODE === 'production' ? 'info' : 'debug',
+  redact: {
+    paths: [
+      '*.email', '*.password', '*.token', '*.session', '*.jwt', '*.secret', 
+      '*.phone', '*.authorization', '*.api_key', '*.card', '*.ssn',
+      '*.*.email', '*.*.password', '*.*.token', '*.*.session', '*.*.jwt', '*.*.secret', 
+      '*.*.phone', '*.*.authorization', '*.*.api_key', '*.*.card', '*.*.ssn'
+    ],
+    censor: '[REDACTED]'
+  }
+});
+
+const SENSITIVE_KEYS = ['email', 'password', 'token', 'session', 'jwt', 'secret', 'phone', 'authorization', 'api_key', 'card', 'ssn'];
+
+// Recursive deep sanitization for Sentry context
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const deepSanitize = (obj: any): any => {
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(item => deepSanitize(item));
+  }
+
+  const sanitized: Record<string, any> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (SENSITIVE_KEYS.some(sk => key.toLowerCase().includes(sk))) {
+      sanitized[key] = '[REDACTED]';
+    } else {
+      sanitized[key] = deepSanitize(value);
+    }
+  }
+  return sanitized;
+};
+
+export const logger = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  info: (msg: string, data?: Record<string, any>) => {
+    // Pino handles redaction for console
+    pinoLogger.info(data, msg);
+  },
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  warn: (msg: string, data?: Record<string, any>) => {
+    pinoLogger.warn(data, msg);
+  },
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  error: (msg: string, error: Error | unknown, context?: Record<string, any>) => {
+    pinoLogger.error({ err: error, ...context }, msg);
+    
+    // Automatically capture structured errors in Sentry with sanitized extra
+    const sanitizedContext = deepSanitize(context);
+    
+    // Attempt to sanitize error object if it's an Axios/Fetch error with response data
+    let sanitizedError = error;
+    if (error && typeof error === 'object') {
+       const errObj = error as any;
+       if (errObj.response && errObj.response.data) {
+           sanitizedError = new Error(errObj.message);
+           (sanitizedError as any).response = { data: deepSanitize(errObj.response.data) };
+           (sanitizedError as any).stack = errObj.stack;
+       }
+    }
+
+    Sentry.captureException(sanitizedError, { 
+      extra: sanitizedContext,
+      tags: { custom_message: msg }
+    });
+  },
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  action: (actionName: string, metadata?: Record<string, any>) => {
+    pinoLogger.info({ action: actionName, ...metadata }, `User Action: ${actionName}`);
+  }
+};

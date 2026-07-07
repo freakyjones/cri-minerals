@@ -95,7 +95,7 @@ describe('useTriggerAlerts', () => {
   });
 
   it('calls triggerAlertsGeneration and invalidates draftAlerts query on success', async () => {
-    vi.mocked(marketAlertService.triggerAlertsGeneration).mockResolvedValue({ message: 'Success' });
+    vi.mocked(marketAlertService.triggerAlertsGeneration).mockResolvedValue({ run_id: '123' });
     const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useTriggerAlerts(), { wrapper });

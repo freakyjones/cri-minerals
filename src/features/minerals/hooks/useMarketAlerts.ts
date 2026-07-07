@@ -65,6 +65,7 @@ export function useTriggerAlerts() {
 }
 
 import { supabase } from '../../../lib/supabase';
+import { logger } from '../../../utils/logger';
 
 export function useSemanticSearch() {
   return useMutation({
@@ -76,7 +77,7 @@ export function useSemanticSearch() {
       });
 
       if (embedError) {
-        console.error("Supabase invoke error:", embedError);
+        logger.error("Supabase invoke error:", embedError, { action: 'search-embedding' });
         throw new Error(embedError.message || "Failed to connect to edge function");
       }
       

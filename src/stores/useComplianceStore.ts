@@ -1,6 +1,7 @@
 import { create } from 'zustand';
  
 import { complianceService, ComplianceStatus, CountryCompliance } from '../features/compliance/services/complianceService';
+import { logger } from '../utils/logger';
 
 export type { ComplianceStatus, CountryCompliance };
 
@@ -27,7 +28,7 @@ export const useComplianceStore = create<ComplianceState>((set, get) => ({
       const data = await complianceService.fetchCountries();
       set({ countries: data, isLoading: false });
     } catch (err: unknown) {
-      console.error('Failed to fetch countries:', err);
+      logger.error('Failed to fetch countries:', err);
       set({ error: (err as Error).message, isLoading: false });
     }
   },

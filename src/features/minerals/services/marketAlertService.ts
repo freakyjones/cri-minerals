@@ -1,10 +1,11 @@
 import { supabase } from '../../../lib/supabase';
+import { logger } from '../../../utils/logger';
 import { marketAlertSchema, type MarketAlert } from '../schema/marketAlertSchema';
 
 const parseMarketAlert = (row: unknown): MarketAlert | null => {
   const parsed = marketAlertSchema.safeParse(row);
   if (parsed.success) return parsed.data;
-  console.warn(`Validation failed for market alert:`, parsed.error);
+  logger.warn(`Validation failed for market alert:`, { error: parsed.error });
   return null;
 };
 
@@ -103,13 +104,16 @@ export const marketAlertService = {
     return (data as number) || 0;
   },
 
-  async triggerAlertsGeneration() {
-    const { data, error } = await supabase.functions.invoke('generate-market-alerts', {
-      method: 'POST',
-    });
+  async triggerAlertsGeneration(): Promise<{ run_id: string }> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any)
+      .from('generate_market_alerts_status')
+      .insert({ status: 'PENDING', triggered_by: 'manual' })
+      .select('run_id')
+      .single();
     
     if (error) throw error;
-    return data;
+    return data as { run_id: string };
   },
 
   async searchAlerts(queryEmbedding: number[], matchThreshold = 0.5, matchCount = 5): Promise<MarketAlert[]> {
