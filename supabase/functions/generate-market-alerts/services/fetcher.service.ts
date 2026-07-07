@@ -2,18 +2,18 @@ import { RSS_FEEDS, GDELT_URL } from '../config/index.ts';
 import { extractRssItems } from '../utils/parsers.ts';
 
 interface FetcherLogger {
-  warn(_message: string, _context?: Record<string, unknown>): void;
-  error(_message: string, _error?: unknown): void;
+  warn: (message: string, context?: Record<string, unknown>) => void;
+  error: (message: string, error?: unknown) => void;
 }
 
 export async function fetchWithTimeout(url: string, timeout = 10000): Promise<Response> {
-  const parsed = new URL(url);
-  if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
-    throw new Error('Invalid URL protocol');
+  const allowedDomains = ['api.gdeltproject.org', 'www.mining.com'];
+  const parsedUrl = new URL(url);
+  if (!allowedDomains.includes(parsedUrl.hostname)) {
+    throw new Error("Disallowed target URL");
   }
-  const allowedHosts = ['api.gdeltproject.org', 'www.mining.com'];
-  if (!allowedHosts.includes(parsed.hostname)) {
-    throw new Error(`Hostname ${parsed.hostname} is not allowed`);
+  if (parsedUrl.protocol !== 'https:' && parsedUrl.protocol !== 'http:') {
+    throw new Error('Invalid URL protocol');
   }
   const controller = new AbortController();
   const id = setTimeout(() => { controller.abort(); }, timeout);

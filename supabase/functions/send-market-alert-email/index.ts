@@ -26,23 +26,16 @@ function buildEmailMetadata(severity: string, minerals: string[]): string {
 }
 
 function buildEmailBody(description: string, rationale: string[]): string {
-  let listItemsHtml = '';
-  if (rationale.length > 0) {
-    for (let i = 0; i < rationale.length; i++) {
-      listItemsHtml += '<li>' + escapeHtml(rationale[i]) + '</li>';
-    }
-  } else {
-    listItemsHtml = '<li>No specific rationale provided.</li>';
-  }
+  const rationaleText = rationale.length > 0
+    ? rationale.map(r => `• ${r}`).join('\n')
+    : 'No specific rationale provided.';
 
   return `
       <p style="font-size: 16px; line-height: 1.5;">${escapeHtml(description)}</p>
       
       <div style="margin-top: 24px; border-top: 1px solid #e5e7eb; padding-top: 16px;">
         <h4 style="margin: 0 0 8px 0;">Rationale & Insights:</h4>
-        <ul style="margin: 0; padding-left: 20px; color: #4b5563;">
-  ` + listItemsHtml + `
-        </ul>
+        <p style="margin: 0; color: #4b5563; white-space: pre-line; line-height: 1.6;">${escapeHtml(rationaleText)}</p>
       </div>`;
 }
 
@@ -71,7 +64,7 @@ function buildEmailHtml(record: Record<string, unknown>): string {
     buildEmailFooter();
 }
 
-serve(async (req) => {
+async function handleEmailRequest(req: Request): Promise<Response> {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
@@ -137,6 +130,12 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
     });
+  }
+}
+
+serve(async (req) => {
+  try {
+    return await handleEmailRequest(req);
   } finally {
     await logger.flush();
   }

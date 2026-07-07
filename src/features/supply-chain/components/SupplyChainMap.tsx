@@ -40,7 +40,7 @@ const getIso3FromCountryName = (countryName: string): string => {
     ['United States', 'USA'],
     ['USA', 'USA']
   ]);
-  return map.get(countryName) || countryName;
+  return map.get(countryName) ?? countryName;
 };
 
 const createCustomIcon = (color: string, isRefiner: boolean, share: number, complianceStatus: string = 'NEUTRAL') => {
