@@ -1,5 +1,8 @@
 # Workspace Agent Rules
 
+## Rule Maintenance
+- **Do Not Delete Rules**: When adding or updating rules, never delete or drop any existing rules. Always either append new rules to the relevant sections or update existing ones to clarify or expand their behavior.
+
 ## Data Handling & Mapping
 - Always prefer standardized identifiers (e.g., ISO-3 codes for countries, UUIDs for entities) over raw string names when mapping data between different sources (like a database and a GeoJSON file) to prevent silent failures.
 
@@ -19,11 +22,16 @@
 - Strictly forbidden to use `eslint-disable` or `@ts-expect-error` comments to bypass type checking or linting rules. 
 - Fix the underlying type errors using proper TypeScript (e.g., using `unknown`, specific interfaces, type narrowing, or generics) instead of resorting to `any` or suppressing the warnings.
 - Do not leave empty catch blocks without handling or logging; do not suppress empty block warnings artificially.
+- **Catch Clause Type Safety**: Explicitly type catch parameters as `(err: unknown) => { ... }` or `catch (err: unknown)` rather than leaving them implicit.
+- **Template Literals**: Avoid interpolating variables of type `unknown` directly inside template literals. Narrow the type (e.g. using `typeof x === 'string'`) or cast it (`String(x)`) first.
+- **Overriding Union Types**: Avoid using type annotations like `Error | unknown` in catch/error parameters; annotate simply as `unknown`.
+- **Unnecessary Checks**: Avoid checking variables for `null`/`undefined` (e.g. `x !== null`) if the control flow analysis has already narrowed the type (e.g. inside a truthy `if (x)` check).
+- **Async without Await**: Avoid wrapping synchronous code block execution in `async` testing wrappers (e.g. `act(async () => ...)`) if no `await` expression is present inside.
 
 ## Security & Static Analysis (Codacy Standards)
-- **Object Injection Protection**: Always check `key !== '__proto__' && key !== 'constructor' && key !== 'prototype'` when dynamically mapping or assigning object properties from external or unknown sources.
-- **SSRF Protection**: Explicitly validate that URLs start with `http://` or `https://` before passing them to `fetch` or other HTTP clients.
-- **Code Complexity**: Keep functions and methods under 50 lines. Extract complex inline logic (like HTML generation or large API calls) into isolated helper functions.
+- **Object Injection Protection**: Always check `key !== '__proto__' && key !== 'constructor' && key !== 'prototype'` when dynamically mapping or assigning object properties from external or unknown sources. For dictionary lookups with dynamic keys, check ownership via `Object.prototype.hasOwnProperty.call(map, key)` or use a strict local allowlist before performing lookups.
+- **SSRF Protection**: Explicitly validate that URLs start with `http://` or `https://` before passing them to `fetch` or other HTTP clients. If fetch URLs contain dynamic parameters (e.g., model names, dynamic paths), validate them against a strict allowlist of allowed values, and verify the full URL prefix belongs to a trusted domain before execution.
+- **Code Complexity**: Keep functions and methods under 50 lines. Extract complex inline logic (like HTML generation or large API calls) into isolated helper functions. For complex templates (e.g., HTML/email builders), decompose the template building into dedicated sub-components/helpers (e.g., header, body, footer helpers) to keep each function short and simple.
 - **Promise Handling**: Never leave floating promises. Always `await` them, end them with `.catch(console.error)`, or explicitly mark them with the `void` operator.
 - **Strict Syntax Invariants**:
   - Avoid non-null assertions (`!`); use explicit truthy checks that throw runtime errors instead.

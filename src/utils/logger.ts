@@ -45,11 +45,12 @@ export const deepSanitize = (obj: unknown): unknown => {
 
   const sanitized: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(obj)) {
-    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
-    if (SENSITIVE_KEYS.some(sk => key.toLowerCase().includes(sk))) {
-      sanitized[key] = '[REDACTED]';
-    } else {
-      sanitized[key] = deepSanitize(value);
+    if (key !== '__proto__' && key !== 'constructor' && key !== 'prototype') {
+      if (SENSITIVE_KEYS.some(sk => key.toLowerCase().includes(sk))) {
+        sanitized[key] = '[REDACTED]';
+      } else {
+        sanitized[key] = deepSanitize(value);
+      }
     }
   }
   return sanitized;
@@ -65,7 +66,7 @@ export const logger = {
     pinoLogger.warn(data, msg);
   },
   
-  error: (msg: string, error: Error | unknown, context?: Record<string, unknown>) => {
+  error: (msg: string, error: unknown, context?: Record<string, unknown>) => {
     pinoLogger.error({ err: error, ...context }, msg);
     
     // Automatically capture structured errors in Sentry with sanitized extra
@@ -75,11 +76,12 @@ export const logger = {
     let sanitizedError = error;
     if (error && typeof error === 'object') {
        const errObj = error as Record<string, unknown>;
-       if (errObj.response && typeof errObj.response === 'object' && errObj.response !== null) {
-           const response = errObj.response as Record<string, unknown>;
-           if (response.data) {
+       const response = errObj.response;
+       if (response && typeof response === 'object') {
+           const resData = (response as Record<string, unknown>).data;
+           if (resData) {
                sanitizedError = new Error(typeof errObj.message === 'string' ? errObj.message : 'Unknown error');
-               Object.assign(sanitizedError as object, { response: { data: deepSanitize(response.data) } });
+               Object.assign(sanitizedError as object, { response: { data: deepSanitize(resData) } });
            }
        }
     }

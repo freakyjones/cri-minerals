@@ -25,11 +25,12 @@ export const deepSanitize = (obj: unknown, seen = new WeakSet(), depth = 0): unk
 
   const sanitized: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(obj)) {
-    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
-    if (SENSITIVE_KEYS.some(sk => key.toLowerCase().includes(sk))) {
-      sanitized[key] = '[REDACTED]';
-    } else {
-      sanitized[key] = deepSanitize(value, seen, depth + 1);
+    if (key !== '__proto__' && key !== 'constructor' && key !== 'prototype') {
+      if (SENSITIVE_KEYS.some(sk => key.toLowerCase().includes(sk))) {
+        sanitized[key] = '[REDACTED]';
+      } else {
+        sanitized[key] = deepSanitize(value, seen, depth + 1);
+      }
     }
   }
   return sanitized;
@@ -61,7 +62,7 @@ class DenoLogger {
   
   warn(msg: string, metadata?: LogMetadata) { this.log("warn", 40, msg, metadata); }
   
-  error(msg: string, error?: Error | unknown, metadata?: LogMetadata) { 
+  error(msg: string, error?: unknown, metadata?: LogMetadata) { 
     const sanitizedContext = { ...deepSanitize(this.baseContext), ...deepSanitize(metadata) };
     console.error(JSON.stringify({
       time: new Date().getTime(),

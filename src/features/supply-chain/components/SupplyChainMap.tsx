@@ -40,7 +40,16 @@ const getIso3FromCountryName = (countryName: string): string => {
     'United States': 'USA',
     'USA': 'USA'
   };
-  return map[countryName] || countryName;
+  if (
+    typeof countryName === 'string' &&
+    countryName !== '__proto__' &&
+    countryName !== 'constructor' &&
+    countryName !== 'prototype' &&
+    Object.prototype.hasOwnProperty.call(map, countryName)
+  ) {
+    return map[countryName];
+  }
+  return countryName;
 };
 
 const createCustomIcon = (color: string, isRefiner: boolean, share: number, complianceStatus: string = 'NEUTRAL') => {
@@ -109,7 +118,7 @@ export default function SupplyChainMap({
     fetch('/data/world-countries-lite.json')
       .then(res => res.json())
       .then(data => setGeoData(data))
-      .catch(err => { logger.error("Failed to load geojson", err, { source: '/ne_110m_admin_0_countries.geojson' }); });
+      .catch((err: unknown) => { logger.error("Failed to load geojson", err, { source: '/ne_110m_admin_0_countries.geojson' }); });
   }, []);
 
   // Map pure data nodes to UI icons

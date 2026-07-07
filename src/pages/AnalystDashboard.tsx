@@ -5,6 +5,7 @@ import { useAlertQueue } from '../features/minerals/hooks/useAlertQueue';
 import { RefreshCw, Info } from 'lucide-react';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { logger } from '../utils/logger';
 
 export default function AnalystDashboard() {
   const triggerAlerts = useTriggerAlerts();
@@ -29,7 +30,7 @@ export default function AnalystDashboard() {
     setPrevDraftCount(getDraftCount());
     try {
       const res = await triggerAlerts.mutateAsync();
-      if (res?.run_id) {
+      if (res.run_id) {
         setActiveRunId(res.run_id);
       }
     } catch (err: unknown) {
@@ -57,7 +58,9 @@ export default function AnalystDashboard() {
 
         // Auto-hide toast
         setTimeout(() => { setToastMessage(null); }, 6000);
-      }).catch(console.error);
+      }).catch((err: unknown) => {
+        logger.error("Failed to invalidate queries after run", err);
+      });
     }
   }, [queueStatus?.status, activeRunId, queryClient, prevDraftCount, getDraftCount]);
 

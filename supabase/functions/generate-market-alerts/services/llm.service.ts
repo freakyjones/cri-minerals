@@ -2,10 +2,18 @@ import { MODELS_TO_TRY, GEMINI_API_BASE } from '../config/index.ts';
 import { extractJsonArray } from '../utils/parsers.ts';
 
 async function callGeminiApi(model: string, geminiKey: string, prompt: string) {
+  if (!MODELS_TO_TRY.includes(model)) {
+    throw new Error(`Model ${model} is not allowed.`);
+  }
+  const url = `${GEMINI_API_BASE}/${model}:generateContent?key=${geminiKey}`;
+  if (!url.startsWith('https://generativelanguage.googleapis.com/')) {
+    throw new Error('Invalid Gemini API destination');
+  }
+
   const controller = new AbortController();
   const timeoutId = setTimeout(() => { controller.abort(); }, 20000);
 
-  const geminiRes = await fetch(`${GEMINI_API_BASE}/${model}:generateContent?key=${geminiKey}`, {
+  const geminiRes = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     signal: controller.signal,
@@ -78,7 +86,12 @@ ${newsText}`;
     }
   }
 
-  if (!geminiData) throw lastError ?? new Error("All fallback models failed.");
+  if (!geminiData) {
+    if (lastError) {
+      throw lastError;
+    }
+    throw new Error("All fallback models failed.");
+  }
 
   const resultText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
   return extractJsonArray(resultText);

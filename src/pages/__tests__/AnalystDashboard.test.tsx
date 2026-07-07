@@ -87,7 +87,7 @@ describe('AnalystDashboard State Machine', () => {
     (mockUseAlertQueue as unknown as Mock).mockReturnValue({ status: null });
     rerender(<AnalystDashboard />);
     
-    await act(async () => {
+    act(() => {
       screen.getByText('Fetch Latest News').click();
     });
     
@@ -115,7 +115,7 @@ describe('AnalystDashboard State Machine', () => {
     const { rerender } = render(<AnalystDashboard />);
     
     // Click button
-    await act(async () => {
+    act(() => {
       screen.getByText('Fetch Latest News').click();
     });
 

@@ -1,7 +1,16 @@
 import { RSS_FEEDS, GDELT_URL } from '../config/index.ts';
 import { extractRssItems } from '../utils/parsers.ts';
 
+interface FetcherLogger {
+  warn(message: string, context?: Record<string, unknown>): void;
+  error(message: string, error?: unknown): void;
+}
+
 export async function fetchWithTimeout(url: string, timeout = 10000): Promise<Response> {
+  const allowedUrls = [GDELT_URL, ...RSS_FEEDS];
+  if (!allowedUrls.includes(url)) {
+    throw new Error(`URL ${url} is not in the allowlist`);
+  }
   if (!url.startsWith('http://') && !url.startsWith('https://')) {
     throw new Error('Invalid URL protocol');
   }
@@ -17,7 +26,7 @@ export async function fetchWithTimeout(url: string, timeout = 10000): Promise<Re
   }
 }
 
-export async function fetchNewsData(logger: unknown): Promise<string> {
+export async function fetchNewsData(logger: FetcherLogger): Promise<string> {
   const [gdeltRes, ...rssRes] = await Promise.all([
     fetchWithTimeout(GDELT_URL).catch(() => null),
     ...RSS_FEEDS.map(url => fetchWithTimeout(url).catch(() => null))
@@ -26,7 +35,7 @@ export async function fetchNewsData(logger: unknown): Promise<string> {
   let gdeltData: { articles?: { title?: string, domain?: string, url?: string }[] } | null = null;
   if (gdeltRes) {
     if (!gdeltRes.ok) {
-      (logger as { warn: (msg: string) => void }).warn(`GDELT returned status ${gdeltRes.status}. Skipping.`);
+      logger.warn(`GDELT returned status ${gdeltRes.status}. Skipping.`);
     } else {
       const contentType = gdeltRes.headers.get("content-type");
       if (!contentType?.includes("application/json")) {
@@ -36,7 +45,7 @@ export async function fetchNewsData(logger: unknown): Promise<string> {
         try {
            gdeltData = await gdeltRes.json();
         } catch (e) {
-          (logger as { error: (msg: string, err: unknown) => void }).error("Failed to parse GDELT JSON", e);
+          logger.error("Failed to parse GDELT JSON", e);
         }
       }
     }
@@ -59,7 +68,7 @@ export async function fetchNewsData(logger: unknown): Promise<string> {
          const rssTitles = extractRssItems(xml, 3);
          rssTitles.forEach(title => items.push(`Source: RSS Feed ${i+1}\n${title}`));
        } catch (e) {
-         (logger as { warn: (msg: string, err: unknown) => void }).warn(`Failed to process RSS feed ${i}`, e);
+         logger.warn(`Failed to process RSS feed ${i}`, e);
        }
     }
     i++;
